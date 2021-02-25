@@ -22,7 +22,7 @@ class HistoryController extends BaseController
 		}
 		else
 		{
-    		$historyData = DB::table('vehicle_registers')->get();
+    		$historyData = DB::table('vehicle_registers')->where("user_id", $customer_user_id)->get();
 
     		return view('history', ['customer_name' => $customer_name, 'histories' => $historyData]);
     	}
