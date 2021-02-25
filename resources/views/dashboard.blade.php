@@ -60,10 +60,10 @@
             <div class='col-md-6'>
                <div class="form-group">
                   <label class="control-label">Drop</label><br>
-                     <input type='radio' name="drop_time" class="drop_time" value="4" required/> 4 Hours
-                     <input type='radio' name="drop_time" class="drop_time" value="7" required/> 7 Days
-                     <input type='radio' name="drop_time" class="drop_time" value="15" required/> 15 Days
-                     <input type='radio' name="drop_time" class="drop_time" value="30" required/> 30 Days
+                     <input type='radio' name="drop_time" class="drop_time" value="4" required onchange="return display()" /> 4 Hours 
+                     <input type='radio' name="drop_time" class="drop_time" value="7" required onchange="return display()"/> 7 Days
+                     <input type='radio' name="drop_time" class="drop_time" value="15" required onchange="return display()"/> 15 Days
+                     <input type='radio' name="drop_time" class="drop_time" value="30" required onchange="return display()"/> 30 Days
                </div>
             </div>
           </div>
@@ -71,10 +71,14 @@
             <div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Vehicle Type</label><br />
-                  @foreach($vehicles as $vehicle)
-                  <input type="radio" name="vehicle" class="txt{{ $vehicle->id}}" value="{{ $vehicle->vehicle_number}}" required> {{ $vehicle->vehicle_number}} 
-                  ({{ $vehicle->vehicle_model}}) <br />
-                  @endforeach
+                  <select name="vehicle" class="form-control" id="vehicle" onchange="return display()">
+                    <option value="">-- Select Vehicle --</option>
+                    @foreach($vehicles as $vehicle)
+                    <option data_model="{{ $vehicle->vehicle_number }}" value="{{ $vehicle->charges }}" > {{ $vehicle->vehicle_number}} 
+                    ({{ $vehicle->vehicle_model}}) </option>
+                    @endforeach  
+                  </select>
+                  
                </div>
             </div>
             <div class="col-md-6">
@@ -156,7 +160,27 @@
        return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]); // padding
     };
 })(jQuery, this, document);
-</script>
 
+</script>
+<script>
+  function display(view){  
+      
+      var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
+      var vehicleValue = parseFloat($("#vehicle").val()) || 0;
+      $('#total_amount').val(dropValue * vehicleValue * 21 * 30 /100);
+      if(dropValue == '4')
+      {
+        var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
+        var vehicleValue = parseFloat($("#vehicle").val()) || 0;
+        $('#total_amount').val(dropValue * vehicleValue);
+      }
+      else if(dropValue == '30')
+      {
+        var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
+        var vehicleValue = parseFloat($("#vehicle").val()) || 0;
+        $('#total_amount').val(dropValue * vehicleValue * 21 * 60 /100);
+      }
+  }
+</script>
 </body>
 </html>
