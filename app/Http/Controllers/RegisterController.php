@@ -27,7 +27,7 @@ class RegisterController extends BaseController
         
         $vehicle = $request->vehicle;
         
-        $masterData = DB::table('vehicles')->where('vehicle_number', $vehicle)->first();
+        $masterData = DB::table('vehicles')->where('charges', $vehicle)->first();
 
         if ($masterData && $drop_time == '7') {
             $total_amount =  $masterData->charges * $drop_time * 21 * 30 /100;
