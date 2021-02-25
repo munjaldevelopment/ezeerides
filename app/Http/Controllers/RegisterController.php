@@ -15,6 +15,9 @@ class RegisterController extends BaseController
 {
     public function RegisterResult(Request $request)
     {
+        $customer_name = session()->get('ezeerides_name');
+        $customer_user_id = session()->get('ezeerides_user_id');
+
         /*Dropping Time*/
         $pick_up = $request->pick_up;
         $drop_time = $request->drop_time;
@@ -46,6 +49,7 @@ class RegisterController extends BaseController
        
         //print_r($dropping);
         $register = new VehicleRegister;
+        $register->user_id = $customer_user_id;
         $register->customer_name = $data['customer_name'];
         $register->phone = $data['phone'];
         $register->pick_up = date('Y-m-d h:i:s', strtotime($data['pick_up']));
