@@ -13,8 +13,22 @@ class HistoryController extends BaseController
 {
     public function Index()
     {
-        $HistoryResult = DB::table('vehicle_registers')->get();
-        echo "<table style='border-collapse: collapse;border:1px solid;border-collapse: collapse;width:100%;'>";
+    	$customer_name = session()->get('ezeerides_name');
+		$customer_user_id = session()->get('ezeerides_user_id');
+		
+		if(!$customer_name)
+		{
+			return redirect(url('/'));
+		}
+		else
+		{
+    		$historyData = DB::table('vehicle_registers')->get();
+
+    		return view('history', ['customer_name' => $customer_name, 'histories' => $historyData]);
+    	}
+
+        
+        /*echo "<table style='border-collapse: collapse;border:1px solid;border-collapse: collapse;width:100%;'>";
            echo "<tr><th>ID</th>"; 
            echo "<th>Customer Name</th>"; 
            echo "<th>Phone</th>"; 
@@ -37,6 +51,6 @@ class HistoryController extends BaseController
            echo "<td style='border:1px solid;'>".$history->total_amount."</td>";
            echo "<td style='border:1px solid;'>".$history->station."</td></tr>";
         }
-        echo "</table>";   
+        echo "</table>";*/
     }
 }
