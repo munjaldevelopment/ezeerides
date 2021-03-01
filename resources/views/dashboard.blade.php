@@ -71,14 +71,9 @@
             <div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Vehicle Type</label><br />
-                  <select name="vehicle" class="form-control" id="vehicle" onchange="return display()">
+                  <select name="vehicle" class="form-control" id="station-vehicle" onchange="return display()">
                     <option value="">-- Select Vehicle --</option>
-                    @foreach($vehicles as $vehicle)
-                    <option data_model="{{ $vehicle->vehicle_number }}" value="{{ $vehicle->charges }}" > {{ $vehicle->vehicle_number}} 
-                    ({{ $vehicle->vehicle_model}}) </option>
-                    @endforeach  
                   </select>
-                  
                </div>
             </div>
             <div class="col-md-6">
@@ -94,7 +89,7 @@
                <div class="form-group">
                   <label class="control-label">Station</label>
                   <select name="station" class="form-control">
-                    <option value="">-- Select Station --</option>
+                  	<option value="">Select</option>
                     @foreach($stations as $station)
                     <option value="{{ $station->station_name }}">{{ $station->station_name }}</option>
                     @endforeach
@@ -122,65 +117,16 @@
    </div>
 </div>
 <script type="text/javascript">
-  $(function () {
-    $('#datetimepicker1').datetimepicker();
- });
-</script>
-<script type="text/javascript">
+	$(function () {
+    	$('#datetimepicker1').datetimepicker();
 
-</script>
-<script type="text/javascript">
-  ;(function($, window, document, undefined){
-    $(".drop_time").on("change", function(){
-        var date = new Date($("#pick_up").val());
-        var dropTime = $(".drop_time:checked").val();
-        if(dropTime == 4)
-        {
-          drop_time = parseInt(0, 30);
-        }
-        else
-        {
-          drop_time = parseInt(dropTime, 30);
-        }
-        
-        if(!isNaN(date.getTime())){
-            date.setDate(date.getDate() + drop_time);
-            
-            $("#dropping").val(date.toInputFormat());
-        } else {
-            alert("Invalid Date");  
-        }
-    });
-    
-    
-    Date.prototype.toInputFormat = function() {
-       var yyyy = this.getFullYear().toString();
-       var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
-       var dd  = this.getDate().toString();
-       return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]); // padding
-    };
-})(jQuery, this, document);
-
-</script>
-<script>
-  function display(view){  
-      
-      var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
-      var vehicleValue = parseFloat($("#vehicle").val()) || 0;
-      $('#total_amount').val(dropValue * vehicleValue * 21 * 30 /100);
-      if(dropValue == '4')
-      {
-        var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
-        var vehicleValue = parseFloat($("#vehicle").val()) || 0;
-        $('#total_amount').val(dropValue * vehicleValue);
-      }
-      else if(dropValue == '30')
-      {
-        var dropValue = parseFloat($("input[name='drop_time']:checked").val()) || 0;
-        var vehicleValue = parseFloat($("#vehicle").val()) || 0;
-        $('#total_amount').val(dropValue * vehicleValue * 21 * 60 /100);
-      }
-  }
+    	$('select[name=\'stataion\']').on('change', function() {
+	 		station_id = $('select[name=\'stataion\'] option:selected').val();
+	 		alert(station_id);
+			$.ajax({
+			});
+		});
+ 	});
 </script>
 </body>
 </html>

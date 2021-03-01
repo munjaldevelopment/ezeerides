@@ -33,10 +33,10 @@ class HomeController extends Controller
 		else
 		{
 			// Show vehicle
-			$vehicles = Vehicle::leftJoin("model_has_vehicles", "vehicles.id", "=", "model_has_vehicles.vehicle_id")->where("user_id", $customer_user_id)->get();
 			$stations = Station::leftJoin("model_has_stations", "stations.id", "=", "model_has_stations.station_id")->where("user_id", $customer_user_id)->get();
 
-			return view('dashboard', ['customer_name' => $customer_name, 'vehicles' => $vehicles, 'stations' => $stations]);
+
+			return view('dashboard', ['customer_name' => $customer_name, 'stations' => $stations]);
 		}
 	}
 	
