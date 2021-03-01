@@ -39,7 +39,15 @@ class StationCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
+        $this->crud->addColumns([
+            [
+                'name'  => 'station_name',
+                'label' => 'Station Name',
+                'type'  => 'text',
+            ],
+        ]);
+
+        //CRUD::setFromDb(); // columns
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,15 +64,39 @@ class StationCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
+        $this->addStationFields();
         CRUD::setValidation(StationRequest::class);
 
-        CRUD::setFromDb(); // fields
+        //CRUD::setFromDb(); // fields
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
          * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
          */
+    }
+
+    public function addStationFields()
+    {
+        $this->crud->addFields([
+            [
+                'name'  => 'station_name',
+                'label' => 'Station Name',
+                'type'  => 'text',
+            ],
+            [
+                'name'  => 'station_address',
+                'label' => 'Station Address',
+                'type'  => 'textarea',
+            ],
+            [
+                'type' => 'select2_multiple',
+                'name' => 'station_vehicles', // the relationship name in your Model
+                'entity' => 'station_vehicles', // the relationship name in your Model
+                'attribute' => 'vehicle_number', // attribute on Article that is shown to admin
+                'pivot' => true,
+            ],
+        ]);
     }
 
     /**

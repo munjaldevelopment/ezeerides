@@ -41,11 +41,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function model_vehicles()
-    {
-        return $this->belongsToMany('App\Models\Vehicle', 'model_has_vehicles');
-    }
-
     public function model_stations()
     {
         return $this->belongsToMany('App\Models\Station', 'model_has_stations');

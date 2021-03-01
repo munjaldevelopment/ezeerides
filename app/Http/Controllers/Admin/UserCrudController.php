@@ -176,13 +176,6 @@ class UserCrudController extends CrudController
                 'pivot' => true,
             ],
             [
-                'type' => 'select2_multiple',
-                'name' => 'model_vehicles', // the relationship name in your Model
-                'entity' => 'model_vehicles', // the relationship name in your Model
-                'attribute' => 'vehicle_number', // attribute on Article that is shown to admin
-                'pivot' => true,
-            ],
-            [
                 // two interconnected entities
                 'label'             => trans('backpack::permissionmanager.user_role_permission'),
                 'field_unique_name' => 'user_role_permission',

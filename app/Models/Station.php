@@ -34,6 +34,10 @@ class Station extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+    public function station_vehicles()
+    {
+        return $this->belongsToMany('App\Models\Vehicle', 'station_has_vehicles');
+    }
 
     /*
     |--------------------------------------------------------------------------
