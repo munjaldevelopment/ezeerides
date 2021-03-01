@@ -15,53 +15,46 @@ class RegisterController extends BaseController
 {
     public function RegisterResult(Request $request)
     {
+        /*array:8 [
+          "customer_name" => "Munjal Mayank"
+          "phone" => "9462045321"
+          "pick_up" => "01-Mar-2021 13:52"
+          "expected_drop" => "02-Mar-2021 14:52"
+          "station" => "Railway station"
+          "vehicle" => "RJ14JJ5432"
+          "total_amount" => "461.5"
+        ]*/
+        
         $customer_name = session()->get('ezeerides_name');
         $customer_user_id = session()->get('ezeerides_user_id');
 
-        /*Dropping Time*/
         $pick_up = $request->pick_up;
-        $drop_time = $request->drop_time;
+        $expected_drop = $request->expected_drop;
+
         $pick_up1 = date('Y-m-d H:i:s', strtotime($pick_up));
+        $expected_drop1 =  date('Y-m-d h:i:s', strtotime($expected_drop));
         
-        $droppingval =  date('Y-m-d h:i:s', strtotime($pick_up1.'+'.$drop_time));
-        
+        $station = $request->station;
         $vehicle = $request->vehicle;
-        
-        $masterData = DB::table('vehicles')->where('charges', $vehicle)->first();
+        $total_amount = $request->total_amount;
 
-        if ($masterData && $drop_time == '7') {
-            $total_amount =  $masterData->charges * $drop_time * 21 * 30 /100;
-        }
-        elseif($masterData && $drop_time == '15')
-        {
-            $total_amount =  $masterData->charges * $drop_time * 21 * 30 /100;
-        }
-        elseif ($masterData && $drop_time == '30') {
-            $total_amount =  $masterData->charges * $drop_time * 21 * 60 /100;
-        }
-        else{
-            $total_amount =  $masterData->charges * $drop_time;   
-        }
-        
-       
-        $data = array('customer_name' => $request->customer_name, 'phone' => $request->phone, 'pick_up' => $request->pick_up, 'drop_time' => $request->drop_time, 'vehicle' => $request->vehicle, 'proof' => $request->proof, 'status' => $request->status, 'dropping' => $droppingval, 'total_amount' => $total_amount, 'station' => $request->station);
+        $customer_name = $request->customer_name;
+        $phone = $request->phone;
 
-       
-        //print_r($dropping);
+        // Insert Data
         $register = new VehicleRegister;
         $register->user_id = $customer_user_id;
-        $register->customer_name = $data['customer_name'];
-        $register->phone = $data['phone'];
-        $register->pick_up = date('Y-m-d h:i:s', strtotime($data['pick_up']));
-        $register->drop_time = $data['drop_time'];
-        $register->vehicle = $data['vehicle'];
-        $register->proof = $data['proof'];
+        $register->customer_name = $customer_name;
+        $register->phone = $phone;
+        $register->pick_up = $pick_up1;
+        $register->expected_drop = $expected_drop1;
+        $register->station = $station;
+        $register->vehicle = $vehicle;
+        $register->total_amount = $total_amount;
+        $register->punchout_time = date('Y-m-d H:i:s');
         $register->status = 'Out';
-        $register->dropping = $data['dropping'];
-        $register->total_amount = $data['total_amount'];
-        $register->station = $data['station'];
-        //dd($data);exit;
         $register->save();
+        
         return back()->with('success', 'Register successfully!');
     }
 }

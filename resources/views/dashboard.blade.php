@@ -77,8 +77,8 @@
           <div class="row">
             <div class="col-md-6">
                <div class="form-group">
-                  <label class="control-label">Station</label>
-                  <select name="station" class="form-control" id="station-station" onchange="showVehicle(this.value);">
+                   <label class="control-label">Station</label>
+                   <select name="station" required class="form-control" id="station-station" onchange="showVehicle(this.value);">
                   	<option value="">Select</option>
                     @foreach($stations as $station)
                     <option value="{{ $station->station_name }}">{{ $station->station_name }}</option>
@@ -90,7 +90,7 @@
             <div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Vehicle</label><br />
-                  <select name="vehicle" class="form-control" id="station-vehicle">
+                  <select name="vehicle" required class="form-control" id="station-vehicle">
                     <option value="">-- Select Vehicle --</option>
                   </select>
                </div>
@@ -101,11 +101,11 @@
           	<div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Total Amount</label>
-                  <input type="text" readonly="" name="total_amount" id="total_amount" class="form-control">
+                  <input type="text" required="" readonly="" name="total_amount" id="total_amount" class="form-control">
                </div>
             </div>
          </div>
-         <input type="submit" disabled="" class="btn btn-primary" value="Submit">
+         <input type="submit" disabled="" class="btn btn-primary submit-btn" value="Submit">
      </form>
       </div>
    </div>
@@ -134,11 +134,22 @@
     		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
     		var hours = calculateHours(fromDate, toDate);
-    		alert(hours);
-    		alert(vehicle_amount);
+    		
+    		if(hours > 4)
+    		{
+    			var amount1 = vehicle_amount * 4; 
+    			var diff = hours - 4;
+				var total = (vehicle_amount * 1.5);
+    			var amount = amount1 + (diff * total) ;
+    		}
+    		else
+    		{
+	    		var amount = hours * (vehicle_amount * 1.5);
+	    	}
+	    	
+	    	$('#total_amount').val(amount);
+	    	$('.submit-btn').removeAttr('disabled');
 
-    		var amount = hours * vehicle_amount;
-    		$('#total_amount').val(amount);
     	});
  	});
 

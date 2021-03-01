@@ -23,6 +23,8 @@ class HomeController extends Controller
 {
 	public function showVehicle(Request $request)
 	{
+		$customer_user_id = session()->get('ezeerides_user_id');
+
 		$station_name = $request->station_id;
 
 		$output = '<option value="">Select</option>';
@@ -39,7 +41,13 @@ class HomeController extends Controller
 				{
 					foreach($stationsVehicle as $row)
 					{
-						$output.= '<option data_model="'.$row->vehicle_number.'" value="'.$row->vehicle_number.'" data-charge="'.$row->charges.'">'.$row->vehicle_number.$row->vehicle_model.'</option>';
+						// Check if already assigned
+						$isExists = \DB::table('vehicle_registers')->where("user_id", $customer_user_id)->where("vehicle", $row->vehicle_number)->where('status', 'Out')->count();
+
+						if($isExists == 0)
+						{
+							$output.= '<option data_model="'.$row->vehicle_number.'" value="'.$row->vehicle_number.'" data-charge="'.$row->charges.'">'.$row->vehicle_number.$row->vehicle_model.'</option>';
+						}
 					}
 				}
 			}
