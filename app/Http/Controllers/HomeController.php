@@ -76,6 +76,34 @@ class HomeController extends Controller
 			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today]);
 		}
 	}
+
+	public function returnVehicle($return_id)
+    {
+		$customer_name = session()->get('ezeerides_name');
+		$customer_user_id = session()->get('ezeerides_user_id');
+		
+		if(!$customer_name)
+		{
+			return redirect(url('/'));
+		}
+		else
+		{
+			$record = \DB::table('vehicle_registers')->find($return_id);
+
+			if($record)
+			{
+				// Show vehicle
+				$base_url = env('APP_URL');
+				$today = date('Y-m-d H:i');
+
+				return view('return_vehicle', ['customer_name' => $customer_name, 'base_url' => $base_url, 'registerRecord' => $record, 'today' => $today]);
+			}
+			else
+			{
+				return redirect(url('/history'));
+			}
+		}
+	}
 	
 	public function postLogin(Request $request)
 	{

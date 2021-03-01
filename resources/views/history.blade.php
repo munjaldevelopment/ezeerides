@@ -6,6 +6,11 @@
 
 		<title>EZee Ride</title>
 
+		<base href="{{ $base_url }}" />
+
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
+        {{-- Encrypted CSRF token for Laravel, in order for Ajax requests to work --}}
+
 		<!-- Fonts -->
 		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">
 		<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -32,16 +37,18 @@
 				<div class="panel-body">
 					<table id="example" class="table">
 						<thead>
-							<tr><th>ID</th>
-							<th>Customer Name</th>
-							<th>Phone</th>
-							<th>Pick Up</th>
-							<th>Drop</th>
-							<th>Vehicle</th>
-							<th>Status</th>
-							<th>Dropping</th>
-							<th>Total Amount</th>
-							<th>Station</th></tr>
+							<tr>
+								<th>ID</th>
+								<th>Customer Name</th>
+								<th>Phone</th>
+								<th>Pick Up</th>
+								<th>Expected Drop</th>
+								<th>Station</th>
+								<th>Vehicle</th>
+								<th>Total Amount</th>
+								<th>Out Time</th>
+								<th>Action</th>
+							</tr>
 						</thead>
 
 						<tbody>
@@ -50,12 +57,19 @@
 					           <td>{{$history->customer_name}}</td>
 					           <td>{{$history->phone}}</td>
 					           <td>{{$history->pick_up}}</td>
-					           <td>{{$history->drop_time}}</td>
+					           <td>{{$history->expected_drop}}</td>
+					           <td>{{$history->station}}</td>
 					           <td>{{$history->vehicle}}</td>
-					           <td>{{$history->status}}</td>
-					           <td>{{$history->dropping}}</td>
 					           <td>{{$history->total_amount}}</td>
-					           <td>{{$history->station}}</td></tr>
+					           <td>{{$history->punchout_time}}</td>
+					       	   <td>
+					       	   	@if($history->status == "Out")
+					       	   	<a class="btn" href="{{ url('/return_vehicle') }}/{{ $history->id }}">Return</a>
+					       	   	@else
+					       	   	Returned
+					       	   	@endif
+					       	   </td>
+					      	</tr>
 					        @endforeach
 					    </tbody>
         			</table>

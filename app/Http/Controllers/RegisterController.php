@@ -13,6 +13,34 @@ use Illuminate\Routing\Controller as BaseController;
 
 class RegisterController extends BaseController
 {
+    public function saveReturn(Request $request)
+    {
+        /*dd($request->all());
+
+        "return_id" => "3"
+        "customer_name" => "Munjal Mayank"
+        "phone" => "9999999999"
+        "pick_up" => "01-Jan-2021 14:10"
+        "expected_drop" => "01-Jan-2021 15:10"
+        "station" => "Railway station"
+        "vehicle" => "RJ14JJ7497"
+        "total_amount" => "19.50"
+        "punchout_time" => "01-Mar-2021 15:16"
+        "additional_hours" => "1"
+        "additional_amount" => "10"*/
+
+        $return_time = date('Y-m-d H:i:s', strtotime($request->return_time));
+        $additional_hours = $request->additional_hours;
+        $additional_amount = $request->additional_amount;
+
+        $updateData = array('return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'status' => 'In');
+
+        $updateEntry = \DB::table('vehicle_registers')->where('id', $request->return_id)->update($updateData);
+
+        return redirect(url('/history'))->with('success', 'Return successfully!');
+
+    }
+
     public function RegisterResult(Request $request)
     {
         /*array:8 [
@@ -24,7 +52,7 @@ class RegisterController extends BaseController
           "vehicle" => "RJ14JJ5432"
           "total_amount" => "461.5"
         ]*/
-        
+
         $customer_name = session()->get('ezeerides_name');
         $customer_user_id = session()->get('ezeerides_user_id');
 
@@ -32,7 +60,7 @@ class RegisterController extends BaseController
         $expected_drop = $request->expected_drop;
 
         $pick_up1 = date('Y-m-d H:i:s', strtotime($pick_up));
-        $expected_drop1 =  date('Y-m-d h:i:s', strtotime($expected_drop));
+        $expected_drop1 =  date('Y-m-d H:i:s', strtotime($expected_drop));
         
         $station = $request->station;
         $vehicle = $request->vehicle;

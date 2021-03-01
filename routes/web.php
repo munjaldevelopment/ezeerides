@@ -23,6 +23,8 @@ Route::post('post-register', 'HomeController@postRegister')->name('post-register
 
 Route::get('dashboard', 'HomeController@dashboard')->name('dashboard');
 
+Route::get('return_vehicle/{id}', 'HomeController@returnVehicle')->name('returnVehicle');
+
 /*Route::get('/dashboard', function () {
 	$vehicles = Vehicle::get();
 	$stations = Station::get();
@@ -30,6 +32,7 @@ Route::get('dashboard', 'HomeController@dashboard')->name('dashboard');
 });*/
 
 Route::post('register_result', 'RegisterController@RegisterResult');
-Route::get('/history', 'HistoryController@Index');
+Route::post('save_return', 'RegisterController@saveReturn');
+Route::get('/history', 'HistoryController@Index')->name('history');
 
 Route::post('/showVehicle', 'HomeController@showVehicle');
