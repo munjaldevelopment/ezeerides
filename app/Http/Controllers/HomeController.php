@@ -21,6 +21,33 @@ use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
 {
+	public function showVehicle(Request $request)
+	{
+		$station_name = $request->station_id;
+
+		$output = '<option value="">Select</option>';
+		if($station_name != "")
+		{
+			$stationInfo = Station::where('station_name', '=', $station_name)->first();
+
+			if($stationInfo)
+			{
+				$station_id = $stationInfo->id;
+				$stationsVehicle = \DB::table('station_has_vehicles')->leftJoin("vehicles", "station_has_vehicles.vehicle_id", "=", "vehicles.id")->where("station_id", $station_id)->get();
+
+				if($stationsVehicle)
+				{
+					foreach($stationsVehicle as $row)
+					{
+							$output.= '<option data_model="'.$row->vehicle_number.'" value="'.$row->charges.'">'.$row->vehicle_number.$row->vehicle_model.'</option>';
+					}
+				}
+			}
+		}
+
+		return $output;
+	}
+
 	public function dashboard()
     {
 		$customer_name = session()->get('ezeerides_name');
@@ -33,10 +60,11 @@ class HomeController extends Controller
 		else
 		{
 			// Show vehicle
+			$base_url = env('APP_URL');
 			$stations = Station::leftJoin("model_has_stations", "stations.id", "=", "model_has_stations.station_id")->where("user_id", $customer_user_id)->get();
 
 
-			return view('dashboard', ['customer_name' => $customer_name, 'stations' => $stations]);
+			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations]);
 		}
 	}
 	

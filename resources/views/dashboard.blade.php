@@ -6,6 +6,11 @@
 
         <title>EZee Ride</title>
 
+        <base href="{{ $base_url }}" />
+
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
+        {{-- Encrypted CSRF token for Laravel, in order for Ajax requests to work --}}
+
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -88,7 +93,7 @@
             <div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Station</label>
-                  <select name="station" class="form-control">
+                  <select name="station" class="form-control" onchange="showVehicle(this.value);">
                   	<option value="">Select</option>
                     @foreach($stations as $station)
                     <option value="{{ $station->station_name }}">{{ $station->station_name }}</option>
@@ -119,14 +124,27 @@
 <script type="text/javascript">
 	$(function () {
     	$('#datetimepicker1').datetimepicker();
-
-    	$('select[name=\'stataion\']').on('change', function() {
-	 		station_id = $('select[name=\'stataion\'] option:selected').val();
-	 		alert(station_id);
-			$.ajax({
-			});
-		});
  	});
+
+ 	function showVehicle(station_id)
+ 	{
+ 		var base_url = $('base').attr('href');
+
+		var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+ 		if(station_id != "")
+ 		{
+ 			$.ajax({
+ 				url: base_url+'/showVehicle',
+				type: 'post',
+				data: {_token: CSRF_TOKEN, station_id: station_id},
+				
+				success: function(output) {
+					$('#station-vehicle').html(output);
+				}
+			});
+		}
+ 	}
 </script>
 </body>
 </html>

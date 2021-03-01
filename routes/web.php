@@ -31,3 +31,5 @@ Route::get('dashboard', 'HomeController@dashboard')->name('dashboard');
 
 Route::post('register_result', 'RegisterController@RegisterResult');
 Route::get('/history', 'HistoryController@Index');
+
+Route::post('/showVehicle', 'HomeController@showVehicle');
