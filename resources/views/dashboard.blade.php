@@ -135,7 +135,7 @@
  		if(station_id != "")
  		{
  			$.ajax({
- 				url: base_url+'/showVehicle',
+ 				url: base_url+'showVehicle',
 				type: 'post',
 				data: {_token: CSRF_TOKEN, station_id: station_id},
 				
