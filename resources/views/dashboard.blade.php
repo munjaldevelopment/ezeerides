@@ -55,7 +55,7 @@
                <div class="form-group">
                   <label class="control-label">Pick Up</label>
                   <div class='input-group date' id='datetimepicker1'>
-                     <input type='text' name="pick_up" class="form-control" placeholder="Pick Up Date" id="pick_up" required/>
+                     <input type='text' name="pick_up" class="form-control" placeholder="Pick Up Date" id="startdate" required/>
                      <span class="input-group-addon">
                      <span class="glyphicon glyphicon-calendar"></span>
                      </span>
@@ -64,36 +64,21 @@
             </div>
             <div class='col-md-6'>
                <div class="form-group">
-                  <label class="control-label">Drop</label><br>
-                     <input type='radio' name="drop_time" class="drop_time" value="4" required onchange="return display()" /> 4 Hours 
-                     <input type='radio' name="drop_time" class="drop_time" value="7" required onchange="return display()"/> 7 Days
-                     <input type='radio' name="drop_time" class="drop_time" value="15" required onchange="return display()"/> 15 Days
-                     <input type='radio' name="drop_time" class="drop_time" value="30" required onchange="return display()"/> 30 Days
+               		<label class="control-label">Expected Drop</label>
+                  	<div class='input-group date' id='datetimepicker2'>
+                     <input type='text' name="expected_drop" class="form-control" placeholder="Expected Drop Date" id="enddate" required/>
+                     <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                  	</div>
                </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
                <div class="form-group">
-                  <label class="control-label">Vehicle Type</label><br />
-                  <select name="vehicle" class="form-control" id="station-vehicle" onchange="return display()">
-                    <option value="">-- Select Vehicle --</option>
-                  </select>
-               </div>
-            </div>
-            <div class="col-md-6">
-               <div class="form-group">
-                  <label class="control-label">Id Proof</label>
-                  <input type="file" name="proof" id="proof">
-               </div>
-            </div>
-         </div>
-
-         <div class="row">
-            <div class="col-md-6">
-               <div class="form-group">
                   <label class="control-label">Station</label>
-                  <select name="station" class="form-control" onchange="showVehicle(this.value);">
+                  <select name="station" class="form-control" id="station-station" onchange="showVehicle(this.value);">
                   	<option value="">Select</option>
                     @foreach($stations as $station)
                     <option value="{{ $station->station_name }}">{{ $station->station_name }}</option>
@@ -101,30 +86,70 @@
                   </select>
                </div>
             </div>
+
             <div class="col-md-6">
                <div class="form-group">
-                  <label class="control-label">Dropping Time</label>
-                  <input type="text" name="dropping" id="dropping" class="form-control" readonly>
+                  <label class="control-label">Vehicle</label><br />
+                  <select name="vehicle" class="form-control" id="station-vehicle">
+                    <option value="">-- Select Vehicle --</option>
+                  </select>
                </div>
             </div>
-         </div>
-         <div class="row">
-          <div class="col-md-6">
+          </div>
+
+          <div class="row">
+          	<div class="col-md-6">
                <div class="form-group">
                   <label class="control-label">Total Amount</label>
-                  <input type="text" name="total_amount" id="total_amount" class="form-control">
+                  <input type="text" readonly="" name="total_amount" id="total_amount" class="form-control">
                </div>
             </div>
          </div>
-         <input type="submit" class="btn btn-primary" value="Submit">
+         <input type="submit" disabled="" class="btn btn-primary" value="Submit">
      </form>
       </div>
    </div>
 </div>
 <script type="text/javascript">
 	$(function () {
-    	$('#datetimepicker1').datetimepicker();
+		var today = "{{ $today }}";
+		$("#datetimepicker1").datetimepicker({
+			format : 'DD-MMM-YYYY HH:mm',
+			minDate:new Date()
+	    }).on('dp.change', function (event) {
+	        var minDate = new Date(event.date.valueOf());
+	        $('#datetimepicker2').data("DateTimePicker").minDate(minDate);
+    	});
+    
+        $("#datetimepicker2").datetimepicker({
+			format : 'DD-MMM-YYYY HH:mm',
+	    }).on('dp.change', function (event) {
+	        var minDate1 = new Date(event.date.valueOf());
+	        $('#datetimepicker1').data("DateTimePicker").maxDate(minDate1);
+    	});
+
+    	$('#station-vehicle').on('change', function() {
+    		var fromDate = new Date($("#startdate").val());
+    		var toDate = new Date($("#enddate").val());
+    		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
+
+    		var hours = calculateHours(fromDate, toDate);
+    		alert(hours);
+    		alert(vehicle_amount);
+
+    		var amount = hours * vehicle_amount;
+    		$('#total_amount').val(amount);
+    	});
  	});
+
+ 	$("#datetimepicker1").trigger('dp.change');
+
+ 	function calculateHours(dt2, dt1) 
+	{
+		var diff =(dt2.getTime() - dt1.getTime()) / 1000;
+		diff /= (60 * 60);
+		return Math.abs(Math.round(diff));
+	}
 
  	function showVehicle(station_id)
  	{

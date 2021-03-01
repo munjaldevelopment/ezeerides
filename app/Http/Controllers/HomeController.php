@@ -39,7 +39,7 @@ class HomeController extends Controller
 				{
 					foreach($stationsVehicle as $row)
 					{
-							$output.= '<option data_model="'.$row->vehicle_number.'" value="'.$row->charges.'">'.$row->vehicle_number.$row->vehicle_model.'</option>';
+						$output.= '<option data_model="'.$row->vehicle_number.'" value="'.$row->vehicle_number.'" data-charge="'.$row->charges.'">'.$row->vehicle_number.$row->vehicle_model.'</option>';
 					}
 				}
 			}
@@ -62,9 +62,10 @@ class HomeController extends Controller
 			// Show vehicle
 			$base_url = env('APP_URL');
 			$stations = Station::leftJoin("model_has_stations", "stations.id", "=", "model_has_stations.station_id")->where("user_id", $customer_user_id)->get();
+			$today = date('Y-m-d H:i');
 
 
-			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations]);
+			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today]);
 		}
 	}
 	
