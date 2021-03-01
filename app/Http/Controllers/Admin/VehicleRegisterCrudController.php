@@ -39,22 +39,20 @@ class VehicleRegisterCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('id');
-        CRUD::column('user_id');
+        CRUD::addColumn([
+            'label'     => 'Employee',
+            'type'      => 'select',
+            'name'      => 'user_id',
+            'entity'    => 'users', //function name
+            'attribute' => 'name', //name of fields in models table like districts
+            'model'     => "App\User",
+        ]);
         CRUD::column('customer_name');
         CRUD::column('phone');
         CRUD::column('pick_up');
         CRUD::column('expected_drop');
         CRUD::column('station');
         CRUD::column('vehicle');
-        CRUD::column('total_amount');
-        CRUD::column('punchout_time');
-        CRUD::column('return_time');
-        CRUD::column('additional_hours');
-        CRUD::column('additional_amount');
-        CRUD::column('status');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -73,22 +71,59 @@ class VehicleRegisterCrudController extends CrudController
     {
         CRUD::setValidation(VehicleRegisterRequest::class);
 
-        CRUD::field('id');
-        CRUD::field('user_id');
+        CRUD::addField([
+            'label'     => 'Employee',
+            'type'      => 'select2',
+            'name'      => 'user_id',
+            'entity'    => 'users', //function name
+            'attribute' => 'name', //name of fields in models table like districts
+            'model'     => "App\User",
+        ]);
         CRUD::field('customer_name');
         CRUD::field('phone');
         CRUD::field('pick_up');
         CRUD::field('expected_drop');
-        CRUD::field('station');
-        CRUD::field('vehicle');
+
+        $stationData = array('' => '--Select--');
+        $stations = \DB::table('stations')->get();
+        foreach($stations as $station)
+        {
+            $stationData[$station->station_name] = $station->station_name;
+        }
+
+        CRUD::addField([
+            'label'     => 'Station',
+            'type'      => 'select2_from_array',
+            'name'      => 'station',
+            'options'   => $stationData
+        ]);
+
+        $vehicleData = array('' => '--Select--');
+        $vehicles = \DB::table('vehicles')->get();
+        foreach($vehicles as $vehicle)
+        {
+            $vehicleData[$vehicle->vehicle_number] = $vehicle->vehicle_number;
+        }
+
+        CRUD::addField([
+            'label'     => 'Vehicle',
+            'type'      => 'select2_from_array',
+            'name'      => 'vehicle',
+            'options'   => $vehicleData
+        ]);
         CRUD::field('total_amount');
         CRUD::field('punchout_time');
         CRUD::field('return_time');
         CRUD::field('additional_hours');
         CRUD::field('additional_amount');
-        CRUD::field('status');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
+
+        $statusData = array('' => '--Select--', 'In' => 'In', 'Out' => 'Out');
+        CRUD::addField([
+            'label'     => 'Status',
+            'type'      => 'select2_from_array',
+            'name'      => 'status',
+            'options'   => $statusData
+        ]);
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
