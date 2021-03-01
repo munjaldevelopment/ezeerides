@@ -8,6 +8,7 @@
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-key"></i> <span>Station</span></a></li>
 	</ul>
 </li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-file-o'></i> Vehicle Register</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-terminal'></i> Employee</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('log') }}'><i class='nav-icon la la-terminal'></i> Logs</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('setting') }}'><i class='nav-icon la la-cog'></i> Settings</a></li>
@@ -21,5 +22,3 @@
 	</ul>
 </li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('page') }}'><i class='nav-icon la la-file-o'></i> <span>Pages</span></a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('station') }}'><i class='nav-icon la la-question'></i> Stations</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle') }}'><i class='nav-icon la la-question'></i> Vehicles</a></li>
