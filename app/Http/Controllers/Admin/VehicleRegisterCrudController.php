@@ -82,6 +82,7 @@ class VehicleRegisterCrudController extends CrudController
         ]);
         CRUD::field('customer_name');
         CRUD::field('phone');
+        CRUD::field('register_otp');
         CRUD::field('pick_up');
         CRUD::field('expected_drop');
 
@@ -117,6 +118,14 @@ class VehicleRegisterCrudController extends CrudController
         CRUD::field('return_time');
         CRUD::field('additional_hours');
         CRUD::field('additional_amount');
+
+        $statusData = array('0' => 'Inactive', '1' => 'Active');
+        CRUD::addField([
+            'label'     => 'Booking Status',
+            'type'      => 'select2_from_array',
+            'name'      => 'booking_status',
+            'options'   => $statusData
+        ]);
 
         $statusData = array('' => '--Select--', 'In' => 'In', 'Out' => 'Out');
         CRUD::addField([
