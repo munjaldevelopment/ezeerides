@@ -30,7 +30,7 @@
 				<a href="{{ asset('/') }}">
 				<img src="{{ asset('/') }}image/ezee.jpg" alt="Ezee Rides" title="Ezee Rides" style="width: 100px;margin-bottom: 12px;">
 				</a>
-				<a target="_blank" href="{{url('/dashboard')}}" style="float: right;border:1px solid;padding: 10px 10px 10px 10px;text-decoration: none;">Home</a>
+				<a href="{{url('/dashboard')}}" style="float: right;border:1px solid;padding: 10px 10px 10px 10px;text-decoration: none;">Home</a>
 			</div>
 			<div class="panel panel-primary">
 				<div class="panel-heading">Customer Detail</div>
