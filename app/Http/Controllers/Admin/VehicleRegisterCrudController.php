@@ -84,7 +84,9 @@ class VehicleRegisterCrudController extends CrudController
         CRUD::field('phone');
         CRUD::field('register_otp');
         CRUD::field('pick_up');
+        CRUD::field('pick_up_time');
         CRUD::field('expected_drop');
+        CRUD::field('expected_drop_time');
 
         $stationData = array('' => '--Select--');
         $stations = \DB::table('stations')->get();
