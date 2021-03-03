@@ -69,7 +69,7 @@
                   <div class='input-group mt-3'>
                      <select name="pick_up_time" id="pick_up_time" class="form-control">
                      	@foreach($timeRange as $time)
-                     	<option value="{{ $time }}">{{ $time }}</option>
+                     	<option value="{{ $time }}" {{ $selected[$time] }}>{{ $time }}</option>
                      	@endforeach
                      </select>
                   </div>
@@ -138,8 +138,7 @@
 		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
 		var hours = calculateHours(fromDate, toDate);
-		//alert(hours);
-
+		
 		if(hours > 4)
 		{
 			if(hours < 24)

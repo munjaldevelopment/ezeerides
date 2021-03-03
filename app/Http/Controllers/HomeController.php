@@ -83,8 +83,32 @@ class HomeController extends Controller
 			$next_date = date('m/d/Y');//, strtotime('+1 day'));
 
 			$timeRange = $this->halfHourTimes();
+			$current_time = date("h:i A");
 
-			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today, 'current_date' => $current_date, 'next_date' => $next_date, 'timeRange' => $timeRange]);
+			$selected = array();
+			if($timeRange)
+			{
+				foreach ($timeRange as $key => $value) {
+					$selected[$value] = '';
+				}
+			}
+
+			if($timeRange)
+			{
+				foreach ($timeRange as $key => $value) {
+					# code...
+					$value1 = strtotime($value);
+					$current_time1 = strtotime($current_time);
+
+					if($value1 >= $current_time1)
+					{
+						$selected[$value] = 'selected';
+						break;
+					}
+				}
+			}
+
+			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today, 'current_date' => $current_date, 'next_date' => $next_date, 'current_time' => $current_time, 'selected' => $selected, 'timeRange' => $timeRange]);
 		}
 	}
 
