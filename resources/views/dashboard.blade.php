@@ -35,9 +35,11 @@
     </a>
     <a href="{{url('/history')}}" style="float: right;border:1px solid;padding: 10px 10px 10px 10px;text-decoration: none;">History</a>
   </div>
-   <div class="panel panel-primary">
-      <div class="panel-heading">Customer Detail</div>
-      <div class="panel-body">
+   <div class="card">
+      <div class="card-header text-white bg-primary">
+      	<strong>Customer Detail</strong>
+      </div>
+      <div class="card-body">
         <form action="{{url('register_result')}}" method="post" id="register_Form">
         {!! csrf_field() !!}
         <div class="row">
