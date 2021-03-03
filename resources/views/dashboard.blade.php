@@ -111,7 +111,7 @@
                <div class="form-group">
                   <label class="control-label">Vehicle</label><br />
                   <select name="vehicle" required class="form-control" id="station-vehicle">
-                    <option value="">-- Select Vehicle --</option>
+                    <option value="" data-charge="0">-- Select Vehicle --</option>
                   </select>
                </div>
             </div>
@@ -145,8 +145,11 @@
 			if(hours < 24)
 			{
 				var amount1 = (vehicle_amount * 1.5) * 4; 
-    			var diff = hours;
+    			var diff = hours - 4;
 				var total = diff * vehicle_amount;
+				alert(amount1);
+				alert(diff);
+				alert(total);
 				var amount = amount1 + total;
 			}
 		}
@@ -155,8 +158,11 @@
     		var amount = hours * (vehicle_amount * 1.5);
     	}
     	
-    	$('#total_amount').val(amount);
-    	$('.submit-btn').removeAttr('disabled');
+    	if(vehicle_amount > 0)
+    	{
+	    	$('#total_amount').val(amount);
+	    	$('.submit-btn').removeAttr('disabled');
+	    }
 	}
 
 	$(function () {

@@ -27,7 +27,7 @@ class HomeController extends Controller
 
 		$station_name = $request->station_id;
 
-		$output = '<option value="">Select</option>';
+		$output = '<option value="" data-charge="0">Select</option>';
 		if($station_name != "")
 		{
 			$stationInfo = Station::where('station_name', '=', $station_name)->first();
