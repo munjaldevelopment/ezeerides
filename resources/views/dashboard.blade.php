@@ -138,7 +138,7 @@
 		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
 		var hours = calculateHours(fromDate, toDate);
-		//alert(hours);
+		alert(hours);
 
 		if(hours > 4)
 		{
@@ -147,10 +147,88 @@
 				var amount1 = (vehicle_amount * 1.5) * 4; 
     			var diff = hours - 4;
 				var total = diff * vehicle_amount;
-				alert(amount1);
-				alert(diff);
-				alert(total);
 				var amount = amount1 + total;
+			}
+			else if(hours == 24)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+				var amount = amount1 + total;
+			}
+			else if(hours > 24 && hours < 48)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 48 && hours < 72)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 2 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 72 && hours < 96)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 3 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 72 && hours < 96)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 3 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 96 && hours < 120)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 4 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 120 && hours < 144)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 5 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours >= 144 && hours < 168)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 6 * vehicle_amount;
+				var amount = amount1 + total + total2;
+			}
+			else if(hours == 144)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+				var total = diff * vehicle_amount;
+
+				var total2 = (hours - 24) * 7 * vehicle_amount;
+				var amount = amount1 + total + total2;
+
+				amount = amount - (amount * 30) / 100;
 			}
 		}
 		else
