@@ -56,6 +56,14 @@ class HomeController extends Controller
 		return $output;
 	}
 
+	public function halfHourTimes() {
+		$formatter = function ($time) {
+			return date('h:i A', $time);
+		};
+		$halfHourSteps = range(7*1800, 31*1800, 1800);
+		return array_map($formatter, $halfHourSteps);
+	}
+
 	public function dashboard()
     {
 		$customer_name = session()->get('ezeerides_name');
@@ -72,8 +80,10 @@ class HomeController extends Controller
 			$stations = Station::leftJoin("model_has_stations", "stations.id", "=", "model_has_stations.station_id")->where("user_id", $customer_user_id)->get();
 			$today = date('Y-m-d H:i');
 
+			$timeRange = $this->halfHourTimes();
 
-			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today]);
+
+			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today, 'timeRange' => $timeRange]);
 		}
 	}
 

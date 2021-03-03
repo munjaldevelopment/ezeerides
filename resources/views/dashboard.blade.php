@@ -58,22 +58,38 @@
             <div class='col-md-6'>
                <div class="form-group">
                   <label class="control-label">Pick Up</label>
-                  <div class='input-group date'>
+                  <div class='input-group'>
                      <input type='text' name="pick_up" class="form-control" placeholder="Pick Up Date" id="startdate" required/>
                      <span class="input-group-addon">
                      <span class="glyphicon glyphicon-calendar"></span>
                      </span>
+                  </div>
+                  <div class='input-group mt-3'>
+                     <select name="pick_up_time" id="pick_up_time" class="form-control">
+                     	<option value="">Select</option>
+                     	@foreach($timeRange as $time)
+                     	<option value="{{ $time }}">{{ $time }}</option>
+                     	@endforeach
+                     </select>
                   </div>
                </div>
             </div>
             <div class='col-md-6'>
                <div class="form-group">
                		<label class="control-label">Expected Drop</label>
-                  	<div class='input-group date' >
+                  	<div class='input-group' >
                      <input type='text' name="expected_drop" class="form-control" placeholder="Expected Drop Date" id="enddate" required/>
                      <span class="input-group-addon">
                      <span class="glyphicon glyphicon-calendar"></span>
                      </span>
+                    </div>
+                    <div class='input-group mt-3'>
+                     <select name="expected_drop_time" id="expected_drop_time" class="form-control">
+                     	<option value="">Select</option>
+                     	@foreach($timeRange as $time)
+                     	<option value="{{ $time }}">{{ $time }}</option>
+                     	@endforeach
+                     </select>
                   	</div>
                </div>
             </div>
@@ -133,21 +149,29 @@
             }
         });
 
-		
-
     	$('#station-vehicle').on('change', function() {
-    		var fromDate = new Date($("#startdate").val());
-    		var toDate = new Date($("#enddate").val());
+    		var fromDate = new Date($("#startdate").val()+" "+$('#pick_up_time').val());
+    		var toDate = new Date($("#enddate").val()+" "+$('#expected_drop_time').val());
     		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
     		var hours = calculateHours(fromDate, toDate);
-    		
+
     		if(hours > 4)
     		{
-    			var amount1 = vehicle_amount * 4; 
-    			var diff = hours - 4;
-				var total = (vehicle_amount * 1.5);
-    			var amount = amount1 + (diff * total) ;
+    			if(hours == 24)
+    			{
+	    			var amount1 = (vehicle_amount * 1.5) * 4; 
+	    			var diff = 17;
+					var total = diff * vehicle_amount;
+					var amount = amount1 + total;
+	    		}
+	    		else
+	    		{
+	    			var amount1 = vehicle_amount * 4; 
+	    			var diff = hours - 4;
+					var total = (vehicle_amount * 1.5);
+	    			var amount = amount1 + (diff * total);
+	    		}
     		}
     		else
     		{

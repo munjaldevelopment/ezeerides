@@ -59,8 +59,14 @@ class RegisterController extends BaseController
         $pick_up = $request->pick_up;
         $expected_drop = $request->expected_drop;
 
-        $pick_up1 = date('Y-m-d H:i:s', strtotime($pick_up));
-        $expected_drop1 =  date('Y-m-d H:i:s', strtotime($expected_drop));
+        $pick_up_time = $request->pick_up_time;
+        $expected_drop_time = $request->expected_drop_time;
+
+        $pick_up1 = date('Y-m-d', strtotime($pick_up));
+        $expected_drop1 =  date('Y-m-d', strtotime($expected_drop));
+
+        $pick_up_time1 = date('H:i:s', strtotime($pick_up_time));
+        $expected_drop_time1 =  date('H:i:s', strtotime($expected_drop_time));
         
         $station = $request->station;
         $vehicle = $request->vehicle;
@@ -76,6 +82,8 @@ class RegisterController extends BaseController
         $register->phone = $phone;
         $register->pick_up = $pick_up1;
         $register->expected_drop = $expected_drop1;
+        $register->pick_up_time = $pick_up_time1;
+        $register->expected_drop_time = $expected_drop_time1;
         $register->station = $station;
         $register->vehicle = $vehicle;
         $register->total_amount = $total_amount;
