@@ -24,6 +24,10 @@
 		
 		<!-- Styles -->
 		<style>.container {margin-top: 40px;}.btn-primary {width: 100%;}
+		.gj-datepicker-md { width: 100%; }
+        	.gj-datepicker-md [role=right-icon] {
+        		top: 20%;
+        	}
 		</style>
 	</head>
 
@@ -64,16 +68,16 @@
 					           <td>{{$history->customer_name}}</td>
 					           <td>{{$history->phone}}</td>
 					           <td>{{$history->pick_up}}</td>
-					           <td>{{$history->pick_up_time}}</td>
+					           <td>{{ date("h:i A", strtotime($history->pick_up_time))}}</td>
 					           <td>{{$history->expected_drop}}</td>
-					           <td>{{$history->expected_drop_time}}</td>
+					           <td>{{ date("h:i A", strtotime($history->expected_drop_time)) }}</td>
 					           <td>{{$history->station}}</td>
 					           <td>{{$history->vehicle}}</td>
 					           <td>{{$history->total_amount}}</td>
 					           <td>{{$history->punchout_time}}</td>
 					       	   <td>
 					       	   	@if($history->status == "Out")
-					       	   	<a class="btn" href="{{ url('/return_vehicle') }}/{{ $history->id }}">Return</a>
+					       	   	<a class="btn btn-primary" href="{{ url('/return_vehicle') }}/{{ $history->id }}">Return</a>
 					       	   	@else
 					       	   	Returned
 					       	   	@endif

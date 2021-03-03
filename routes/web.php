@@ -23,6 +23,8 @@ Route::post('post-register', 'HomeController@postRegister')->name('post-register
 
 Route::get('dashboard', 'HomeController@dashboard')->name('dashboard');
 
+Route::get('booking_verify/{id}', 'HomeController@bookingVerify')->name('bookingVerify');
+
 Route::get('return_vehicle/{id}', 'HomeController@returnVehicle')->name('returnVehicle');
 
 /*Route::get('/dashboard', function () {

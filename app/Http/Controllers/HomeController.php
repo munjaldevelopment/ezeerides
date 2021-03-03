@@ -79,11 +79,40 @@ class HomeController extends Controller
 			$base_url = env('APP_URL');
 			$stations = Station::leftJoin("model_has_stations", "stations.id", "=", "model_has_stations.station_id")->where("user_id", $customer_user_id)->get();
 			$today = date('Y-m-d H:i');
+			$current_date = date('m/d/Y');
+			$next_date = date('m/d/Y');//, strtotime('+1 day'));
 
 			$timeRange = $this->halfHourTimes();
 
+			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today, 'current_date' => $current_date, 'next_date' => $next_date, 'timeRange' => $timeRange]);
+		}
+	}
 
-			return view('dashboard', ['customer_name' => $customer_name, 'base_url' => $base_url, 'stations' => $stations, 'today' => $today, 'timeRange' => $timeRange]);
+	public function bookingVerify($return_id)
+    {
+		$customer_name = session()->get('ezeerides_name');
+		$customer_user_id = session()->get('ezeerides_user_id');
+		
+		if(!$customer_name)
+		{
+			return redirect(url('/'));
+		}
+		else
+		{
+			$record = \DB::table('vehicle_registers')->find($return_id);
+
+			if($record)
+			{
+				// Show vehicle
+				$base_url = env('APP_URL');
+				$today = date('Y-m-d H:i');
+
+				return view('booking_verify', ['customer_name' => $customer_name, 'base_url' => $base_url, 'registerRecord' => $record, 'today' => $today]);
+			}
+			else
+			{
+				return redirect(url('/history'));
+			}
 		}
 	}
 

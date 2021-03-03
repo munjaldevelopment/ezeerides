@@ -61,14 +61,13 @@
                <div class="form-group">
                   <label class="control-label">Pick Up</label>
                   <div class='input-group'>
-                     <input type='text' name="pick_up" class="form-control" placeholder="Pick Up Date" id="startdate" required/>
+                     <input type='text' name="pick_up" class="form-control" placeholder="Pick Up Date" id="startdate" value="{{ $current_date }}" required/>
                      <span class="input-group-addon">
                      <span class="glyphicon glyphicon-calendar"></span>
                      </span>
                   </div>
                   <div class='input-group mt-3'>
                      <select name="pick_up_time" id="pick_up_time" class="form-control">
-                     	<option value="">Select</option>
                      	@foreach($timeRange as $time)
                      	<option value="{{ $time }}">{{ $time }}</option>
                      	@endforeach
@@ -80,14 +79,13 @@
                <div class="form-group">
                		<label class="control-label">Expected Drop</label>
                   	<div class='input-group' >
-                     <input type='text' name="expected_drop" class="form-control" placeholder="Expected Drop Date" id="enddate" required/>
+                     <input type='text' name="expected_drop" class="form-control" placeholder="Expected Drop Date" id="enddate" required value="{{ $next_date }}" />
                      <span class="input-group-addon">
                      <span class="glyphicon glyphicon-calendar"></span>
                      </span>
                     </div>
                     <div class='input-group mt-3'>
                      <select name="expected_drop_time" id="expected_drop_time" class="form-control">
-                     	<option value="">Select</option>
                      	@foreach($timeRange as $time)
                      	<option value="{{ $time }}">{{ $time }}</option>
                      	@endforeach
@@ -133,6 +131,34 @@
    </div>
 </div>
 <script type="text/javascript">
+	function calculateAmount()
+	{
+		var fromDate = new Date($("#startdate").val()+" "+$('#pick_up_time').val());
+		var toDate = new Date($("#enddate").val()+" "+$('#expected_drop_time').val());
+		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
+
+		var hours = calculateHours(fromDate, toDate);
+		alert(hours);
+
+		if(hours > 4)
+		{
+			if(hours < 24)
+			{
+				var amount1 = (vehicle_amount * 1.5) * 4; 
+    			var diff = hours;
+				var total = diff * vehicle_amount;
+				var amount = amount1 + total;
+			}
+		}
+		else
+		{
+    		var amount = hours * (vehicle_amount * 1.5);
+    	}
+    	
+    	$('#total_amount').val(amount);
+    	$('.submit-btn').removeAttr('disabled');
+	}
+
 	$(function () {
 		var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
         $('#startdate').datepicker({
@@ -151,38 +177,25 @@
             }
         });
 
+        
+        $('#pick_up_time').on('change', function() {
+    		calculateAmount();
+    	});
+
+    	$('#expected_drop_time').on('change', function() {
+    		calculateAmount();
+    	});
+
     	$('#station-vehicle').on('change', function() {
-    		var fromDate = new Date($("#startdate").val()+" "+$('#pick_up_time').val());
-    		var toDate = new Date($("#enddate").val()+" "+$('#expected_drop_time').val());
-    		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
+    		calculateAmount();
+    	});
 
-    		var hours = calculateHours(fromDate, toDate);
+    	$('#startdate').on('change', function() {
+    		calculateAmount();
+    	});
 
-    		if(hours > 4)
-    		{
-    			if(hours == 24)
-    			{
-	    			var amount1 = (vehicle_amount * 1.5) * 4; 
-	    			var diff = 17;
-					var total = diff * vehicle_amount;
-					var amount = amount1 + total;
-	    		}
-	    		else
-	    		{
-	    			var amount1 = vehicle_amount * 4; 
-	    			var diff = hours - 4;
-					var total = (vehicle_amount * 1.5);
-	    			var amount = amount1 + (diff * total);
-	    		}
-    		}
-    		else
-    		{
-	    		var amount = hours * (vehicle_amount * 1.5);
-	    	}
-	    	
-	    	$('#total_amount').val(amount);
-	    	$('.submit-btn').removeAttr('disabled');
-
+    	$('#enddate').on('change', function() {
+    		calculateAmount();
     	});
  	});
 
@@ -192,7 +205,7 @@
 	{
 		var diff =(dt2.getTime() - dt1.getTime()) / 1000;
 		diff /= (60 * 60);
-		return Math.abs(Math.round(diff));
+		return Math.abs(diff);
 	}
 
  	function showVehicle(station_id)

@@ -91,6 +91,6 @@ class RegisterController extends BaseController
         $register->status = 'Out';
         $register->save();
         
-        return back()->with('success', 'Register successfully!');
+        return redirect(url('booking_verify/'.$register->id));
     }
 }

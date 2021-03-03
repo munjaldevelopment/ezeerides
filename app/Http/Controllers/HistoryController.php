@@ -23,7 +23,7 @@ class HistoryController extends BaseController
 		else
 		{
 			$base_url = env('APP_URL');
-			$historyData = DB::table('vehicle_registers')->where("user_id", $customer_user_id)->get();
+			$historyData = DB::table('vehicle_registers')->where("user_id", $customer_user_id)->where('booking_status', '1')->get();
 
 			return view('history', ['customer_name' => $customer_name, 'base_url' => $base_url, 'histories' => $historyData]);
 		}
