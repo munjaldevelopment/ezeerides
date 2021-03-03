@@ -42,7 +42,9 @@
 								<th>Customer Name</th>
 								<th>Phone</th>
 								<th>Pick Up</th>
+								<th>Pick Up Time</th>
 								<th>Expected Drop</th>
+								<th>Expected Drop Time</th>
 								<th>Station</th>
 								<th>Vehicle</th>
 								<th>Total Amount</th>
@@ -57,7 +59,9 @@
 					           <td>{{$history->customer_name}}</td>
 					           <td>{{$history->phone}}</td>
 					           <td>{{$history->pick_up}}</td>
+					           <td>{{$history->pick_up_time}}</td>
 					           <td>{{$history->expected_drop}}</td>
+					           <td>{{$history->expected_drop_time}}</td>
 					           <td>{{$history->station}}</td>
 					           <td>{{$history->vehicle}}</td>
 					           <td>{{$history->total_amount}}</td>
