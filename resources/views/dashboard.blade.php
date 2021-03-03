@@ -138,7 +138,7 @@
 		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
 		var hours = calculateHours(fromDate, toDate);
-		alert(hours);
+		//alert(hours);
 
 		if(hours > 4)
 		{
