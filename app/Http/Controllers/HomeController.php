@@ -42,7 +42,7 @@ class HomeController extends Controller
 					foreach($stationsVehicle as $row)
 					{
 						// Check if already assigned
-						$isExists = \DB::table('vehicle_registers')->where("user_id", $customer_user_id)->where("vehicle", $row->vehicle_number)->where('status', 'Out')->count();
+						$isExists = \DB::table('vehicle_registers')->where("user_id", $customer_user_id)->where("vehicle", $row->vehicle_number)->where('status', 'Out')->where('booking_status', '1')->count();
 
 						if($isExists == 0)
 						{

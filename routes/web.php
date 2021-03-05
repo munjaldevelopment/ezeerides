@@ -38,3 +38,4 @@ Route::post('save_return', 'RegisterController@saveReturn');
 Route::get('/history', 'HistoryController@Index')->name('history');
 
 Route::post('/showVehicle', 'HomeController@showVehicle');
+Route::post('/save_booking_verify', 'RegisterController@saveBookingVerify');

@@ -41,6 +41,23 @@ class RegisterController extends BaseController
 
     }
 
+    public function httpGet($url)
+    {
+        $ch = curl_init(); 
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_VERBOSE, 0); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $head = curl_exec($ch); 
+        curl_close($ch);
+        return $head;
+    }
+
+    public function saveBookingVerify(Request $request)
+    {
+        dd($request->all());
+    }
+    
+
     public function RegisterResult(Request $request)
     {
         /*array:8 [
@@ -75,12 +92,15 @@ class RegisterController extends BaseController
         $customer_name = $request->customer_name;
         $phone = $request->phone;
 
+        $otp = rand(111111, 999999);
+
         // Insert Data
         $register = new VehicleRegister;
         $register->user_id = $customer_user_id;
         $register->customer_name = $customer_name;
         $register->phone = $phone;
         $register->pick_up = $pick_up1;
+        $register->register_otp = $otp;
         $register->expected_drop = $expected_drop1;
         $register->pick_up_time = $pick_up_time1;
         $register->expected_drop_time = $expected_drop_time1;
@@ -90,6 +110,9 @@ class RegisterController extends BaseController
         $register->punchout_time = date('Y-m-d H:i:s');
         $register->status = 'Out';
         $register->save();
+
+        $message = str_replace(" ", "%20", "your OTP is ".$otp);
+        $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$phone."&text=".$message."&route=15");
         
         return redirect(url('booking_verify/'.$register->id));
     }

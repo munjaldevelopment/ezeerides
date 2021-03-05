@@ -109,7 +109,7 @@
             <div class='col-md-6'>
                <div class="form-group">
                		<label class="control-label">User OTP</label>
-                  <input type='text' name="return_time" class="form-control" placeholder="Return Time" id="return_time" required value="" />
+                  <input type='text' name="user_otp" class="form-control" placeholder="User OTP" id="user_otp" required value="" />
                </div>
             </div>
          </div>
