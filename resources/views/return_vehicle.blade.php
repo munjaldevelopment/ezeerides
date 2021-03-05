@@ -26,7 +26,7 @@
     <body>
 <div class="container">
   <div class="logo-header">
-    <a href="{{ asset('/') }}">
+    <a href="{{ asset('/dashboard') }}">
       <img src="{{ asset('/') }}image/ezee.jpg" alt="Ezee Rides" title="Ezee Rides" style="width: 100px;margin-bottom: 12px;">
     </a>
     <a target="_blank" href="{{url('/history')}}" style="float: right;border:1px solid;padding: 10px 10px 10px 10px;text-decoration: none;">History</a>
