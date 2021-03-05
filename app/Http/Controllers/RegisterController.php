@@ -38,7 +38,6 @@ class RegisterController extends BaseController
         $updateEntry = \DB::table('vehicle_registers')->where('id', $request->return_id)->update($updateData);
 
         return redirect(url('/history'))->with('success', 'Return successfully!');
-
     }
 
     public function httpGet($url)
@@ -124,7 +123,7 @@ class RegisterController extends BaseController
         $register->status = 'Out';
         $register->save();
 
-        $message = str_replace(" ", "%20", "your OTP is ".$otp);
+        $message = str_replace(" ", "%20", "Dear ".$customer_name.", Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
         $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$phone."&text=".$message."&route=15");
         
         return redirect(url('booking_verify/'.$register->id));
