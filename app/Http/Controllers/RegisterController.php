@@ -54,7 +54,20 @@ class RegisterController extends BaseController
 
     public function saveBookingVerify(Request $request)
     {
-        dd($request->all());
+        $record = \DB::table('vehicle_registers')->where('id', $request->booking_id)->where('register_otp', $request->user_otp)->count();
+
+        if($record)
+        {
+            $updateData = array('booking_status' => '1');
+
+            $updateEntry = \DB::table('vehicle_registers')->where('id', $request->booking_id)->update($updateData);
+
+            return redirect(url('/history'));
+        }
+        else
+        {
+            return redirect(url('booking_verify/'.$request->booking_id));
+        }
     }
     
 

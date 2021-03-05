@@ -131,7 +131,7 @@ class HomeController extends Controller
 				$base_url = env('APP_URL');
 				$today = date('Y-m-d H:i');
 
-				return view('booking_verify', ['customer_name' => $customer_name, 'base_url' => $base_url, 'registerRecord' => $record, 'today' => $today]);
+				return view('booking_verify', ['customer_name' => $customer_name, 'base_url' => $base_url, 'registerRecord' => $record, 'today' => $today, 'booking_id' => $return_id]);
 			}
 			else
 			{

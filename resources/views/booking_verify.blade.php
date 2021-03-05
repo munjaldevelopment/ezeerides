@@ -43,7 +43,7 @@
       <div class="card-body">
         <form action="{{url('save_booking_verify')}}" method="post" id="register_Form">
         {!! csrf_field() !!}
-        <input type="hidden" name="booking_id" value="{{ $registerRecord->id }}">
+        <input type="hidden" name="booking_id" value="{{ $booking_id }}">
         <div class="row">
             <div class="col-md-6">
                <div class="form-group">
@@ -109,7 +109,7 @@
             <div class='col-md-6'>
                <div class="form-group">
                		<label class="control-label">User OTP</label>
-                  <input type='text' name="user_otp" class="form-control" placeholder="User OTP" id="user_otp" required value="" />
+                  <input type='text' name="user_otp" class="form-control" placeholder="User OTP" id="user_otp" maxlength="6" required value="" />
                </div>
             </div>
          </div>
