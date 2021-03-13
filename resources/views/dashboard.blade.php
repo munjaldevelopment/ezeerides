@@ -138,7 +138,7 @@
 		var vehicle_amount = $('#station-vehicle option:selected').attr('data-charge');
 
 		var hours = calculateHours(fromDate, toDate);
-    
+    console.log(hours);
 		
 		if(hours > 4)
 		{
@@ -163,11 +163,7 @@
 				var total = diff * vehicle_amount;
 
         var total2 = (hours - 24) * vehicle_amount;
-        console.log(hours);
-        console.log(amount1);
-        console.log(total);
-        console.log(total2);
-				var amount = amount1 + total + total2;
+        var amount = amount1 + total + total2;
 			}
 			else if(hours >= 48 && hours < 72)
 			{
