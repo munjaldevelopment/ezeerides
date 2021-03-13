@@ -223,10 +223,10 @@
 				var total2 = (hours - 24) * 6 * vehicle_amount;
 				var amount = amount1 + total + total2;
 			}
-			else if(hours == 144)
+			else if(hours == 168)
 			{
 				var amount1 = (vehicle_amount * 1.5) * 4; 
-    			var diff = 17;
+    	 var diff = 17;
 				var total = diff * vehicle_amount;
 
 				var total2 = (hours - 24) * 7 * vehicle_amount;
