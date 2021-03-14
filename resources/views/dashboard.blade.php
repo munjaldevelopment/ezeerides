@@ -237,8 +237,20 @@
 				var nextDayTotal = (diff * vehicle_amount) * 6;
 				
 				var amount = firstFourAmount + dayTotalAmount + nextDayTotal;
-				
+
 				amount = amount - (amount * 30) / 100;
+			}
+			else if(hours > 168 && hours < 192)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 6;
+				var reminaingHour = (hours - 168) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
 		}
 		else
