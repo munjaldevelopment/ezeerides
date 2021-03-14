@@ -144,121 +144,100 @@
 		{
 			if(hours < 24)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = hours - 4;
-				var total = diff * vehicle_amount;
-				var amount = amount1 + total;
+				var dayTotalAmount = diff * vehicle_amount;
+				var amount = firstFourAmount + dayTotalAmount;
 			}
 			else if(hours == 24)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
-				var amount = amount1 + total;
+				var dayTotalAmount = diff * vehicle_amount;
+				var amount = firstFourAmount + dayTotalAmount;
 			}
 			else if(hours > 24 && hours < 48)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
+				var dayTotalAmount = diff * vehicle_amount;
 
-				var total2 = (hours - 24) * vehicle_amount;
+				var extraDays = (hours - 24) * vehicle_amount;
 
-				var amount = amount1 + total + total2;
+				var amount = firstFourAmount + dayTotalAmount + extraDays;
 			}
 			else if(hours >= 48 && hours < 72)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
+				var dayTotalAmount = diff * vehicle_amount;
 
 				var diff = 21;
 				var total0 = diff * vehicle_amount;
 
 				var total2 = (hours - 48) * vehicle_amount;
 
-				var amount = amount1 + total + total0 + total2;
+				var amount = firstFourAmount + total + total0 + total2;
 			}
 			else if(hours >= 72 && hours < 96)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
+				var dayTotalAmount = diff * vehicle_amount;
 
 				var diff = 21;
-				var total0 = diff * vehicle_amount;
-				var total1 = diff * vehicle_amount;
-				var total2 = (hours - 72) * vehicle_amount;
+				var nextDayTotal = (diff * vehicle_amount) * 2;
+				var reminaingHour = (hours - 72) * vehicle_amount;
 
-				console.log(amount1);
-				console.log(total);
-				console.log(total0);
-				console.log(total1);
-				console.log(total2);
-				
-				var amount = amount1 + total + total0 + total1 + total2;
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
 			else if(hours >= 96 && hours < 120)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
-    			var diff = 17;
-				var total = diff * vehicle_amount;
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+				var diff = 17;
+				var dayTotalAmount = diff * vehicle_amount;
 
 				var diff = 21;
-				var total0 = diff * vehicle_amount;
-				var total1 = diff * vehicle_amount;
-				var total20 = diff * vehicle_amount;
+				var nextDayTotal = (diff * vehicle_amount) * 3;
+				var reminaingHour = (hours - 96) * vehicle_amount;
 
-				var total2 = (hours - 96) * vehicle_amount;
-				var amount = amount1 + total + total0 + total1 + total20 + total2;
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
 			else if(hours >= 120 && hours < 144)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-    			var total = diff * vehicle_amount;
+    			var dayTotalAmount = diff * vehicle_amount;
 
-    			var diff = 21;
-				var total0 = diff * vehicle_amount;
-				var total1 = diff * vehicle_amount;
-				var total20 = diff * vehicle_amount;
-				var total21 = diff * vehicle_amount;
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 4;
+				var reminaingHour = (hours - 120) * vehicle_amount;
 
-				var total2 = (hours - 120) * vehicle_amount;
-				var amount = amount1 + total + total0 + total1 + total20 + total21 + total2;
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
 			else if(hours >= 144 && hours < 168)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-    			var total = diff * vehicle_amount;
+    			var dayTotalAmount = diff * vehicle_amount;
 
-    			var diff = 21;
-				var total0 = diff * vehicle_amount;
-				var total1 = diff * vehicle_amount;
-				var total20 = diff * vehicle_amount;
-				var total21 = diff * vehicle_amount;
-				var total22 = diff * vehicle_amount;
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 5;
+				var reminaingHour = (hours - 144) * vehicle_amount;
 
-				var total2 = (hours - 144) * vehicle_amount;
-				var amount = amount1 + total + total0 + total1 + total20 + total21 + total22 + total2;
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
 			else if(hours == 168)
 			{
-				var amount1 = (vehicle_amount * 1.5) * 4; 
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
     	 		var diff = 17;
-    	 		var total = diff * vehicle_amount;
+    	 		var dayTotalAmount = diff * vehicle_amount;
 
-    	 		var diff = 21;
-				var total0 = diff * vehicle_amount;
-				var total1 = diff * vehicle_amount;
-				var total20 = diff * vehicle_amount;
-				var total21 = diff * vehicle_amount;
-				var total22 = diff * vehicle_amount;
-				var total23 = diff * vehicle_amount;
-
-				var amount = amount1 + total + total0 + total1 + total20 + total21 + total22 + total23;
-
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 6;
+				
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal;
+				
 				amount = amount - (amount * 30) / 100;
 			}
 		}
