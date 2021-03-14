@@ -1,5 +1,13 @@
 @if ($crud->hasAccess('create'))
+	@php
+		$count = \DB::table('vehicle_registers')->where('user_id', $entry->getKey())->where('is_amount_receive', '0')->count();
+
+		if($count > 0):
+	@endphp
 	<a href="javascript:void(0)" onclick="recceiveAmountEntry(this)" data-route="{{ backpack_url('receive_amount').'/'.$entry->getKey() }}" data-button-type="receive" class="btn btn-xs btn-success"><i class="fa fa-eye"></i> Receive Amount</a>
+	@php
+		endif;
+	@endphp
 @endif
 
 {{-- Button Javascript --}}

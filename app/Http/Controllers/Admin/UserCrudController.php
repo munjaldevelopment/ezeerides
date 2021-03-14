@@ -208,4 +208,10 @@ class UserCrudController extends CrudController
             ],
         ]);
     }
+
+    public function receiveAmount($id)
+    {
+        \DB::table('vehicle_registers')->where('user_id', $id)->update(['is_amount_receive' => '1', 'receive_date' => date('Y-m-d H:i:s')]);
+        echo 1;
+    }
 }
