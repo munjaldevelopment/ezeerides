@@ -237,8 +237,298 @@
 				var nextDayTotal = (diff * vehicle_amount) * 6;
 				
 				var amount = firstFourAmount + dayTotalAmount + nextDayTotal;
-				
+
 				amount = amount - (amount * 30) / 100;
+			}
+			else if(hours > 168 && hours < 192)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 6;
+				var reminaingHour = (hours - 168) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 192 && hours < 216)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 7;
+				var reminaingHour = (hours - 192) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 216 && hours < 240)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 8;
+				var reminaingHour = (hours - 216) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 240 && hours < 264)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 9;
+				var reminaingHour = (hours - 240) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 264 && hours < 288)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 10;
+				var reminaingHour = (hours - 264) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 288 && hours < 312)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 11;
+				var reminaingHour = (hours - 288) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 312 && hours < 336)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 12;
+				var reminaingHour = (hours - 312) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 336 && hours < 360)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 13;
+				var reminaingHour = (hours - 336) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 360 && hours < 384)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 14;
+				var reminaingHour = (hours - 360) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 384 && hours < 408)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 15;
+				var reminaingHour = (hours - 384) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 408 && hours < 432)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 16;
+				var reminaingHour = (hours - 408) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 432 && hours < 456)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 17;
+				var reminaingHour = (hours - 432) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 456 && hours < 480)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 18;
+				var reminaingHour = (hours - 456) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 480 && hours < 504)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 19;
+				var reminaingHour = (hours - 480) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 504 && hours < 528)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 20;
+				var reminaingHour = (hours - 504) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 528 && hours < 552)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 21;
+				var reminaingHour = (hours - 528) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 552 && hours < 576)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 22;
+				var reminaingHour = (hours - 552) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 576 && hours < 600)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 23;
+				var reminaingHour = (hours - 576) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 600 && hours < 624)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 24;
+				var reminaingHour = (hours - 600) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 624 && hours < 648)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 25;
+				var reminaingHour = (hours - 624) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 648 && hours < 672)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 26;
+				var reminaingHour = (hours - 648) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 672 && hours < 696)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 27;
+				var reminaingHour = (hours - 672) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 696 && hours < 720)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 28;
+				var reminaingHour = (hours - 696) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours == 720)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 29;
+				var reminaingHour = (hours - 720) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+
+				amount = amount - (amount * 40) / 100;
 			}
 		}
 		else
