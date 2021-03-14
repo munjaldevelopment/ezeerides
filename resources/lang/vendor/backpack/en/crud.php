@@ -41,6 +41,7 @@ return [
     'reset'                     => 'Reset',
     'actions'                   => 'Actions',
     'preview'                   => 'Preview',
+    'receive'                   => 'Receive',
     'delete'                    => 'Delete',
     'admin'                     => 'Admin',
     'details_row'               => 'This is the details row. Modify as you please.',
@@ -51,6 +52,7 @@ return [
 
     // Confirmation messages and bubbles
     'delete_confirm'                              => 'Are you sure you want to delete this item?',
+    'receive_amount_confirm'                      => 'Are you sure you want to receive amount this item?',
     'delete_confirmation_title'                   => 'Item Deleted',
     'delete_confirmation_message'                 => 'The item has been deleted successfully.',
     'delete_confirmation_not_title'               => 'NOT deleted',

@@ -18,10 +18,10 @@
 
 		swal({
 		  title: "{!! trans('backpack::base.warning') !!}",
-		  text: "{!! trans('backpack::crud.delete_confirm') !!}",
+		  text: "{!! trans('backpack::crud.receive_amount_confirm') !!}",
 		  icon: "success",
-		  buttons: ["{!! trans('backpack::crud.cancel') !!}", "{!! trans('backpack::crud.delete') !!}"],
-		  dangerMode: true,
+		  buttons: ["{!! trans('backpack::crud.cancel') !!}", "{!! trans('backpack::crud.receive') !!}"],
+		  dangerMode: false,
 		}).then((value) => {
 			if (value) {
 				$.ajax({
