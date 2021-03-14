@@ -203,28 +203,43 @@
 			{
 				var amount1 = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
+    			var total = diff * vehicle_amount;
+				var total0 = diff * vehicle_amount;
+				var total1 = diff * vehicle_amount;
+				var total20 = diff * vehicle_amount;
+				var total21 = diff * vehicle_amount;
 
-				var total2 = (hours - 24) * 5 * vehicle_amount;
-				var amount = amount1 + total + total2;
+				var total2 = (hours - 120) * 5 * vehicle_amount;
+				var amount = amount1 + total + total0 + total1 + total20 + total21 + total2;
 			}
 			else if(hours >= 144 && hours < 168)
 			{
 				var amount1 = (vehicle_amount * 1.5) * 4; 
     			var diff = 17;
-				var total = diff * vehicle_amount;
+    			var total = diff * vehicle_amount;
+				var total0 = diff * vehicle_amount;
+				var total1 = diff * vehicle_amount;
+				var total20 = diff * vehicle_amount;
+				var total21 = diff * vehicle_amount;
+				var total22 = diff * vehicle_amount;
 
-				var total2 = (hours - 24) * 6 * vehicle_amount;
-				var amount = amount1 + total + total2;
+				var total2 = (hours - 144) * 5 * vehicle_amount;
+				var amount = amount1 + total + total0 + total1 + total20 + total21 + total22 + total2;
 			}
 			else if(hours == 168)
 			{
 				var amount1 = (vehicle_amount * 1.5) * 4; 
-    	 var diff = 17;
-				var total = diff * vehicle_amount;
+    	 		var diff = 17;
+    	 		var total = diff * vehicle_amount;
+				var total0 = diff * vehicle_amount;
+				var total1 = diff * vehicle_amount;
+				var total20 = diff * vehicle_amount;
+				var total21 = diff * vehicle_amount;
+				var total22 = diff * vehicle_amount;
+				var total23 = diff * vehicle_amount;
 
-				var total2 = (hours - 24) * 7 * vehicle_amount;
-				var amount = amount1 + total + total2;
+				var total2 = (hours - 144) * 5 * vehicle_amount;
+				var amount = amount1 + total + total0 + total1 + total20 + total21 + total22 + total23 + total2;
 
 				amount = amount - (amount * 30) / 100;
 			}
@@ -232,7 +247,7 @@
 		else
 		{
     		var amount = hours * (vehicle_amount * 1.5);
-    }
+    	}
     	
     	if(vehicle_amount > 0)
     	{
