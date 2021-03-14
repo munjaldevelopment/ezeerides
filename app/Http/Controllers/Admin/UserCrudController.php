@@ -83,6 +83,8 @@ class UserCrudController extends CrudController
                 });
             }
         );
+
+        $this->crud->addButtonFromView('line', 'receive_amount', 'receive_amount', 'end');
     }
 
     public function setupCreateOperation()

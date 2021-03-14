@@ -55,9 +55,6 @@ class VehicleRegisterCrudController extends CrudController
         CRUD::column('vehicle');
         CRUD::column('status');
 
-        $this->crud->addButtonFromView('line', 'receive_amount', 'receive_amount', 'end');
-        $this->crud->enableAjaxTable();
-
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
