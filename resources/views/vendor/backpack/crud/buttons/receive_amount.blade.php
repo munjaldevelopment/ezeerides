@@ -45,7 +45,7 @@
 			          	  // Show a success notification bubble
 			              new Noty({
 		                    type: "success",
-		                    text: "{!! '<strong>'.trans('backpack::crud.delete_confirmation_title').'</strong><br>'.trans('backpack::crud.delete_confirmation_message') !!}"
+		                    text: "{!! '<strong>'.trans('backpack::crud.receive_confirmation_title').'</strong><br>'.trans('backpack::crud.receive_confirmation_message') !!}"
 		                  }).show();
 
 			              // Hide the modal, if any
