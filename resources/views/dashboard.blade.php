@@ -176,6 +176,7 @@
 				var total0 = diff * vehicle_amount;
 
 				var total2 = (hours - 48) * vehicle_amount;
+
 				var amount = amount1 + total + total0 + total2;
 			}
 			else if(hours >= 72 && hours < 96)
@@ -187,8 +188,14 @@
 				var diff = 21;
 				var total0 = diff * vehicle_amount;
 				var total1 = diff * vehicle_amount;
-
 				var total2 = (hours - 72) * vehicle_amount;
+
+				console.log(amount1);
+				console.log(total);
+				console.log(total0);
+				console.log(total1);
+				console.log(total2);
+				
 				var amount = amount1 + total + total0 + total1 + total2;
 			}
 			else if(hours >= 96 && hours < 120)
