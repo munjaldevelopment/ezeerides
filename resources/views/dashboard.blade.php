@@ -252,6 +252,30 @@
 
 				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 			}
+			else if(hours >= 192 && hours < 216)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 7;
+				var reminaingHour = (hours - 192) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
+			else if(hours >= 216 && hours < 240)
+			{
+				var firstFourAmount = (vehicle_amount * 1.5) * 4; 
+    			var diff = 17;
+    			var dayTotalAmount = diff * vehicle_amount;
+
+				var diff = 21;
+				var nextDayTotal = (diff * vehicle_amount) * 8;
+				var reminaingHour = (hours - 216) * vehicle_amount;
+
+				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
+			}
 		}
 		else
 		{
