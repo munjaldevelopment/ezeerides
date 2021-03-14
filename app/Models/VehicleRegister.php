@@ -21,7 +21,7 @@ class VehicleRegister extends Model
     protected $guarded = ['id'];
     
     protected $fillable = ['user_id', 'customer_name', 'phone', 'register_otp', 'pick_up', 'pick_up_time', 
-    'expected_drop', 'expected_drop_time', 'station', 'vehicle', 'total_amount', 'punchout_time', 'return_time', 'additional_hours', 'additional_amount', 'status', 'booking_status'];
+    'expected_drop', 'expected_drop_time', 'station', 'vehicle', 'total_amount', 'punchout_time', 'return_time', 'additional_hours', 'additional_amount', 'status', 'booking_status', 'is_amount_receive', 'receive_date'];
     // protected $hidden = [];
     // protected $dates = [];
 

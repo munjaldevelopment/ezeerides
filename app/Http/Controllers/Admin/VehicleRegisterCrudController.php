@@ -129,6 +129,20 @@ class VehicleRegisterCrudController extends CrudController
             'options'   => $statusData
         ]);
 
+        $statusData = array('0' => 'Inactive', '1' => 'Active');
+        CRUD::addField([
+            'label'     => 'Amount Recceive',
+            'type'      => 'select2_from_array',
+            'name'      => 'is_amount_receive',
+            'options'   => $statusData
+        ]);
+
+        CRUD::addField([
+            'label'     => 'Receive Date',
+            'type'      => 'datetime',
+            'name'      => 'receive_date'
+        ]);
+
         $statusData = array('' => '--Select--', 'In' => 'In', 'Out' => 'Out');
         CRUD::addField([
             'label'     => 'Status',
