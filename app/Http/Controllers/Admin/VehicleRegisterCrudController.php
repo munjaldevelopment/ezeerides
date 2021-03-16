@@ -53,7 +53,7 @@ class VehicleRegisterCrudController extends CrudController
         CRUD::column('expected_drop');
         CRUD::column('station');
         CRUD::column('vehicle');
-        CRUD::column('status');
+        CRUD::column('booking_status');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
