@@ -238,7 +238,7 @@
 				
 				var amount = firstFourAmount + dayTotalAmount + nextDayTotal;
 
-				amount = amount - (amount * 30) / 100;
+				amount = amount - (amount * {{ WEEKLY_DISCOUNT }}) / 100;
 			}
 			else if(hours > 168 && hours < 192)
 			{
@@ -528,7 +528,7 @@
 
 				var amount = firstFourAmount + dayTotalAmount + nextDayTotal + reminaingHour;
 
-				amount = amount - (amount * 40) / 100;
+				amount = amount - (amount * {{ MONTHLY_DISCOUNT }}) / 100;
 			}
 		}
 		else

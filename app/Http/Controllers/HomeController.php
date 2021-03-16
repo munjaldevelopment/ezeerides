@@ -15,6 +15,7 @@ use App\User;
 
 use App\Models\Vehicle;
 use App\Models\Station;
+use App\Models\Setting;
 
 use Illuminate\Support\Facades\Hash;
 
@@ -66,6 +67,7 @@ class HomeController extends Controller
 
 	public function dashboard()
     {
+    	Setting::assignSetting();
 		$customer_name = session()->get('ezeerides_name');
 		$customer_user_id = session()->get('ezeerides_user_id');
 		
