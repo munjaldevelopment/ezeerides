@@ -17,3 +17,14 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('customer-token', 'apiController@getCustomerType');
+
+Route::post('customer-login', 'apiController@customerLogin');
+Route::post('customer-verify', 'apiController@customerVerify');
+Route::post('resend-sms', 'apiController@resendSMS');
+Route::get('customer-profile', 'apiController@customer_profile');
+Route::post('update-profile', 'apiController@update_profile');
+
+Route::post('customer-logout', 'apiController@customer_logout');
+

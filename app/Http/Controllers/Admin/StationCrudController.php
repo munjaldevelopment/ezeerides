@@ -29,6 +29,14 @@ class StationCrudController extends CrudController
         CRUD::setModel(\App\Models\Station::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/station');
         CRUD::setEntityNameStrings('station', 'stations');
+
+        $is_admin = backpack_user()->hasRole('Admin');
+        if($is_admin)
+        {
+            $this->crud->allowAccess(['list','create', 'update', 'delete']);
+        }else{
+            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
+        }
     }
 
     /**

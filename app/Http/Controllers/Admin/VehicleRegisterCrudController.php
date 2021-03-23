@@ -29,6 +29,14 @@ class VehicleRegisterCrudController extends CrudController
         CRUD::setModel(\App\Models\VehicleRegister::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/vehicle_register');
         CRUD::setEntityNameStrings('Vehicle', 'Vehicle Data');
+
+        $is_admin = backpack_user()->hasRole('Admin');
+        if($is_admin)
+        {
+            $this->crud->allowAccess(['list','create', 'update', 'delete']);
+        }else{
+            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
+        }
     }
 
     /**

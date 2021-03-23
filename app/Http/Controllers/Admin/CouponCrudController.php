@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\VehicleRequest;
+use App\Http\Requests\CouponRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class VehicleCrudController
+ * Class CouponCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class VehicleCrudController extends CrudController
+class CouponCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,17 +26,9 @@ class VehicleCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Vehicle::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/vehicle');
-        CRUD::setEntityNameStrings('vehicle', 'vehicles');
-
-        $is_admin = backpack_user()->hasRole('Admin');
-        if($is_admin)
-        {
-            $this->crud->allowAccess(['list','create', 'update', 'delete']);
-        }else{
-            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
-        }
+        CRUD::setModel(\App\Models\Coupon::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/coupon');
+        CRUD::setEntityNameStrings('coupon', 'coupons');
     }
 
     /**
@@ -64,7 +56,7 @@ class VehicleCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(VehicleRequest::class);
+        CRUD::setValidation(CouponRequest::class);
 
         CRUD::setFromDb(); // fields
 
