@@ -26,4 +26,5 @@ Route::group([
     Route::crud('helmets', 'HelmetsCrudController');
     Route::crud('penalty', 'PenaltyCrudController');
     Route::crud('servicetype', 'ServiceTypeCrudController');
+    Route::crud('vehicleservice', 'VehicleServiceCrudController');
 }); // this should be the absolute last line of this file

@@ -29,6 +29,14 @@ class HelmetsCrudController extends CrudController
         CRUD::setModel(\App\Models\Helmets::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/helmets');
         CRUD::setEntityNameStrings('helmets', 'helmets');
+
+        $is_admin = backpack_user()->hasRole('Admin');
+        if($is_admin)
+        {
+            $this->crud->allowAccess(['list','create', 'update', 'delete']);
+        }else{
+            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
+        }  
     }
 
     /**
