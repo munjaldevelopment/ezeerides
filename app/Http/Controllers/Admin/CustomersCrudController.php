@@ -112,7 +112,7 @@ class CustomersCrudController extends CrudController
 
           $this->crud->addField([
             'name' => 'status',
-            'label' => 'Is Active',
+            'label' => 'Status',
             'type' => 'select2_from_array',
             'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
             'hint' => '',

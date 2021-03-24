@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\CouponRequest;
+use App\Http\Requests\PenaltyRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class CouponCrudController
+ * Class PenaltyCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class CouponCrudController extends CrudController
+class PenaltyCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class CouponCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Coupon::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/coupon');
-        CRUD::setEntityNameStrings('coupon', 'coupons');
+        CRUD::setModel(\App\Models\Penalty::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/penalty');
+        CRUD::setEntityNameStrings('Penalty', 'Penalties');
 
         $is_admin = backpack_user()->hasRole('Admin');
         if($is_admin)
@@ -64,9 +64,9 @@ class CouponCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(CouponRequest::class);
+        CRUD::setValidation(PenaltyRequest::class);
 
-       // CRUD::setFromDb(); // fields
+        // CRUD::setFromDb(); // fields
 
         $this->crud->addField([
             'name' => 'title',
@@ -81,27 +81,12 @@ class CouponCrudController extends CrudController
             'type' => 'textarea',
             'hint' => '',
         ]);
-        $this->crud->addField([
-            'name' => 'discount',
-            'label' => 'Discount',
+         $this->crud->addField([
+            'name' => 'charges',
+            'label' => 'Charges',
             'type' => 'text',
             'hint' => '',
         ]);
-
-        $this->crud->addField([
-            'name' => 'start_date',
-            'label' => 'Start Date',
-            'type' => 'datetime',
-            'hint' => '',
-        ]);
-
-        $this->crud->addField([
-            'name' => 'end_date',
-            'label' => 'End Date',
-            'type' => 'datetime',
-            'hint' => '',
-        ]);
-
         $this->crud->addField([
             'name' => 'status',
             'label' => 'Status',
@@ -109,7 +94,6 @@ class CouponCrudController extends CrudController
             'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
             'hint' => '',
         ]);
-
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
@@ -126,6 +110,5 @@ class CouponCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
-        
     }
 }

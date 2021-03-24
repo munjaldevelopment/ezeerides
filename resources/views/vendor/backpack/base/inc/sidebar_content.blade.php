@@ -10,9 +10,11 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Master</a>
 	<ul class="nav-dropdown-items">
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle') }}"><i class="nav-icon la la-id-badge"></i> <span>Vehicle</span></a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicetype') }}'><i class='nav-icon la la-motorcycle'></i> Service Type</a></li>
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-key"></i> <span>Station</span></a></li>
 
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('helmets') }}'><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('penalty') }}'><i class='nav-icon la la-rupee-sign'></i> Penalties</a></li>
 	</ul>
 </li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-file-o'></i> Vehicle Register</a></li>
@@ -34,4 +36,6 @@
 @php
 	endif;
 @endphp
+
+
 

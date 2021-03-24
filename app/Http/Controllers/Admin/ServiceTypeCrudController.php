@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\CouponRequest;
+use App\Http\Requests\ServiceTypeRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class CouponCrudController
+ * Class ServiceTypeCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class CouponCrudController extends CrudController
+class ServiceTypeCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,17 +26,9 @@ class CouponCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Coupon::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/coupon');
-        CRUD::setEntityNameStrings('coupon', 'coupons');
-
-        $is_admin = backpack_user()->hasRole('Admin');
-        if($is_admin)
-        {
-            $this->crud->allowAccess(['list','create', 'update', 'delete']);
-        }else{
-            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
-        }  
+        CRUD::setModel(\App\Models\ServiceType::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/servicetype');
+        CRUD::setEntityNameStrings('Service Type', 'Service Type');
     }
 
     /**
@@ -64,9 +56,9 @@ class CouponCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(CouponRequest::class);
+        CRUD::setValidation(ServiceTypeRequest::class);
 
-       // CRUD::setFromDb(); // fields
+        //CRUD::setFromDb(); // fields
 
         $this->crud->addField([
             'name' => 'title',
@@ -79,26 +71,6 @@ class CouponCrudController extends CrudController
             'name' => 'description',
             'label' => 'Description',
             'type' => 'textarea',
-            'hint' => '',
-        ]);
-        $this->crud->addField([
-            'name' => 'discount',
-            'label' => 'Discount',
-            'type' => 'text',
-            'hint' => '',
-        ]);
-
-        $this->crud->addField([
-            'name' => 'start_date',
-            'label' => 'Start Date',
-            'type' => 'datetime',
-            'hint' => '',
-        ]);
-
-        $this->crud->addField([
-            'name' => 'end_date',
-            'label' => 'End Date',
-            'type' => 'datetime',
             'hint' => '',
         ]);
 
@@ -126,6 +98,5 @@ class CouponCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
-        
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
-class HelmetsRequest extends FormRequest
+class ServiceTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +26,7 @@ class HelmetsRequest extends FormRequest
     public function rules()
     {
         return [
-             'brand' => 'required|min:5|max:255',
-             'total' => 'required'
+            // 'name' => 'required|min:5|max:255'
         ];
     }
 

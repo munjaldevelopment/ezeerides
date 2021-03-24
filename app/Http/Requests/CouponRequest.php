@@ -26,7 +26,10 @@ class CouponRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+             'title' => 'required|min:5|max:255',
+             'discount' => 'required',
+             'start_date' => 'required',
+             'end_date' => 'required'
         ];
     }
 
