@@ -36,7 +36,10 @@ class VehicleServiceCrudController extends CrudController
             $this->crud->allowAccess(['list','create', 'update', 'delete']);
         }else{
             $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
-        }  
+        } 
+
+         $this->crud->setCreateView('admin.create-vehicle-service-form');
+         $this->crud->setUpdateView('admin.edit-vehicle-service-form'); 
     }
 
     /**
@@ -68,6 +71,7 @@ class VehicleServiceCrudController extends CrudController
 
          ]);
        $this->crud->addColumn('service_amount');
+       $this->crud->addColumn('bike_km');
        $this->crud->addColumn('service_date');
        //$this->crud->addColumn('service_date');
         /**
@@ -142,6 +146,13 @@ class VehicleServiceCrudController extends CrudController
         ]);
 
         $this->crud->addField([
+            'name' => 'bike_km',
+            'label' => 'Bike KM',
+            'type' => 'number',
+            'hint' => '',
+        ]);
+
+        $this->crud->addField([
             'type' => 'checklist',
             'label' => 'Service Type',
             'name' => 'all_service_type', // the relationship name in your Model
@@ -154,6 +165,19 @@ class VehicleServiceCrudController extends CrudController
             'name' => 'service_date',
             'label' => 'Service Date',
             'type' => 'datetime',
+            'attributes' => [
+                        'id' => 'service_date',
+                        'onblur' => 'getNextServiceDate(this.value);'
+                    ],
+            'hint' => '',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'next_date',
+            'type' => 'hidden',
+            'attributes' => [
+                        'id' => 'next_date'
+                    ],
             'hint' => '',
         ]);
 
