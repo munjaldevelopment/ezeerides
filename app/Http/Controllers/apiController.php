@@ -479,7 +479,7 @@ class apiController extends Controller
             $baseUrl = URL::to("/");
             $json       =   array();
             $language = $request->language;
-            $centerList = DB::table('stations')->select('station_name')->orderBy('station_name', 'ASC')->get();
+            $centerList = DB::table('stations')->select('id','station_name')->orderBy('station_name', 'ASC')->get();
             
             $status_code = '1';
             $message = 'Center list';
@@ -571,7 +571,7 @@ class apiController extends Controller
                             $baseUrl = URL::to("/");
                             $vehicle_image  = "";
                             if($vlist->vehicle_image){
-                                $vehicle_image  =  $baseUrl."/public/uploads/vehicle_image/".$vlist->vehicle_image;
+                                $vehicle_image  =  $baseUrl."/public/".$vlist->vehicle_image;
                             
                             }
 
