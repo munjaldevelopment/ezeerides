@@ -396,14 +396,14 @@ class apiController extends Controller
                     $image_type_aux = explode("image/", $image_parts[0]);
                     $image_type = $image_type_aux[1];
 
-                    $customerimage = 'uploads/customer_image/'.rand(10000, 99999).'-'.time().'.'.$image_type;
+                    $customerimage = rand(10000, 99999).'-'.time().'.'.$image_type;
                     $destinationPath = public_path('/uploads/customer_image/').$customerimage;
 
                     $data = base64_decode($image_parts[1]);
                    // $data = $image_parts[1];
                     file_put_contents($destinationPath, $data);
                 }
-                DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => $customerimage, 'updated_at' => $date]);
+                DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
                 
                 /* user update */
                 $user_id = $customer->user_id;
