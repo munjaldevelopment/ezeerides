@@ -396,7 +396,7 @@ class apiController extends Controller
                     $image_type_aux = explode("image/", $image_parts[0]);
                     $image_type = $image_type_aux[1];
 
-                    $customerimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                    $customerimage = 'uploads/customer_image/'.rand(10000, 99999).'-'.time().'.'.$image_type;
                     $destinationPath = public_path('/uploads/customer_image/').$customerimage;
 
                     $data = base64_decode($image_parts[1]);
