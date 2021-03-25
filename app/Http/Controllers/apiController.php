@@ -546,7 +546,7 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
 
-                    $vehicleList = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->select('v.id','v.vehicle_model','v.vehicle_number','v.allowed_km_per_hour','v.charges_per_hour','v.premium_charges_per_hour', 'v.penalty_amount_per_hour','v.vehicle_image');
+                    $vehicleList = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('vehicle_registers as vr', 'v.vehicle_number', '=', 'vr.vehicle')->select('v.id','v.vehicle_model','v.vehicle_number','v.allowed_km_per_hour','v.charges_per_hour','v.premium_charges_per_hour', 'v.penalty_amount_per_hour','v.vehicle_image')->where('vr.status','In');
 
                     if($center){
                         $vehicleList = $vehicleList->where('sv.station_id',$center);    
