@@ -28,3 +28,7 @@ Route::post('update-profile', 'apiController@update_profile');
 
 Route::post('customer-logout', 'apiController@customer_logout');
 
+Route::post('vehicle-center', 'apiController@all_center');
+
+Route::post('vehicle-filter', 'apiController@vehicle_filter');
+

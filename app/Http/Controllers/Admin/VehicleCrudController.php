@@ -47,7 +47,17 @@ class VehicleCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
+        //CRUD::setFromDb(); // columns
+
+        CRUD::column('vehicle_model');
+        CRUD::column('vehicle_number');
+        CRUD::column('allowed_km_per_hour');
+       CRUD::column('charges_per_hour');
+        $this->crud->addColumn([
+                'name' => 'vehicle_image',
+                'label' => 'Image',
+                'type' => 'image',
+            ]);
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -66,7 +76,19 @@ class VehicleCrudController extends CrudController
     {
         CRUD::setValidation(VehicleRequest::class);
 
-        CRUD::setFromDb(); // fields
+        //CRUD::setFromDb(); // fields
+        CRUD::field('vehicle_model');
+        CRUD::field('vehicle_number');
+        CRUD::field('allowed_km_per_hour');
+        CRUD::field('charges_per_hour');
+        CRUD::field('premium_charges_per_hour');
+        CRUD::field('penalty_amount_per_hour');
+
+         $this->crud->addField([
+                'name' => 'vehicle_image',
+                'label' => 'Image',
+                'type' => 'browse',
+            ]);
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
