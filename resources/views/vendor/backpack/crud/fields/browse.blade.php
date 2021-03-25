@@ -22,6 +22,10 @@
 				<button type="button" data-inputid="{{ $field['name'] }}-filemanager" class="btn btn-light btn-sm clear_elfinder_picker"><i class="la la-eraser"></i> {{ trans('backpack::crud.clear') }}</button>
 			</span>
 		</div>
+		@if(isset($field['value']))
+		<br />
+			<img src="{{ asset('/').'/'.$field['value'] }}" width="100" height="100" />
+		@endif	
 	</div>
 
 	@if (isset($field['hint']))

@@ -58,6 +58,12 @@ class CustomersCrudController extends CrudController
         CRUD::column('email');
         CRUD::column('status');
 
+        $this->crud->addColumn([
+                'name' => 'image',
+                'label' => 'Image',
+                'type' => 'image',
+            ]);
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
