@@ -223,37 +223,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-    /* Get customer detail */
-    public function getCustomerType(Request $request)
-    {
-        try 
-        {   
-            $baseUrl = URL::to("/");
-            $json       =   array();
-            $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', '1')->first();
-            if($customer){
-                $custname = $customer->name;
-            }else{
-                $custname = "Guest";
-            }    
-           
-            
-            $status_code = '1';
-            $message = 'All Customer Type';
-            $json = array('status_code' => $status_code,  'message' => $message, 'name' => $custname);
-        }
-        
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
-    //END 
      //START show feed list 
     public function birth_year(Request $request)
     {
@@ -400,17 +370,15 @@ class apiController extends Controller
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
             $name = $request->name;
-            $age = $request->age;
-            $email = $request->email;
-            $telephone = $request->telephone;
-            $address1 = $request->address;
+            $dob = $request->dob;
+            $email = $request->email ;
+            //$telephone = $request->telephone;
+            $address = $request->address;
             //$address2 = $request->address2;
             $customer_image = $request->customer_image;
-            $address2 = '';
-            $city = $request->city;
-
-
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', '1')->first();
+            
+            
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
             if($customer){ 
                 $customerimage = '';
                 /*if ($request->hasFile('customer_image')) {
@@ -435,8 +403,13 @@ class apiController extends Controller
                    // $data = $image_parts[1];
                     file_put_contents($destinationPath, $data);
                 }
-                DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'age' => $age, 'email' => $email, 'telephone' => $telephone, 'address1' => $address1, 'address2' => $address2, 'city' => $city, 'image' => $customerimage, 'updated_at' => $date]);
-
+                DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => $customerimage, 'updated_at' => $date]);
+                
+                /* user update */
+                $user_id = $customer->user_id;
+                if($user_id){
+                    DB::table('User')->where('id', '=', $user_id)->->update(['name' => $name, 'email' => $email, 'updated_at' => date('Y-m-d H:i:s')]);
+                }    
                 $status_code = $success = '1';
                 $message = 'Customer info updated successfully';
                 
