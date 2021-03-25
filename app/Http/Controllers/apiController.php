@@ -408,7 +408,7 @@ class apiController extends Controller
                 /* user update */
                 $user_id = $customer->user_id;
                 if($user_id){
-                    DB::table('User')->where('id', '=', $user_id)->->update(['name' => $name, 'email' => $email, 'updated_at' => date('Y-m-d H:i:s')]);
+                    DB::table('User')->where('id', '=', $user_id)->update(['name' => $name, 'email' => $email, 'updated_at' => date('Y-m-d H:i:s')]);
                 }    
                 $status_code = $success = '1';
                 $message = 'Customer info updated successfully';

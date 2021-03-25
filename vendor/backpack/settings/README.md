@@ -138,7 +138,7 @@ For example, you can override the Backpack `show_powered_by` or the `skin` setti
 See [backpackforlaravel.com](https://backpackforlaravel.com)
 
 - List view:
-![List / table view in Backpack/Settings](https://backpackforlaravel.com/uploads/screenshots/settings_list.png)
+![List / table view in Backpack/Settings](https://user-images.githubusercontent.com/1032474/111115626-8f7a0480-856d-11eb-99bb-3004ec621ebb.gif)
 - Editing a setting with the email field type:
 
 ## Change log
