@@ -84,12 +84,35 @@ class VehicleCrudController extends CrudController
         CRUD::field('premium_charges_per_hour');
         CRUD::field('penalty_amount_per_hour');
 
-         $this->crud->addField([
-                'name' => 'vehicle_image',
-                'label' => 'Image',
-                'type' => 'browse',
-            ]);
+        $this->crud->addField([
+            'name' => 'vehicle_image',
+            'label' => 'Image',
+            'type' => 'browse',
+        ]);
 
+        $this->crud->addField([
+            'name' => 'alt_image1',
+            'label' => 'Alt Image 1',
+            'type' => 'browse',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'alt_image2',
+            'label' => 'Alt Image 2',
+            'type' => 'browse',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'alt_image3',
+            'label' => 'Alt Image 3',
+            'type' => 'browse',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'alt_image4',
+            'label' => 'Alt Image 4',
+            'type' => 'browse',
+        ]);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
