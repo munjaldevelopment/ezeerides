@@ -146,7 +146,7 @@ class apiController extends Controller
 
                      DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
 
-                     DB::table('customers_tmp')->where('mobile' => $mobile)->delete();
+                     DB::table('customers_tmp')->where('mobile', $mobile)->delete();
                     
                     $refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.ezeerides&referrer=ezeerdrefer".$customer->id;
 
