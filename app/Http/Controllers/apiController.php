@@ -150,9 +150,23 @@ class apiController extends Controller
                     
                     $refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.ezeerides&referrer=ezeerdrefer".$customer->id;
 
+                    $name = '';
+                    $email = '';
+                    $rscustomer = DB::table('customers')->where('id', $customerid)->first();
+                    if($rscustomer) 
+                    {
+                        $name = $rscustomer->name;
+                        $email = $rscustomer->email;
+                        if($name != '' && $email != ''){
+                            $profile_status = 'true';
+                        }else{
+                            $profile_status = 'false';
+                        }
+                    }   
+
                     $status_code = '1';
                     $message = 'Customer activated successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => (int)$customerid, 'mobile' => $mobile, 'referurl' => $refer_url);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => (int)$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'profile_status' => $profile_status);
                 } 
                 else 
                 {
