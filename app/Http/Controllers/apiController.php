@@ -71,7 +71,7 @@ class apiController extends Controller
                    
                 }else{
                 		
-                    $otp = rand(111111, 999999);
+                    $otp = rand(11111, 99999);
                     $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
                         
                     $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
@@ -192,7 +192,7 @@ class apiController extends Controller
                 if($customer) 
                 {
                     $customerid = $customer->id;
-                    $otp = rand(111111, 999999);
+                    $otp = rand(11111, 99999);
                     
                     $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
                         
