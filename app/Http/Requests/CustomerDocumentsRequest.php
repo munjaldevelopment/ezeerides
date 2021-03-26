@@ -26,7 +26,11 @@ class CustomerDocumentsRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+             'customer_id' => 'required',
+             'title' => 'required|min:5|max:255',
+             'front_image' => 'required',
+             'back_image' => 'required',
+             'other_image' => 'required',
         ];
     }
 
