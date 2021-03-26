@@ -64,6 +64,7 @@ class CustomersCrudController extends CrudController
                 'type' => 'image',
             ]);
 
+         $this->crud->addButtonFromView('line', 'customer_documents', 'customer_documents', 'end');
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
