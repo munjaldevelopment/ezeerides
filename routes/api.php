@@ -25,6 +25,7 @@ Route::post('customer-verify', 'apiController@customerVerify');
 Route::post('resend-sms', 'apiController@resendSMS');
 Route::get('customer-profile', 'apiController@customer_profile');
 Route::post('update-profile', 'apiController@update_profile');
+Route::post('customer-documents', 'apiController@customer_documents');
 
 Route::post('customer-logout', 'apiController@customer_logout');
 

@@ -447,32 +447,37 @@ class apiController extends Controller
 
     
 
-    //START show cities 
-    public function home_slider(Request $request)
+    //START show customer_documents 
+    public function customer_documents(Request $request)
     {
         try 
         {   
             $baseUrl = URL::to("/");
             $json       =   array();
             $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', '1')->first();
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
             if($customer){
                 $custname = $customer->name;
+               
+                $customerDocArr = array();
+                $customerDocList = DB::table('customer_documents')->select('id','title','front_image' ,'back_image', 'other_image')->where('customer_id', '=', $customer_id)->where('status', '=', 'Live')->orderBy('id', 'DESC')->get();
+                foreach ($customerDocList as $doclist) {
+                    $front_image  =  $baseUrl."/public/".$doclist->front_image;
+                    $back_image  =  $baseUrl."/public/".$doclist->back_image;
+                    $other_image  =  $baseUrl."/public/".$doclist->other_image;
+                    $customerDocArr[] = ['id' => (int)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
+                }
+                
+                $status_code = '1';
+                $message = 'All Document list';
+                $json = array('status_code' => $status_code,  'message' => $message, 'name' => $custname, 'customerDocList' => $customerDocArr);
             }else{
-                $custname = "Guest";
-            }    
-            $sliderArr = array();
-            $sliderList = DB::table('home_slider')->select('id','image')->where('isactive', '=', 1)->orderBy('id', 'DESC')->get();
-            foreach ($sliderList as $hslider) {
-                $sliderimage  =  $baseUrl."/public/".$hslider->image;
-                $sliderArr[] = ['id' => (int)$hslider->id, 'slider_image' => $sliderimage]; //'planning_isprogress' => 
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
             }
-            
-            $status_code = '1';
-            $message = 'All Slider list';
-            $json = array('status_code' => $status_code,  'message' => $message, 'name' => $custname, 'sliderList' => $sliderArr);
         }
-        
         catch(\Exception $e) {
             $status_code = '0';
             $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
