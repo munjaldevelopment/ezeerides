@@ -47,13 +47,20 @@ class apiController extends Controller
                     
                     if($customer_status == 'Live'){
 
-                        DB::table('customers')->where('id', '=', $customerid)->update(['fcmToken' => $fcmToken, 'updated_at' => $date]);
+                        $otp = rand(111111, 999999);
+                        
+                       $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
+                        
+                         $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
+                    
+                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
+                       
                         //$refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.krishimulya&referrer=krvrefer".$customerid;
                         
                         $status_code = '1';
                         $message = 'Customer login successfully';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, 'mobile' => $mobile, 'name' => $customer->name, "customer_type" => "already");
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, "customer_type" => "already");
                     }else{
                        // $otp = rand(111111, 999999);
                         
@@ -76,7 +83,7 @@ class apiController extends Controller
                         
                     $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
 
-                    $customerid = DB::table('customers_tmp')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'updated_at' => $date]); 
+                    $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not-live',  'updated_at' => $date]); 
 
                     $date   = date('Y-m-d H:i:s');
                     /*if($refer_code != ""){
@@ -134,19 +141,20 @@ class apiController extends Controller
                 $json = array('status_code' => '0', 'message' => $error);
             }
             if($error == ""){
-                $customer = DB::table('customers_tmp')->where('mobile', $mobile)->where('otp', $otp)->first();
+                $customer = DB::table('customers')->where('mobile', $mobile)->where('otp', $otp)->first();
                 if($customer) 
                 {
                     $device_id = $customer->device_id;
                     $fcmToken = $customer->fcmToken;
+                    $customerid = $customer->id;
 
-                    $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'updated_at' => $date, 'status' => 'Live']); 
+                    //$customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'updated_at' => $date, 'status' => 'Live']); 
 
                      $userid = DB::table('users')->insertGetId(['phone' => $mobile, 'password' => Hash::make($mobile), 'created_at' => $date, 'updated_at' => $date]);
 
                      DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
 
-                     DB::table('customers_tmp')->where('mobile', $mobile)->delete();
+                     //DB::table('customers_tmp')->where('mobile', $mobile)->delete();
                     
                     $refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.ezeerides&referrer=ezeerdrefer".$customer->id;
 
