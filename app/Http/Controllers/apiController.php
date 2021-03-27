@@ -59,8 +59,8 @@ class apiController extends Controller
                         //$refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.krishimulya&referrer=krvrefer".$customerid;
                         
                         $status_code = '1';
-                        $message = 'Customer login successfully';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, "customer_type" => "already");
+                        $message = 'Customer login OTP Send';
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, "customer_type" => "already" , 'otp' => $otp);
                     }else{
                        // $otp = rand(111111, 999999);
                         
