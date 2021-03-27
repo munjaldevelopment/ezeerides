@@ -29,6 +29,8 @@ Route::post('customer-documents', 'apiController@customer_documents');
 
 Route::post('customer-logout', 'apiController@customer_logout');
 
+Route::get('all-city', 'apiController@allCities');
+
 Route::post('vehicle-center', 'apiController@all_center');
 
 Route::post('vehicle-filter', 'apiController@vehicle_filter');

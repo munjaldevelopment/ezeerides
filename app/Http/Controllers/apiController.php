@@ -499,7 +499,7 @@ class apiController extends Controller
             $baseUrl = URL::to("/");
             $json       =   array();
             $language = $request->language;
-            $centerList = DB::table('stations')->select('id','station_name')->orderBy('station_name', 'ASC')->get();
+            $centerList = DB::table('stations')->select('id','city_id','station_name')->orderBy('station_name', 'ASC')->get();
             
             $status_code = '1';
             $message = 'Center list';
@@ -524,7 +524,7 @@ class apiController extends Controller
             $json       =   array();
             
             
-            $cityList = DB::table('cities')->select('id','name')->where('state_id', '=', 1)->where('isactive', '=', 1)->orderBy('id', 'ASC')->get();
+            $cityList = DB::table('cities')->select('id','city')->where('status', '=', 'Live')->orderBy('id', 'ASC')->get();
 
             $status_code = '1';
             $message = 'All City list';
