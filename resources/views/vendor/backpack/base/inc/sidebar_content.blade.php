@@ -12,6 +12,7 @@
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle') }}"><i class="nav-icon la la-id-badge"></i> <span>Vehicle</span></a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice') }}'><i class='nav-icon la la-motorcycle'></i> Vehicle Services</a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicetype') }}'><i class='nav-icon la la-motorcycle'></i> Service Type</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('city') }}'><i class='nav-icon la la-building'></i> Cities</a></li>
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-key"></i> <span>Station</span></a></li>
 
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('helmets') }}'><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>

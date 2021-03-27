@@ -37,6 +37,65 @@ class StationCrudController extends CrudController
         }else{
             $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
         }
+
+        $cityData = array();
+        $cities = \DB::table('cities')->get();
+        foreach ($cities as $key => $row) {
+            $cityData[$row->id] = $row->city;
+        }
+
+        $this->crud->addFilter([
+              'type' => 'select2',
+              'name' => 'city_id',
+              'label'=> 'City'
+            ],
+            $cityData,
+            function($value) {
+                $this->crud->addClause('where', 'city_id', $value);
+        });
+        $this->crud->addColumn([
+            'label'     => 'City Name',
+            'type'      => 'select',
+            'name'      => 'city_id',
+            'entity'    => 'allCities', //function name
+            'attribute' => 'city', //name of fields in models table like districts
+            'model'     => "App\Models\City", //name of Models
+
+         ]);
+        CRUD::column('station_name');
+        CRUD::column('status');
+
+
+
+        $city_list = array();
+            
+        $city_list[0] = 'Select';
+        $cities = \DB::table('cities')->orderBy('id')->get();
+        if($cities)
+        {
+            foreach($cities as $row)
+            {
+                $city_list[$row->id] = $row->city;
+            }
+        }
+
+        $this->crud->addField([
+            'name' => 'city_id',
+            'label' => 'City',
+            'type'      => 'select2_from_array',
+            'options'   => $city_list,
+            'hint' => '',
+        ]);
+
+        CRUD::field('station_name');
+
+        $this->crud->addField([
+            'name' => 'status',
+            'label' => 'Status',
+            'type' => 'select2_from_array',
+            'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
+            'hint' => '',
+        ]);
     }
 
     /**
