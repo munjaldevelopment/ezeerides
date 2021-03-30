@@ -561,8 +561,8 @@ class apiController extends Controller
         try 
         {   
             $json       =   array();
-            $ridetype = array('key' => 'regular', "value" => 'Regualr Ride');
-            $ridetype = array('key' => 'long', "value" => 'Long Ride');
+            $ridetype[] = array('key' => 'regular', "value" => 'Regualr Ride');
+            $ridetype[] = array('key' => 'long', "value" => 'Long Ride');
             $status_code = '1';
             $message = 'All Ride Type';
             $json = array('status_code' => $status_code,  'message' => $message, 'ridetype' => $ridetype);
