@@ -9,19 +9,58 @@
 <li class="nav-item nav-dropdown">
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Master</a>
 	<ul class="nav-dropdown-items">
-	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle') }}"><i class="nav-icon la la-id-badge"></i> <span>Vehicle</span></a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice') }}'><i class='nav-icon la la-motorcycle'></i> Vehicle Services</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicetype') }}'><i class='nav-icon la la-motorcycle'></i> Service Type</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('city') }}'><i class='nav-icon la la-building'></i> Cities</a></li>
-	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-key"></i> <span>Station</span></a></li>
-
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('helmets') }}'><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('penalty') }}'><i class='nav-icon la la-rupee-sign'></i> Penalties</a></li>
+	  <li class='nav-item'><a class='nav-link' href="{{ backpack_url('helmets') }}"><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>
 	</ul>
 </li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-file-o'></i> Vehicle Register</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('customers') }}'><i class='nav-icon la la-user'></i> Customers</a></li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-city"></i>Center Management</a>
+	<ul class="nav-dropdown-items">
+	  <li class='nav-item'><a class='nav-link' href="{{ backpack_url('city') }}"><i class='nav-icon la la-building'></i> Cities</a></li>
+	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-city"></i> <span>Station</span></a></li>
+
+	</ul>
+</li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-exclamation-circle"></i>Dispute Management</a>
+	<ul class="nav-dropdown-items">
+	 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('penalty') }}'><i class='nav-icon la la-rupee-sign'></i> Penalties</a></li>
+	 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('damages') }}'><i class='nav-icon la la-clipboard'></i> Damages</a></li>
+
+	</ul>
+</li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-motorcycle"></i>Fleet Management</a>
+	<ul class="nav-dropdown-items">
+	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle/create') }}"><i class="nav-icon la la-motorcycle"></i> <span>Create Fleet </span></a></li>
+	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle') }}"><i class="nav-icon la la-motorcycle"></i> <span>Fleet </span></a></li>
+	  
+	</ul>
+</li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-tools"></i>Service Management</a>
+	<ul class="nav-dropdown-items">
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicetype') }}'><i class='nav-icon la la-tools'></i> Service Type</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice/create') }}'><i class='nav-icon la la-tools'></i> Services Request </a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice') }}'><i class='nav-icon la la-tools'></i> ALL Services </a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('pendingservices') }}'><i class='nav-icon la la-tools'></i> Pending Services </a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('completedservices') }}'><i class='nav-icon la la-tools'></i> Completed Services </a></li>
+	</ul>
+</li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-biking"></i>Booking Management</a>
+	<ul class="nav-dropdown-items">
+	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle/create') }}"><i class="nav-icon la la-biking"></i> <span>Create Booking</span></a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Today's Drop</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Current Booking</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Upcoming Booking</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Completed Booking</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Canceled Booking</a></li>
+	  
+	</ul>
+</li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('coupon') }}'><i class='nav-icon la la-wallet'></i> Coupons</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('customers') }}'><i class='nav-icon la la-user'></i> Customers</a></li>
+
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-terminal'></i> Employee</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('log') }}'><i class='nav-icon la la-terminal'></i> Logs</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('setting') }}'><i class='nav-icon la la-cog'></i> Settings</a></li>
@@ -38,9 +77,3 @@
 @php
 	endif;
 @endphp
-
-
-
-
-
-<!-- <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehiclegallery') }}'><i class='nav-icon la la-question'></i> VehicleGalleries</a></li> -->

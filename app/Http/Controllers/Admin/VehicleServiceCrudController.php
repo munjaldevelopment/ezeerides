@@ -37,6 +37,8 @@ class VehicleServiceCrudController extends CrudController
         }else{
             $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
         } 
+         $current_date = date('Y-m-d H:i:s');
+       // $this->crud->addClause('where', 'next_date', '>=', $current_date);
 
          $this->crud->setCreateView('admin.create-vehicle-service-form');
          $this->crud->setUpdateView('admin.edit-vehicle-service-form'); 
@@ -207,4 +209,6 @@ class VehicleServiceCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+   
 }

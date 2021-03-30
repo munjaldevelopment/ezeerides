@@ -62,17 +62,17 @@ class apiController extends Controller
                         $message = 'Customer login OTP Send';
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' =>"".$customerid, "customer_type" => "already" , 'otp' => "".$otp);
                     }else{
-                       // $otp = rand(111111, 999999);
+                        $otp = rand(11111, 99999);
                         
-                       /* $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
+                       $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
                         
                          $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
                     
-                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);*/
+                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
-                        $status_code = '0';
-                        $message = 'Customer Not Active, Please Contact to Support';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile);
+                        $status_code = $success = '1';
+                        $message = 'Customer Otp Send, Please Process Next Step';
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, "customer_type" => "already", 'otp' => "".$otp);
                     }
                         
                    
@@ -555,6 +555,26 @@ class apiController extends Controller
     
         return response()->json($json, 200);
     }
+
+    public function rideType(Request $request)
+    {
+        try 
+        {   
+            $json       =   array();
+            $ridetype = array('regular' => 'Regular Ride', 'long' => 'Long Ride');
+            $status_code = '1';
+            $message = 'All Ride Type';
+            $json = array('status_code' => $status_code,  'message' => $message, 'ridetype' => $ridetype);
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
     //END 
 
     
@@ -570,6 +590,7 @@ class apiController extends Controller
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
             $center = $request->center;
+            $ride_type = $request->ride_type;
             $from_date = date("Y-m-d",strtotime($request->from_date));
             $to_date = date("Y-m-d",strtotime($request->to_date));
             $error = "";
@@ -586,6 +607,10 @@ class apiController extends Controller
 
                     if($center){
                         $vehicleList = $vehicleList->where('sv.station_id',$center);    
+                    }
+
+                    if($ride_type){
+                        $vehicleList = $vehicleList->where('v.ride_type',$ride_type);    
                     }
 
                     if($from_date){
