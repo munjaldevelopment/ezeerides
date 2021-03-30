@@ -47,20 +47,20 @@ class apiController extends Controller
                     
                     if($customer_status == 'Live'){
 
-                        $otp = rand(111111, 999999);
+                        $otp = rand(11111, 99999);
                         
                        $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
                         
                          $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
                     
-                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
+                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
                        
                         //$refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.krishimulya&referrer=krvrefer".$customerid;
                         
                         $status_code = '1';
                         $message = 'Customer login OTP Send';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, "customer_type" => "already" , 'otp' => $otp);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' =>"".$customerid, "customer_type" => "already" , 'otp' => "".$otp);
                     }else{
                        // $otp = rand(111111, 999999);
                         
@@ -72,7 +72,7 @@ class apiController extends Controller
 
                         $status_code = '0';
                         $message = 'Customer Not Active, Please Contact to Support';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, 'mobile' => $mobile);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile);
                     }
                         
                    
@@ -83,7 +83,7 @@ class apiController extends Controller
                         
                     $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
 
-                    $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not-live',  'updated_at' => $date]); 
+                    $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not live',  'updated_at' => $date]); 
 
                     $date   = date('Y-m-d H:i:s');
                     /*if($refer_code != ""){
@@ -95,7 +95,7 @@ class apiController extends Controller
 
                     $status_code = $success = '1';
                     $message = 'Customer Otp Send, Please Process Next Step';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customerid, 'mobile' => $mobile, "customer_type" => "new", 'otp' => "".$otp);
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, "customer_type" => "new", 'otp' => "".$otp);
 	           }   
             }   
         }
@@ -149,10 +149,16 @@ class apiController extends Controller
                     $customerid = $customer->id;
 
                     //$customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'updated_at' => $date, 'status' => 'Live']); 
+                     DB::table('customers')->where('id', '=', $customerid)->update(['status' => 'Live', 'updated_at' => $date]); 
+                     $usersChk = DB::table('users')->where('phone', $mobile)->first();
+                    if($usersChk) 
+                    {    
 
-                     $userid = DB::table('users')->insertGetId(['phone' => $mobile, 'password' => Hash::make($mobile), 'created_at' => $date, 'updated_at' => $date]);
+                    }else{     
+                            $userid = DB::table('users')->insertGetId(['phone' => $mobile, 'password' => Hash::make($mobile), 'created_at' => $date, 'updated_at' => $date]);
 
-                     DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
+                            DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
+                    }      
 
                      //DB::table('customers_tmp')->where('mobile', $mobile)->delete();
                     
@@ -168,13 +174,15 @@ class apiController extends Controller
                         if($name != '' && $email != ''){
                             $profile_status = 'true';
                         }else{
+                            $name = '';
+                            $email = '';
                             $profile_status = 'false';
                         }
                     }   
 
                     $status_code = '1';
                     $message = 'Customer activated successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => (int)$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'profile_status' => $profile_status);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'profile_status' => $profile_status);
                 } 
                 else 
                 {
@@ -225,7 +233,7 @@ class apiController extends Controller
 
                     $status_code = '1';
                     $message = 'OTP Send sucessfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => (int)$customerid,  'mobile' => $mobile, 'otp' => "".$otp);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid,  'mobile' => $mobile, 'otp' => "".$otp);
                 } 
                 else 
                 {
