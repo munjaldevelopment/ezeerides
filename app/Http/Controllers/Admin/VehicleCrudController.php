@@ -82,7 +82,7 @@ class VehicleCrudController extends CrudController
         CRUD::field('vehicle_number');
         CRUD::field('allowed_km_per_hour');
         CRUD::field('charges_per_hour');
-        CRUD::field('premium_charges_per_hour');
+        CRUD::field('insurance_charges_per_hour');
         CRUD::field('penalty_amount_per_hour');
 
         $this->crud->addField([

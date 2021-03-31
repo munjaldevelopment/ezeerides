@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\StationRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-
+use App\User;
 /**
  * Class StationCrudController
  * @package App\Http\Controllers\Admin
@@ -63,6 +63,16 @@ class StationCrudController extends CrudController
 
          ]);
         CRUD::column('station_name');
+
+        $this->crud->addColumn([
+            'label'     => 'Employee Name',
+            'type'      => 'select',
+            'name'      => 'employee_id',
+            'entity'    => 'allEmployes', //function name
+            'attribute' => 'name', //name of fields in models table like districts
+            'model'     => "App\User", //name of Models
+
+         ]);
         CRUD::column('status');
 
 
@@ -88,6 +98,28 @@ class StationCrudController extends CrudController
         ]);
 
         CRUD::field('station_name');
+
+        $employee_list = array();
+            
+        $employee_list[0] = 'Select';
+        $emplist= User::whereHas('roles', function($q){
+                    $q->where('name', 'Employee');
+                  })->get();
+        if($emplist)
+        {
+            foreach($emplist as $row)
+            {
+                $employee_list[$row->id] = $row->name;
+            }
+        }
+
+        $this->crud->addField([
+            'name' => 'employee_id',
+            'label' => 'Employee',
+            'type'      => 'select2_from_array',
+            'options'   => $employee_list,
+            'hint' => '',
+        ]);
 
         $this->crud->addField([
             'name' => 'status',
@@ -176,4 +208,6 @@ class StationCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+    
 }

@@ -18,6 +18,9 @@
 	  <li class='nav-item'><a class='nav-link' href="{{ backpack_url('city') }}"><i class='nav-icon la la-building'></i> Cities</a></li>
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('station') }}"><i class="nav-icon la la-city"></i> <span>Station</span></a></li>
 
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('stationpremiums') }}'><i class='nav-icon la la-rupee-sign'></i> Station Premiums</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('stationholidays') }}'><i class='nav-icon la la-user'></i> Station Holiday</a></li>
+
 	</ul>
 </li>
 <li class="nav-item nav-dropdown">
@@ -61,7 +64,10 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('coupon') }}'><i class='nav-icon la la-wallet'></i> Coupons</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('customers') }}'><i class='nav-icon la la-user'></i> Customers</a></li>
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-terminal'></i> Employee</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-user'></i> Employee</a></li>
+
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employeeattendance') }}'><i class='nav-icon la la-user'></i> Employee Attendances</a></li>
+
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('log') }}'><i class='nav-icon la la-terminal'></i> Logs</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('setting') }}'><i class='nav-icon la la-cog'></i> Settings</a></li>
 <!-- Users, Roles, Permissions -->
@@ -77,3 +83,5 @@
 @php
 	endif;
 @endphp
+
+

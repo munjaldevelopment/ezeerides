@@ -33,4 +33,10 @@ Route::group([
     Route::crud('damages', 'DamagesCrudController');
     Route::crud('pendingservices', 'PendingServicesCrudController');
     Route::crud('completedservices', 'CompletedServicesCrudController');
+    Route::crud('stationpremiums', 'StationPremiumsCrudController');
+
+    Route::get('getStation/{city_id}', 'StationPremiumsCrudController@getStations');
+    Route::crud('stationholidays', 'StationHolidaysCrudController');
+    Route::get('getHolidayStation/{city_id}', 'StationHolidaysCrudController@getStations');
+    Route::crud('employeeattendance', 'EmployeeAttendanceCrudController');
 }); // this should be the absolute last line of this file

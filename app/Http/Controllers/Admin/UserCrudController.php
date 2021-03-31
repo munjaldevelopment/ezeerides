@@ -29,6 +29,8 @@ class UserCrudController extends CrudController
         }else{
             $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
         }
+
+       $value = 2;
     }
 
     public function setupListOperation()

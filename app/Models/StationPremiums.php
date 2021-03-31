@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Backpack\CRUD\app\Models\Traits\CrudTrait;
 
-class Station extends Model
+class StationPremiums extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class Station extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'stations';
+    protected $table = 'station_premiums';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -28,26 +28,21 @@ class Station extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
+     public function allCities()
+    {
+        return $this->belongsTo('App\Models\City', 'city_id');
+    }
 
+     public function allStations()
+    {
+        return $this->belongsTo('App\Models\Station', 'station_id');
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-    public function station_vehicles()
-    {
-        return $this->belongsToMany('App\Models\Vehicle', 'station_has_vehicles');
-    }
 
-    public function allCities()
-    {
-        return $this->belongsTo('App\Models\City', 'city_id');
-    }
-
-    public function allEmployes()
-    {
-        return $this->belongsTo('App\User', 'employee_id');
-    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Backpack\CRUD\app\Models\Traits\CrudTrait;
 
-class Station extends Model
+class EmployeeAttendance extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class Station extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'stations';
+    protected $table = 'employee_attendance';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -29,25 +29,24 @@ class Station extends Model
     |--------------------------------------------------------------------------
     */
 
+     public function allEmployes()
+    {
+        return $this->belongsTo('App\User', 'employee_id');
+    }
+
+    public function allEmployesMobile()
+    {
+        return $this->belongsTo('App\User', 'employee_id');
+    }
+
+
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-    public function station_vehicles()
-    {
-        return $this->belongsToMany('App\Models\Vehicle', 'station_has_vehicles');
-    }
 
-    public function allCities()
-    {
-        return $this->belongsTo('App\Models\City', 'city_id');
-    }
-
-    public function allEmployes()
-    {
-        return $this->belongsTo('App\User', 'employee_id');
-    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -65,4 +64,10 @@ class Station extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+
+    public function GetUserEmailAttribute()
+    {
+        return $this->allEmployes()->first()->email;
+        //return '9828807023';
+    }
 }
