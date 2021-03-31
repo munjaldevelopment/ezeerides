@@ -371,41 +371,49 @@ class apiController extends Controller
             
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
             if($customer){ 
-                $customerimage = '';
-                /*if ($request->hasFile('customer_image')) {
-                    $image = $request->file('customer_image'); 
-                    if($image)
-                    {
-                        $customer_image = rand(10000, 99999).'-'.time().'.'.$image->getClientOriginalExtension();
-                        $destinationPath = public_path('/uploads/customer_image/');
-                        $image->move($destinationPath, $customer_image);
-                        
+
+                $chkemail = DB::table('customers')->where('email', $email)->where('id', '!=', $customer_id)->first();
+                if($chkemail){
+                    $status_code = $success = '0';
+                    $message = 'Email already exists, please try another ';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }else{
+                    $customerimage = '';
+                    /*if ($request->hasFile('customer_image')) {
+                        $image = $request->file('customer_image'); 
+                        if($image)
+                        {
+                            $customer_image = rand(10000, 99999).'-'.time().'.'.$image->getClientOriginalExtension();
+                            $destinationPath = public_path('/uploads/customer_image/');
+                            $image->move($destinationPath, $customer_image);
+                            
+                        }
+                    }*/
+                    if($customer_image != ''){
+                        $image_parts = explode(";base64,", $customer_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $customerimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $destinationPath = public_path('/uploads/customer_image/').$customerimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($destinationPath, $data);
                     }
-                }*/
-                if($customer_image != ''){
-                    $image_parts = explode(";base64,", $customer_image);
-                    $image_type_aux = explode("image/", $image_parts[0]);
-                    $image_type = $image_type_aux[1];
-
-                    $customerimage = rand(10000, 99999).'-'.time().'.'.$image_type;
-                    $destinationPath = public_path('/uploads/customer_image/').$customerimage;
-
-                    $data = base64_decode($image_parts[1]);
-                   // $data = $image_parts[1];
-                    file_put_contents($destinationPath, $data);
-                }
-                DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
-                
-                /* user update */
-                $user_id = $customer->user_id;
-                if($user_id){
-                    DB::table('users')->where('id', '=', $user_id)->update(['name' => $name, 'email' => $email, 'updated_at' => date('Y-m-d H:i:s')]);
+                    DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
+                    
+                    /* user update */
+                    $user_id = $customer->user_id;
+                    if($user_id){
+                        DB::table('users')->where('id', '=', $user_id)->update(['name' => $name, 'email' => $email, 'updated_at' => date('Y-m-d H:i:s')]);
+                    }    
+                    $status_code = $success = '1';
+                    $message = 'Customer info updated successfully';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                 }    
-                $status_code = $success = '1';
-                $message = 'Customer info updated successfully';
-                
-                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
 
             } else{
                 $status_code = $success = '0';
