@@ -156,6 +156,9 @@ class apiController extends Controller
 
                     }else{     
                             $userid = DB::table('users')->insertGetId(['phone' => $mobile, 'password' => Hash::make($mobile), 'created_at' => $date, 'updated_at' => $date]);
+                            $role_id = 3;
+                            $model_type = 'App\User';
+                             $roleid = DB::table('model_has_roles')->insert(['role_id' => $role_id, 'model_type' => $model_type, 'model_id' => $userid]);
 
                             DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
                     }      
