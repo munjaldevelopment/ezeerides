@@ -518,12 +518,13 @@ class apiController extends Controller
     //START show feed list 
     public function all_center(Request $request)
     {
+        $city_id = $request->city_id;
         try 
         {   
             $baseUrl = URL::to("/");
             $json       =   array();
             $language = $request->language;
-            $centerList = DB::table('stations')->select('id','city_id','station_name')->orderBy('station_name', 'ASC')->get();
+            $centerList = DB::table('stations')->select('id','city_id','station_name')->where('city_id', $city_id)->orderBy('station_name', 'ASC')->get();
             
             $status_code = '1';
             $message = 'Center list';
@@ -612,7 +613,7 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
 
-                    $vehicleList = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('vehicle_registers as vr', 'v.vehicle_number', '=', 'vr.vehicle')->select('v.id','v.vehicle_model','v.vehicle_number','v.allowed_km_per_hour','v.charges_per_hour','v.premium_charges_per_hour', 'v.penalty_amount_per_hour','v.vehicle_image')->where('vr.status','In');
+                    $vehicleList = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('vehicle_registers as vr', 'v.vehicle_number', '=', 'vr.vehicle')->select('v.id','v.vehicle_model','v.vehicle_number','v.allowed_km_per_hour','v.charges_per_hour','v.insurance_charges_per_hour', 'v.penalty_amount_per_hour','v.vehicle_image')->where('vr.status','In');
 
                     if($center){
                         $vehicleList = $vehicleList->where('sv.station_id',$center);    
@@ -636,7 +637,7 @@ class apiController extends Controller
                             $vehicle_number = $vlist->vehicle_number;
                             $allowed_km_per_hour = $vlist->allowed_km_per_hour;
                             $charges_per_hour = $vlist->charges_per_hour;
-                            $premium_charges_per_hour = $vlist->premium_charges_per_hour;
+                            $insurance_charges_per_hour = $vlist->insurance_charges_per_hour;
                             $penalty_amount_per_hour = $vlist->penalty_amount_per_hour;
                             $baseUrl = URL::to("/");
                             $vehicle_image  = "";
@@ -644,9 +645,9 @@ class apiController extends Controller
                                 $vehicle_image  =  $baseUrl."/public/".$vlist->vehicle_image;
                             
                             }
-
+                            $premium_charges_per_hour = '0.00';
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'vehicle_number' =>$vehicle_number, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'vehicle_number' =>$vehicle_number, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
                          }
 
                         $status_code = $success = '1';
