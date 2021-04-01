@@ -122,6 +122,8 @@ class apiController extends Controller
         return $head;
     }
 
+
+
     //START VERIFY
     public function customerVerify(Request $request)
     {
@@ -174,18 +176,26 @@ class apiController extends Controller
                     {
                         $name = $rscustomer->name;
                         $email = $rscustomer->email;
+                        $city_id = "".$rscustomer->city_id;
+                        $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                        $station_id = "".$rscustomer->station_id;
+                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
                         if($name != '' && $email != ''){
                             $profile_status = 'true';
                         }else{
                             $name = '';
                             $email = '';
+                            $city_id = '';
+                            $city_name = '';
+                            $station_id = '';
+                            $station_name = '';
                             $profile_status = 'false';
                         }
                     }   
 
                     $status_code = '1';
                     $message = 'Customer activated successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'profile_status' => $profile_status);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'city_id' => $city_id, 'city_name' => $city_name, 'station_id' => $station_id, 'station_name' => $station_name, 'profile_status' => $profile_status);
                 } 
                 else 
                 {
@@ -321,11 +331,25 @@ class apiController extends Controller
                 }else{
                     $address = "";
                 }
+                if($customer->city_id != 0){
+                    $city_id = "".$customer->city_id;
+                    $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                }else{
+                    $city_id = "";
+                    $city_name = "";
+                }
+                if($customer->station_id != 0){
+                    $station_id = "".$customer->station_id;
+                    $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                }else{
+                    $station_id = "";
+                    $station_name = "";
+                }
                 
                 $baseUrl = URL::to("/");
                 $customer_image  = "";
                 if($customer->image){
-                    $customer_image  =  $baseUrl."/public/uploads/customer_image/".$customer->image;
+                    $customer_image  =  $baseUrl."/public/".$customer->image;
                 
                 }else{
                    $customer_image  =  $baseUrl."/public/uploads/customer_image/profile.jpg";
@@ -335,7 +359,7 @@ class apiController extends Controller
                 $status_code = $success = '1';
                 $message = 'Customer Profile Info';
                 
-                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id , 'name' => $name, 'email' => $email, 'dob' => $dob, 'mobile' => $mobile, 'address' => $address , 'customer_image' => $customer_image);
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id , 'name' => $name, 'email' => $email, 'dob' => $dob, 'mobile' => $mobile, 'address' => $address , 'city_id' => $city_id ,'city_name' => $city_name ,'station_id' => $station_id ,'station_name' => $station_name , 'customer_image' => $customer_image);
 
 
             } else{
@@ -368,7 +392,8 @@ class apiController extends Controller
             $email = $request->email ;
             //$telephone = $request->telephone;
             $address = $request->address;
-            //$address2 = $request->address2;
+            $city_id = $request->city_id;
+            $station_id = $request->station_id;
             $customer_image = $request->customer_image;
             
             
@@ -405,7 +430,7 @@ class apiController extends Controller
                        // $data = $image_parts[1];
                         file_put_contents($destinationPath, $data);
                     }
-                    DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
+                    DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'city_id' => $city_id, 'station_id' => $station_id, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
                     
                     /* user update */
                     $user_id = $customer->user_id;
