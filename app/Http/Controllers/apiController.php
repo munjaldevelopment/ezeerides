@@ -625,12 +625,12 @@ class apiController extends Controller
                     DB::table('customer_documents')->insert(['customer_id' => $customer_id, 'title' => $title, 'front_image' => 'uploads/customer_documents/'.$frontimage, 'back_image' => 'uploads/customer_documents/'.$backimage, 'other_image' => 'uploads/customer_documents/'.$otherimage, 'status' => $status, 'created_at' => $date, 'updated_at' => $date]);
                     
                     $status_code = $success = '1';
-                    $message = 'Customer info updated successfully';
+                    $message = 'Customer Documents uploaded successfully';
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                 } else{
                     $status_code = $success = '0';
-                    $message = 'Documents already added for '.$title;
+                    $message = 'Documents already uploaded for '.$title;
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                 }                    
