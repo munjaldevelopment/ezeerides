@@ -26,6 +26,8 @@ Route::post('resend-sms', 'apiController@resendSMS');
 Route::get('customer-profile', 'apiController@customer_profile');
 Route::post('update-profile', 'apiController@update_profile');
 Route::post('customer-documents', 'apiController@customer_documents');
+Route::get('document-type', 'apiController@documentType');
+Route::post('upload-documents', 'apiController@upload_documents');
 
 Route::post('customer-logout', 'apiController@customer_logout');
 
@@ -34,6 +36,8 @@ Route::get('all-city', 'apiController@allCities');
 Route::post('vehicle-center', 'apiController@all_center');
 
 Route::get('ride-type', 'apiController@rideType');
+
+
 
 Route::post('vehicle-filter', 'apiController@vehicle_filter');
 

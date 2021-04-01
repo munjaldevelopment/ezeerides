@@ -541,7 +541,116 @@ class apiController extends Controller
     }
     //END 
 
-     
+    public function documentType(Request $request)
+    {
+        try 
+        {   
+            $json       =   array();
+            $doctype[] = array('key' => 'Driving License', "value" => 'Driving License');
+            $doctype[] = array('key' => 'ID Proof (Adhaar Card)', "value" => 'ID Proof (Adhaar Card)');
+            $status_code = '1';
+            $message = 'All Document Type';
+            $json = array('status_code' => $status_code,  'message' => $message, 'doctype' => $doctype);
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+    //END
+     //Customer Update
+    public function upload_documents(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $title = $request->document_type;
+            $front_image = $request->front_image;
+            $back_image = $request->back_image;
+            $other_image = $request->other_image;
+            $status = 'Live';
+            
+            
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+            if($customer){ 
+                $customerDoc = DB::table('customer_documents')->where('title', $title)->where('customer_id', $customer_id)->first();
+                if(!$customerDoc){ 
+                    $frontimage = '';
+                    $backimage = '';
+                    $otherimage = '';
+                    if($front_image != ''){
+                        $image_parts = explode(";base64,", $front_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $frontimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $destinationPath = public_path('/uploads/customer_documents/').$frontimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($destinationPath, $data);
+                    }
+
+                    if($back_image != ''){
+                        $image_parts = explode(";base64,", $back_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $backimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $backimgdestinationPath = public_path('/uploads/customer_documents/').$backimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($backimgdestinationPath, $data);
+                    }
+
+                    if($other_image != ''){
+                        $image_parts = explode(";base64,", $other_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $otherimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $otherdestinationPath = public_path('/uploads/customer_documents/').$otherimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($otherdestinationPath, $data);
+                    }
+                    DB::table('customer_documents')->insert(['customer_id' => $customer_id, 'title' => $title, 'front_image' => 'uploads/customer_documents/'.$frontimage, 'back_image' => 'uploads/customer_documents/'.$backimage, 'other_image' => 'uploads/customer_documents/'.$otherimage, 'status' => $status, 'created_at' => $date, 'updated_at' => $date]);
+                    
+                    $status_code = $success = '1';
+                    $message = 'Customer info updated successfully';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Documents already added for '.$title;
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }                    
+
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
 
     //START show feed list 
     public function all_center(Request $request)
