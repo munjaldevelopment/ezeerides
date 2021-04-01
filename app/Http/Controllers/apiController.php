@@ -393,7 +393,7 @@ class apiController extends Controller
             //$telephone = $request->telephone;
             $address = $request->address;
             $city_id = $request->city_id;
-            $station_id = $request->station_id;
+            $station_id = $request->center_id;
             $customer_image = $request->customer_image;
             
             
