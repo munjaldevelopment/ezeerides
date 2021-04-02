@@ -171,15 +171,23 @@ class apiController extends Controller
 
                     $name = '';
                     $email = '';
+                    $city_id = '';
+                    $city_name = '';
+                    $station_id = '';
+                    $station_name = '';
                     $rscustomer = DB::table('customers')->where('id', $customerid)->first();
                     if($rscustomer) 
                     {
                         $name = $rscustomer->name;
                         $email = $rscustomer->email;
-                        $city_id = "".$rscustomer->city_id;
-                        $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
-                        $station_id = "".$rscustomer->station_id;
-                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                        if($rscustomer->city_id > 0){
+                            $city_id = "".$rscustomer->city_id;
+                            $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                        }
+                        if($rscustomer->station_id > 0){
+                            $station_id = "".$rscustomer->station_id;
+                            $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                        }    
                         if($name != '' && $email != ''){
                             $profile_status = 'true';
                         }else{
