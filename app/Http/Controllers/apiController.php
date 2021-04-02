@@ -895,7 +895,7 @@ class apiController extends Controller
                     
                     $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
                     if($bikeDetail){ 
-                        $vehicle_model = $bikeDetail->vehicle_model;
+                        $vehicle_model = $bikeDetail->model;
                         $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour;
                         $charges_per_hour = $bikeDetail->charges_per_hour;
                         $insurance_charges_per_hour = $bikeDetail->insurance_charges_per_hour;
@@ -921,7 +921,7 @@ class apiController extends Controller
                         
                         }
                         
-                        $bikegallery = DB::table('vehicle_galleries')->where('vehicle_id', $bike_id)->where('status', '=', 'Live')->get();
+                        $bikegallery = DB::table('vehicle_galleries')->where('vehicle_model_id', $bike_model_id)->where('status', '=', 'Live')->get();
                         $bgallery = array();
                         if(count($bikegallery) >0){
                             
