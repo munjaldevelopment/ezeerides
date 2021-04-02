@@ -792,9 +792,9 @@ class apiController extends Controller
                         $vehicleList = $vehicleList->where('sv.station_id',$center);    
                     }
 
-                    if($ride_type){
+                   /* if($ride_type){
                         $vehicleList = $vehicleList->where('v.ride_type',$ride_type);    
-                    }
+                    }*/
 
                     if($from_date){
                         //$rentinList = $rentinList->wheredate('available_date',' > ',$available_date);   
