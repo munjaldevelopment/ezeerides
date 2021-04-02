@@ -175,11 +175,21 @@ class apiController extends Controller
                     $city_name = '';
                     $station_id = '';
                     $station_name = '';
+                    $address = "";
+                    $customer_image  = "";
                     $rscustomer = DB::table('customers')->where('id', $customerid)->first();
                     if($rscustomer) 
                     {
                         $name = $rscustomer->name;
                         $email = $rscustomer->email;
+                        if($rscustomer->address){
+                            $address = $rscustomer->address;    
+                        }
+                        if($rscustomer->image){
+                            $customer_image  =  $baseUrl."/public/".$rscustomer->image;
+                        }else{
+                           $customer_image  =  $baseUrl."/public/uploads/customer_image/user.png";
+                        }
                         if($rscustomer->city_id > 0){
                             $city_id = "".$rscustomer->city_id;
                             $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
@@ -203,7 +213,7 @@ class apiController extends Controller
 
                     $status_code = '1';
                     $message = 'Customer activated successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'city_id' => $city_id, 'city_name' => $city_name, 'station_id' => $station_id, 'station_name' => $station_name, 'profile_status' => $profile_status);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, 'referurl' => $refer_url, 'name' => $name, 'email' => $email, 'city_id' => $city_id, 'city_name' => $city_name, 'station_id' => $station_id, 'station_name' => $station_name, 'address' => $address, 'customer_image' => $customer_image, 'profile_status' => $profile_status);
                 } 
                 else 
                 {
@@ -361,7 +371,7 @@ class apiController extends Controller
                     $customer_image  =  $baseUrl."/public/".$customer->image;
                 
                 }else{
-                   $customer_image  =  $baseUrl."/public/uploads/customer_image/profile.jpg";
+                   $customer_image  =  $baseUrl."/public/uploads/customer_image/user.png";
                 }
                 
                 
@@ -528,10 +538,19 @@ class apiController extends Controller
                
                 $customerDocArr = array();
                 $customerDocList = DB::table('customer_documents')->select('id','title','front_image' ,'back_image', 'other_image')->where('customer_id', '=', $customer_id)->where('status', '=', 'Live')->orderBy('id', 'DESC')->get();
+                $front_image  = '';
+                $back_image  = '';
+                $other_image  = '';
                 foreach ($customerDocList as $doclist) {
-                    $front_image  =  $baseUrl."/public/".$doclist->front_image;
-                    $back_image  =  $baseUrl."/public/".$doclist->back_image;
-                    $other_image  =  $baseUrl."/public/".$doclist->other_image;
+                    if($doclist->front_image){
+                        $front_image  =  $baseUrl."/public/".$doclist->front_image;
+                    }
+                    if($doclist->front_image){
+                        $back_image  =  $baseUrl."/public/".$doclist->back_image;
+                    }
+                    if($doclist->front_image){
+                        $other_image  =  $baseUrl."/public/".$doclist->other_image;
+                    }
                     $customerDocArr[] = ['id' => (int)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
                 }
                 
@@ -833,40 +852,83 @@ class apiController extends Controller
 
      
 
-    //Tractor Purchase Enquiry
-    public function tractor_purchase_enquiry(Request $request)
+    //Bike Detail
+    public function bike_detail(Request $request)
     {
         try 
         {
             $json = $userData = array();
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
-            $what_need = $request->what_need;
-            $company_name = $request->company_name;
-            $other_company = $request->other_company;
-            $location = $request->location;
-            $other_city = $request->other_city;
-            $hourse_power = $request->hourse_power;
-            $payment_type = $request->payment_type;
-            $isactive = 1;
+            $bike_id = $request->bike_id;
+            $ride_type  = $request->ride_type;
+            $city_id = $request->city_id;
+            $station_id = $request->center_id;
+            $from_date = $request->from_date;
+            $to_date = $request->to_date;
             $error = "";
-            if($company_name == ""){
-                $error = "Please enter company name for tractor";
+            if($ride_type == ""){
+                $error = "Please choose ride type for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($bike_id == ""){
+                $error = "Please choose bike for bike booking";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
             
             if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', '1')->first();
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $name = $customer->name;
-                    $mobile = $customer->telephone;
-                    DB::table('tractor_purchase_enquiry')->insert(['customer_id' => $customer_id, 'name' => $name, 'mobile' => $mobile, 'uses_type' => $what_need, 'company_name' => $company_name, 'other_company' => $other_company, 'hourse_power' => $hourse_power, 'payment_type' => $payment_type, 'location' => $location, 'other_city' => $other_city, 'isactive' => $isactive, 'created_at' => $date, 'updated_at' => $date]);
-
-                    $status_code = $success = '1';
-                    $message = 'Tractor purchase enquiry added successfully';
                     
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    $bikeDetail = DB::table('vehicles')->where('id', $bike_id)->where('status', '=', 'Live')->first();
+                    if($bikeDetail){ 
+                        $vehicle_model = $bikeDetail->vehicle_model;
+                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour;
+                        $charges_per_hour = $bikeDetail->charges_per_hour;
+                        $insurance_charges_per_hour = $bikeDetail->insurance_charges_per_hour;
+                        $penalty_amount_per_hour = $bikeDetail->penalty_amount_per_hour;
 
+                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+
+                        $booking_time = $from_date."-".$to_date;
+
+                        $booking_time = $from_date."-".$to_date;
+
+                        $baseUrl = URL::to("/");
+                        $vehicle_image  = "";
+                        if($bikeDetail->vehicle_image){
+                            $vehicle_image  =  $baseUrl."/public/".$bikeDetail->vehicle_image;
+                        
+                        }
+                        
+                        $bikegallery = DB::table('vehicle_galleries')->where('vehicle_id', $bike_id)->where('status', '=', 'Live')->get();
+                        $bgallery = array();
+                        if(count($bikegallery) >0){
+                            
+                            foreach($bikegallery as $bike_gallery)
+                            {
+                                if($bike_gallery->image){
+                                    $title = $bike_gallery->title;
+                                    $vehicle_gal_image  =  $baseUrl."/public/".$bike_gallery->image;
+
+                                    $bgallery[] = ['title' => $title, 'gallery_img' => $vehicle_gal_image];
+                                }      
+                            }
+                        }       
+                            
+                            
+
+                        $status_code = $success = '1';
+                        $message = 'Bike Details';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'vehicle_model' => $vehicle_model, 'charges_per_hour' => $charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'pickup_station' => $station_name, 'booking_time' => $booking_time , 'allow_km' => $allowed_km_per_hour, 'penalty_amount' => $penalty_amount_per_hour);
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'Bike not valid';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message);
+                    }
 
                 } else{
                     $status_code = $success = '0';

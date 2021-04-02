@@ -91,7 +91,13 @@ class VehicleCrudController extends CrudController
             'type' => 'browse',
         ]);
 
-        
+        $this->crud->addField([
+            'name' => 'status',
+            'label' => 'Status',
+            'type' => 'select2_from_array',
+            'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
+            'hint' => '',
+        ]);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
