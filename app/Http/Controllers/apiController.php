@@ -129,6 +129,7 @@ class apiController extends Controller
     {
         try 
         {
+            $baseUrl = URL::to("/");
             $json = $userData = array();
             $mobile = $request->mobile;
             $otp = $request->otp;
