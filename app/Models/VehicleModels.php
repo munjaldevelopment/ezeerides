@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 
-class VehicleGallery extends Model
+class VehicleModels extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class VehicleGallery extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'vehicle_galleries';
+    protected $table = 'vehicle_models';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -28,15 +28,7 @@ class VehicleGallery extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-     public function allVehicle()
-    {
-        return $this->belongsTo('App\Models\Vehicle', 'vehicle_id');
-    }
 
-     public function allVehicleModel()
-    {
-        return $this->belongsTo('App\Models\VehicleModels', 'vehicle_model_id');
-    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

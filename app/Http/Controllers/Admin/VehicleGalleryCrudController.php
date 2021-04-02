@@ -31,29 +31,29 @@ class VehicleGalleryCrudController extends CrudController
         CRUD::setEntityNameStrings('Vehicle Gallery', 'Vehicle Galleries');
 
         $vehicleData = array();
-        $vehicle = \DB::table('vehicles')->get();
+        $vehicle = \DB::table('vehicle_models')->get();
         foreach ($vehicle as $key => $row) {
-            $vehicleData[$row->id] = $row->vehicle_number;
+            $vehicleData[$row->id] = $row->model;
             # code...
         }
 
         $this->crud->addFilter([
               'type' => 'select2',
-              'name' => 'vehicle_id',
-              'label'=> 'Vehicle'
+              'name' => 'vehicle_model_id',
+              'label'=> 'Vehicle Model'
             ],
             $vehicleData,
             function($value) {
-                $this->crud->addClause('where', 'vehicle_id', $value);
+                $this->crud->addClause('where', 'vehicle_model_id', $value);
         });
 
         $this->crud->addColumn([
-            'label'     => 'Vehicle Number',
+            'label'     => 'Vehicle Model',
             'type'      => 'select',
-            'name'      => 'vehicle_id',
-            'entity'    => 'allVehicle', //function name
-            'attribute' => 'vehicle_number', //name of fields in models table like districts
-            'model'     => "App\Models\Vehicle", //name of Models
+            'name'      => 'vehicle_model_id',
+            'entity'    => 'allVehicleModel', //function name
+            'attribute' => 'model', //name of fields in models table like districts
+            'model'     => "App\Models\VehicleModels", //name of Models
 
          ]);
         CRUD::column('title');
@@ -69,18 +69,18 @@ class VehicleGalleryCrudController extends CrudController
          $vehicle_list = array();
             
         $vehicle_list[0] = 'Select';
-        $vehicle = \DB::table('vehicles')->orderBy('id')->get();
+        $vehicle = \DB::table('vehicle_models')->orderBy('id')->get();
         if($vehicle)
         {
             foreach($vehicle as $row)
             {
-                $vehicle_list[$row->id] = $row->vehicle_number ;
+                $vehicle_list[$row->id] = $row->model ;
             }
         }
 
         $this->crud->addField([
-            'name' => 'vehicle_id',
-            'label' => 'Vehicle',
+            'name' => 'vehicle_model_id',
+            'label' => 'Vehicle Model',
             'type'      => 'select2_from_array',
             'options'   => $vehicle_list,
             'hint' => '',

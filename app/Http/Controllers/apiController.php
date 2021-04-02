@@ -772,7 +772,8 @@ class apiController extends Controller
             
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
-            $center = $request->center;
+            $city_id = $request->city_id;
+            $center = $request->center_id;
             $ride_type = $request->ride_type;
             $from_date = date("Y-m-d",strtotime($request->from_date));
             $to_date = date("Y-m-d",strtotime($request->to_date));
@@ -786,7 +787,7 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
 
-                    $vehicleList = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('vehicle_registers as vr', 'v.vehicle_number', '=', 'vr.vehicle')->select('v.id','v.vehicle_model','v.vehicle_number','v.allowed_km_per_hour','v.charges_per_hour','v.insurance_charges_per_hour', 'v.penalty_amount_per_hour','v.vehicle_image')->where('vr.status','In');
+                    $vehicleList = DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->select('vm.id','vm.model','vm.allowed_km_per_hour','vm.charges_per_hour','vm.insurance_charges_per_hour', 'vm.penalty_amount_per_hour','vm.vehicle_image')->where('v.status','Live')->groupBy('vm.id');
 
                     if($center){
                         $vehicleList = $vehicleList->where('sv.station_id',$center);    
@@ -806,8 +807,7 @@ class apiController extends Controller
                         foreach($vehicleList as $vlist)
                         {
                             
-                            $vehicle_model = $vlist->vehicle_model;
-                            $vehicle_number = $vlist->vehicle_number;
+                            $vehicle_model = $vlist->model;
                             $allowed_km_per_hour = $vlist->allowed_km_per_hour;
                             $charges_per_hour = $vlist->charges_per_hour;
                             $insurance_charges_per_hour = $vlist->insurance_charges_per_hour;
@@ -820,13 +820,23 @@ class apiController extends Controller
                             }
                             $premium_charges_per_hour = '0.00';
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'vehicle_number' =>$vehicle_number, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
                          }
 
+                         if($center != 0){
+                    
+                            $station_name = DB::table('stations')->where('id', $center)->pluck('station_name')[0];
+                        }else{
+                            
+                            $station_name = "";
+                        } 
+                        if($city_id > 0){
+                            $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                        }
                         $status_code = $success = '1';
                         $message = 'Vehicle Filter Result';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'vehicle_list' => $v_list);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'station_name' => $station_name, 'vehicle_list' => $v_list);
                     }else{
                         $status_code = $success = '0';
                         $message = 'Vehicle not available right now';

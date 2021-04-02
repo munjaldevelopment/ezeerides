@@ -35,6 +35,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-motorcycle"></i>Fleet Management</a>
 	<ul class="nav-dropdown-items">
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle/create') }}"><i class="nav-icon la la-motorcycle"></i> <span>Create Fleet </span></a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehiclemodels') }}'><i class='nav-icon la la-motorcycle'></i> Models</a></li>
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle') }}"><i class="nav-icon la la-motorcycle"></i> <span>Fleet </span></a></li>
 	  
 	</ul>
@@ -83,5 +84,6 @@
 @php
 	endif;
 @endphp
+
 
 

@@ -39,4 +39,5 @@ Route::group([
     Route::crud('stationholidays', 'StationHolidaysCrudController');
     Route::get('getHolidayStation/{city_id}', 'StationHolidaysCrudController@getStations');
     Route::crud('employeeattendance', 'EmployeeAttendanceCrudController');
+    Route::crud('vehiclemodels', 'VehicleModelsCrudController');
 }); // this should be the absolute last line of this file

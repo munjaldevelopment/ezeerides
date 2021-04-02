@@ -27,7 +27,7 @@ class VehicleRequest extends FormRequest
     {
         $id = $this->get('id') ?? request()->route('id');
         return [
-            'vehicle_model' => 'required|min:5|max:255',
+            'vehicle_model' => 'required',
             'vehicle_number' => 'required|min:5|max:255|unique:vehicles,vehicle_number,'.$id,
         ];
     }
