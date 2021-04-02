@@ -41,3 +41,4 @@ Route::post('vehicle-filter', 'apiController@vehicle_filter');
 
 Route::post('bike-detail', 'apiController@bike_detail');
 
+Route::post('contact-us', 'apiController@contact_us');

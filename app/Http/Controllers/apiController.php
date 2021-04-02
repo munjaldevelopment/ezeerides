@@ -967,8 +967,8 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-    //Purchase Old Enquiry
-    public function purchase_old_results(Request $request)
+    //contact_us
+    public function contact_us(Request $request)
     {
         try 
         {
@@ -976,96 +976,19 @@ class apiController extends Controller
             
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
-            $what_need = $request->what_need;
-            $location = $request->location;
-            $other_city = $request->other_city;
-            $company_name = $request->company_name;
-            $other_company = $request->other_company;
-            $hourse_power = $request->hourse_power;
-            $model = $request->model;
-            $year_manufacturer = $request->year_manufacturer;
             $error = "";
-            if($what_need == ""){
-                $error = "Please select what need to search";
-                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
-            }
-            
+            $$contactusid = 1;
             if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', '1')->first();
-                if($customer){ 
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $rspage = DB::table('pages')->where('id', $contactusid)->first();
+                    $pagecontent = $rspage->content;
+                    $pagetitle = $rspage->title;
 
+                    $status_code = $success = '1';
+                    $message = 'Contact Us';
                     
-                    
-                    $purchaseOldList = DB::table('tractor_sell_enquiry')->select('id','customer_id','name','mobile','company_name','other_company','model','hourse_power','hrs', 'exp_price', 'image','sale_type','location', 'other_city')->where('isactive', '=', 1);
-
-                    if($what_need){
-                        $purchaseOldList = $purchaseOldList->where('sale_type',$what_need);    
-                    }
-
-                    if($company_name){
-                        $purchaseOldList = $purchaseOldList->where('company_name',$company_name);    
-                    }
-
-                    if($other_company){
-                        $purchaseOldList = $purchaseOldList->where('other_company',$other_company);    
-                    }
-
-                    if($location){
-                        $purchaseOldList = $purchaseOldList->where('location',$location);    
-                    }
-
-                    if($model){
-                        $purchaseOldList = $purchaseOldList->orWhere('model',$model);    
-                    }
-
-                    if($year_manufacturer){
-                        $purchaseOldList = $purchaseOldList->orWhere('year_manufacturer',$year_manufacturer);    
-                    }
-
-                    if($other_city){
-                        $purchaseOldList = $purchaseOldList->where('other_city',$other_city);    
-                    }
-
-                    if($hourse_power){
-                        $hparr = explode('-', $hourse_power);
-                        $hpfrom = $hparr[0];
-                        $hpto = $hparr[1];
-                        //$purchaseOldList = $purchaseOldList->whereBetween('hourse_power', [$hpfrom, $hpto]);
-                        $purchaseOldList = $purchaseOldList->where('hourse_power','LIKE',$hourse_power);    
-                    }
-
-                   
-                    $purchaseOldList = $purchaseOldList->orderBy('id', 'desc')->get(); 
-
-                    if(count($purchaseOldList) >0){
-                        $purchaseList = array();
-                        foreach($purchaseOldList as $plist)
-                        {
-                            
-                         
-                            $customer_name = $plist->name;
-                            $customer_telphone = $plist->mobile;
-                            $baseUrl = URL::to("/");
-                            $tractor_image  = "";
-                            if($plist->image){
-                                $tractor_image  =  $baseUrl."/public/uploads/tractor_image/".$plist->image;
-                            
-                            }
-                            $other_company = ($plist->other_company != '') ? $plist->other_company : "";
-                            $othercity = ($plist->other_city != '') ? $plist->other_city : "";
-                            $purchaseList[] = ['id' => (string)$plist->id, 'customer_name' =>$customer_name, 'customer_telphone' =>$customer_telphone, 'company_name' =>$plist->company_name, 'other_company' =>$other_company, 'what_need' =>$plist->sale_type, 'location' =>$plist->location, 'other_city' =>$othercity, 'model' => $plist->model, 'hourse_power' => $plist->hourse_power, 'hrs' => $plist->hrs, 'exp_price' => $plist->exp_price, 'image' => $tractor_image]; 
-                        }
-
-                        $status_code = $success = '1';
-                        $message = 'Old Purchase enquiry result';
-                        
-                        $json = array('status_code' => $status_code, 'message' => $message, 'purchase_list' => $purchaseList);
-                    }else{
-                        $status_code = $success = '0';
-                        $message = 'Item for purchase not available right now';
-                    
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);    
-                    }
+                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
 
                 } else{
                     $status_code = $success = '0';
