@@ -545,10 +545,10 @@ class apiController extends Controller
                     if($doclist->front_image){
                         $front_image  =  $baseUrl."/public/".$doclist->front_image;
                     }
-                    if($doclist->front_image){
+                    if($doclist->back_image){
                         $back_image  =  $baseUrl."/public/".$doclist->back_image;
                     }
-                    if($doclist->front_image){
+                    if($doclist->other_image){
                         $other_image  =  $baseUrl."/public/".$doclist->other_image;
                     }
                     $customerDocArr[] = ['id' => (int)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
