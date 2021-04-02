@@ -1008,6 +1008,88 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+    //contact_us
+    public function about_us(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $error = "";
+            $pageid = 2;
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $rspage = DB::table('pages')->where('id', $pageid)->first();
+                    $pagecontent = $rspage->content;
+                    $pagetitle = $rspage->title;
+
+                    $status_code = $success = '1';
+                    $message = 'About Us';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //contact_us
+    public function privacy(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $error = "";
+            $pageid = 3;
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $rspage = DB::table('pages')->where('id', $pageid)->first();
+                    $pagecontent = $rspage->content;
+                    $pagetitle = $rspage->title;
+
+                    $status_code = $success = '1';
+                    $message = 'privacy';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
     public function all_purpose(Request $request)
     {
         try 
