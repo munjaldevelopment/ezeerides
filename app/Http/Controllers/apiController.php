@@ -538,10 +538,11 @@ class apiController extends Controller
                
                 $customerDocArr = array();
                 $customerDocList = DB::table('customer_documents')->select('id','title','front_image' ,'back_image', 'other_image')->where('customer_id', '=', $customer_id)->where('status', '=', 'Live')->orderBy('id', 'DESC')->get();
-                $front_image  = '';
-                $back_image  = '';
-                $other_image  = '';
+               
                 foreach ($customerDocList as $doclist) {
+                    $front_image  = '';
+                    $back_image  = '';
+                    $other_image  = '';
                     if($doclist->front_image){
                         $front_image  =  $baseUrl."/public/".$doclist->front_image;
                     }
