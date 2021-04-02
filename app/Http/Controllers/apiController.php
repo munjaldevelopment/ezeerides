@@ -872,7 +872,7 @@ class apiController extends Controller
             $json = $userData = array();
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
-            $bike_id = $request->bike_id;
+            $bike_model_id = $request->bike_id;
             $ride_type  = $request->ride_type;
             $city_id = $request->city_id;
             $station_id = $request->center_id;
@@ -884,8 +884,8 @@ class apiController extends Controller
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
 
-            if($bike_id == ""){
-                $error = "Please choose bike for bike booking";
+            if($bike_model_id == ""){
+                $error = "Please choose bike model for bike booking";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
             
@@ -893,7 +893,7 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     
-                    $bikeDetail = DB::table('vehicles')->where('id', $bike_id)->where('status', '=', 'Live')->first();
+                    $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->vehicle_model;
                         $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour;
