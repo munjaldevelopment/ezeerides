@@ -895,7 +895,14 @@ class apiController extends Controller
 
                         $booking_time = $from_date."-".$to_date;
 
-                        $booking_time = $from_date."-".$to_date;
+                        $start_trip_date = date('d-m-Y',strtotime($from_date));
+                        $start_trip_time = date('H:i',strtotime($from_date));
+                        $end_trip_date = date('d-m-Y',strtotime($to_date));
+                        $end_trip_time = date('H:i',strtotime($to_date));
+
+                        $end_trip_time = date('H:i',strtotime($to_date));
+
+                        $total_price = $charges_per_hour+$insurance_charges_per_hour;
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -924,7 +931,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'vehicle_model' => $vehicle_model, 'charges_per_hour' => $charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'pickup_station' => $station_name, 'booking_time' => $booking_time , 'allow_km' => $allowed_km_per_hour, 'penalty_amount' => $penalty_amount_per_hour);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'vehicle_model' => $vehicle_model, 'charges_per_hour' => $charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'pickup_station' => $station_name, 'booking_time' => $booking_time , 'allow_km' => $allowed_km_per_hour, 'penalty_amount' => $penalty_amount_per_hour, 'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'total_price' => $total_price);
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
