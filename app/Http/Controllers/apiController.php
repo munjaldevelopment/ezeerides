@@ -342,6 +342,7 @@ class apiController extends Controller
                 if($customer->city_id != 0){
                     $city_id = "".$customer->city_id;
                     $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                    
                 }else{
                     $city_id = "";
                     $city_name = "";
@@ -437,6 +438,12 @@ class apiController extends Controller
                         $data = base64_decode($image_parts[1]);
                        // $data = $image_parts[1];
                         file_put_contents($destinationPath, $data);
+                    }
+                    if($city_id == ''){
+                        $city_id = '0';
+                    }
+                    if($station_id == ''){
+                        $station_id = '0';
                     }
                     DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'city_id' => $city_id, 'station_id' => $station_id, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
                     
