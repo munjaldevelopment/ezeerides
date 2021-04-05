@@ -177,6 +177,27 @@ class StationCrudController extends CrudController
 
     public function addStationFields()
     {
+       $vehicle_list = array();
+       $vehicleidarr = array();
+         
+        $vehicleIds = \DB::table('station_has_vehicles')->distinct()->select('vehicle_id')->get();
+        if($vehicleIds){
+            foreach ($vehicleIds as $vid) {
+                $vehicleidarr[] = $vid->vehicle_id;
+            }
+        }
+       // print_r($vehicleidarr);
+            
+        $vehicle_list[0] = 'Select';
+        $vehicles = \DB::table('vehicles')->whereNotIn('id', $vehicleidarr)->orderBy('id')->get();
+        if($vehicles)
+        {
+            foreach($vehicles as $row)
+            {
+                $vehicle_list[$row->id] = $row->vehicle_number;
+            }
+        }
+        //print_r($vehicle_list);
         $this->crud->addFields([
             [
                 'name'  => 'station_name',
@@ -192,9 +213,12 @@ class StationCrudController extends CrudController
                 'type' => 'select2_multiple',
                 'name' => 'station_vehicles', // the relationship name in your Model
                 'entity' => 'station_vehicles', // the relationship name in your Model
+                //'options'   => $employee_list,
                 'attribute' => 'vehicle_number', // attribute on Article that is shown to admin
                 'pivot' => true,
             ],
+
+
         ]);
     }
 

@@ -53,12 +53,13 @@
 <li class="nav-item nav-dropdown">
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-biking"></i>Booking Management</a>
 	<ul class="nav-dropdown-items">
-	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle/create') }}"><i class="nav-icon la la-biking"></i> <span>Create Booking</span></a></li>
+	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('vehicle_register/create') }}"><i class="nav-icon la la-biking"></i> <span>Create Booking</span></a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Today's Drop</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Current Booking</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Upcoming Booking</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Completed Booking</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicle_register') }}'><i class='nav-icon la la-biking'></i> Canceled Booking</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('bookings') }}'><i class='nav-icon la la-biking'></i> Current Bookings</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('upcoming_bookings') }}'><i class='nav-icon la la-biking'></i> Upcoming Bookings</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('old_bookings') }}'><i class='nav-icon la la-biking'></i> OLD Bookings</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('canceled_bookings') }}'><i class='nav-icon la la-biking'></i> Canceled Bookings</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('overdue_bookings') }}'><i class='nav-icon la la-biking'></i> Overdue Bookings</a></li>
 	  
 	</ul>
 </li>
@@ -84,6 +85,3 @@
 @php
 	endif;
 @endphp
-
-
-

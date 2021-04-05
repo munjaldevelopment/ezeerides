@@ -41,6 +41,10 @@ Route::post('vehicle-filter', 'apiController@vehicle_filter');
 
 Route::post('bike-detail', 'apiController@bike_detail');
 
+Route::post('notification-list', 'apiController@notification_list');
+
 Route::post('contact-us', 'apiController@contact_us');
+
 Route::post('about-us', 'apiController@about_us');
+
 Route::post('privacy', 'apiController@privacy');

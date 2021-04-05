@@ -40,4 +40,12 @@ Route::group([
     Route::get('getHolidayStation/{city_id}', 'StationHolidaysCrudController@getStations');
     Route::crud('employeeattendance', 'EmployeeAttendanceCrudController');
     Route::crud('vehiclemodels', 'VehicleModelsCrudController');
+    Route::crud('bookings', 'BookingsCrudController');
+
+    Route::get('getEmployee/{station_id}', 'VehicleRegisterCrudController@getEmployee');
+    Route::get('getVehicle/{station_id}', 'VehicleRegisterCrudController@getVehicle');
+    Route::crud('upcoming_bookings', 'Upcoming_bookingsCrudController');
+    Route::crud('old_bookings', 'Old_bookingsCrudController');
+    Route::crud('canceled_bookings', 'Canceled_bookingsCrudController');
+    Route::crud('overdue_bookings', 'Overdue_bookingsCrudController');
 }); // this should be the absolute last line of this file
