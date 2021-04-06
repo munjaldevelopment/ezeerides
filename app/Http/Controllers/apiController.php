@@ -897,13 +897,20 @@ class apiController extends Controller
                 if($customer){ 
                     
                     $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
+                    $bike_feature = array();
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->model;
-                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour;
-                        $charges_per_hour = $bikeDetail->charges_per_hour;
-                        $insurance_charges_per_hour = $bikeDetail->insurance_charges_per_hour;
-                        $penalty_amount_per_hour = $bikeDetail->penalty_amount_per_hour;
+                        $allowed_km_per_hour = '₹ '.$bikeDetail->allowed_km_per_hour;
+                        $excess_km_charges = '₹ 0 / KM';
+                        $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour;
+                        $insurance_charges_per_hour = '₹ '.$bikeDetail->insurance_charges_per_hour;
+                        $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour;
+                        $helmet_charges = '₹ 0';
+                        $helmet_status = '1';
+                        $document_status = '1';
 
+                        $bike_feature[] = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $vehicle_gal_image, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
+                        
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
 
                         $booking_time = $from_date."-".$to_date;
@@ -946,7 +953,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'vehicle_model' => $vehicle_model, 'charges_per_hour' => $charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'pickup_station' => $station_name, 'booking_time' => $booking_time , 'allow_km' => $allowed_km_per_hour, 'penalty_amount' => $penalty_amount_per_hour, 'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'total_price' => $total_price);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'total_price' => $total_price);
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
