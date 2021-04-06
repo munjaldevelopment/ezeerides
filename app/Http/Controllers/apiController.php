@@ -12,6 +12,7 @@ use URL;
 use File;
 use Session;
 use QR_Code\QR_Code;
+use App\Models\VehicleRegister;
 
 class apiController extends Controller
 {
@@ -449,6 +450,8 @@ class apiController extends Controller
                         $data = base64_decode($image_parts[1]);
                        // $data = $image_parts[1];
                         file_put_contents($destinationPath, $data);
+
+                        DB::table('customers')->where('id', '=', $customer_id)->update('image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
                     }
                     if($city_id == ''){
                         $city_id = '0';
@@ -456,7 +459,7 @@ class apiController extends Controller
                     if($station_id == ''){
                         $station_id = '0';
                     }
-                    DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'city_id' => $city_id, 'station_id' => $station_id, 'image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
+                    DB::table('customers')->where('id', '=', $customer_id)->update(['name' => $name, 'dob' => $dob, 'email' => $email, 'address' => $address, 'city_id' => $city_id, 'station_id' => $station_id, 'updated_at' => $date]);
                     
                     /* user update */
                     $user_id = $customer->user_id;
@@ -911,6 +914,8 @@ class apiController extends Controller
                         $end_trip_time = date('H:i',strtotime($to_date));
 
                         $end_trip_time = date('H:i',strtotime($to_date));
+
+
 
                         $total_price = $charges_per_hour+$insurance_charges_per_hour;
 
