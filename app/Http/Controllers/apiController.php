@@ -451,7 +451,7 @@ class apiController extends Controller
                        // $data = $image_parts[1];
                         file_put_contents($destinationPath, $data);
 
-                        DB::table('customers')->where('id', '=', $customer_id)->update('image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
+                        DB::table('customers')->where('id', '=', $customer_id)->update(['image' => 'uploads/customer_image/'.$customerimage, 'updated_at' => $date]);
                     }
                     if($city_id == ''){
                         $city_id = '0';
