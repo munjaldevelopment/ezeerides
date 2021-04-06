@@ -270,7 +270,8 @@ class VehicleRegisterCrudController extends CrudController
         $insurance_charges_per_hour = \DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->where('v.vehicle_number', $vehicle)->pluck('vm.insurance_charges_per_hour')[0];
 
         $hours = abs($timestamp2 - $timestamp1)/(60*60);
-        $fleetFare = $this->crud->getFleetFare($hours,$vehicle_amount);
+        $VehicleRegister = new VehicleRegister();
+        $fleetFare = $VehicleRegister->getFleetFare($hours,$vehicle_amount);
         $fleetFare += $insurance_charges_per_hour;
         
         $booking_id = VehicleRegister::insertGetId([

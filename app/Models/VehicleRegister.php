@@ -80,11 +80,11 @@ class VehicleRegister extends Model
                 
                 $firstFourAmount = ($vehicle_amount * 1.5) * 4; 
                 $diff = 17;
-                $dayTotalAmount = $diff * $vehicle_amount;
+                 $dayTotalAmount = $diff * $vehicle_amount;
 
                 $diff = 21;
                 $daycount = floor($hours/24);
-                $nextDayTotal = ($diff * $vehicle_amount) * $daycount-1;
+                $nextDayTotal = ($diff * $vehicle_amount) * ($daycount-1);
 
                 $reminaingHour = ($hours - ($daycount*24)) * $vehicle_amount;
 

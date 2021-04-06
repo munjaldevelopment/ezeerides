@@ -902,16 +902,24 @@ class apiController extends Controller
                         $vehicle_model = $bikeDetail->model;
                         $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
                         $excess_km_charges = '₹ 0 / KM';
-                        $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour;
+                        $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
                         $bikecharges = $bikeDetail->charges_per_hour;
                         $insurance_charges_per_hour = '₹ '.$bikeDetail->insurance_charges_per_hour;
                         $insurance_charges = $bikeDetail->insurance_charges_per_hour;
-                        $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour;
+                        $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
                         $helmet_charges = '₹ 0';
                         $helmet_status = '1';
                         $document_status = '1';
 
-                        $bike_feature = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $excess_km_charges, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
+                        $pick_upDateTime = $from_date;
+                        $expected_dropDateTime = $to_date;
+                        $timestamp1 = strtotime($pick_upDateTime);
+                        $timestamp2 = strtotime($expected_dropDateTime);
+
+                        $hours = abs($timestamp2 - $timestamp1)/(60*60);
+
+
+                        $bike_feature[] = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $excess_km_charges, 'Charges' => $charges_per_hour, 'Penalty' => $penalty_amount_per_hour, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
 
@@ -922,11 +930,18 @@ class apiController extends Controller
                         $end_trip_date = date('d-m-Y',strtotime($to_date));
                         $end_trip_time = date('H:i',strtotime($to_date));
 
-                        $end_trip_time = date('H:i',strtotime($to_date));
+                        
 
+                         $fleetFare = 0;
+                         $total_price = 0;
+                        if($hours > 0){
+                            //echo $bikecharges;
+                            $VehicleRegister = new VehicleRegister();
+                            $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                            $total_price = $fleetFare+$insurance_charges;
+                        }
 
-
-                        $total_price = $bikecharges+$insurance_charges;
+                        
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -955,7 +970,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'total_price' => $total_price);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
@@ -974,6 +989,90 @@ class apiController extends Controller
         catch(\Exception $e) {
             $status_code = '0';
             $message = $e->getTraceAsString();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //contact_us
+    public function make_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $bike_model_id = $request->bike_id;
+            $ride_type  = $request->ride_type;
+            $city_id = $request->city_id;
+            $station_id = $request->center_id;
+            $hours = $request->hours;
+            $total_amount = $request->total_amount;
+            $from_date = $request->from_date;
+            $to_date = $request->to_date;
+            $error = "";
+            if($ride_type == ""){
+                $error = "Please choose ride type for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($bike_model_id == ""){
+                $error = "Please choose bike model for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $status = 'In';
+                    $booking_status = '0';
+                    $customer_name = $customer->name;
+                    $phone = $customer->mobile;
+                    $pick_up = date('Y-m-d',strtotime($from_date));
+                    $pick_up_time = date('H:i',strtotime($from_date));
+                    $expected_drop = date('Y-m-d',strtotime($to_date));
+                    $expected_drop_time = date('H:i',strtotime($to_date));
+                    
+                    $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                    $user_id = DB::table('stations')->where('id', $station_id)->pluck('employee_id')[0];
+                    $booking_id = VehicleRegister::insertGetId([
+                        'user_id' => $user_id,
+                        'station' => $station_name,
+                        'vehicle_model_id' => $bike_model_id,
+                        'customer_name' => $customer_name,
+                        'phone' => $phone,
+                        'pick_up' => $pick_up,
+                        'pick_up_time' => $pick_up_time,
+                        'expected_drop' => $expected_drop,
+                        'expected_drop_time' => $expected_drop_time,
+                        'total_amount' => $total_amount,
+                        'booking_status' => $booking_status,
+                        'status' => $status,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+
+                    $booking_no = "EZR".date('YmdHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
+        
+                    VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+
+                    $status_code = $success = '1';
+                    $message = 'Bike Enquiry Booked Successfully';
+                        
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
