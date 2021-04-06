@@ -1027,8 +1027,14 @@ class apiController extends Controller
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){
-                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Live')->first();
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
                     if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{    
                         $status = 'In';
                         $booking_status = '0';
                         $customer_name = $customer->name;
@@ -1065,11 +1071,7 @@ class apiController extends Controller
                         $message = 'Bike Enquiry Booked Successfully';
                             
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
-                    }else{
-                        $status_code = $success = '0';
-                        $message = 'Customer Document not verified yet.';
-                        
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    
                     }
                 } else{
                     $status_code = $success = '0';
