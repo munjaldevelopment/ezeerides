@@ -1013,6 +1013,7 @@ class apiController extends Controller
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
+            $document_status = 0;
             $error = "";
             if($ride_type == ""){
                 $error = "Please choose ride type for bike booking";
@@ -1026,42 +1027,50 @@ class apiController extends Controller
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){
-                    $status = 'In';
-                    $booking_status = '0';
-                    $customer_name = $customer->name;
-                    $phone = $customer->mobile;
-                    $pick_up = date('Y-m-d',strtotime($from_date));
-                    $pick_up_time = date('H:i',strtotime($from_date));
-                    $expected_drop = date('Y-m-d',strtotime($to_date));
-                    $expected_drop_time = date('H:i',strtotime($to_date));
-                    
-                    $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
-                    $user_id = DB::table('stations')->where('id', $station_id)->pluck('employee_id')[0];
-                    $booking_id = VehicleRegister::insertGetId([
-                        'user_id' => $user_id,
-                        'station' => $station_name,
-                        'vehicle_model_id' => $bike_model_id,
-                        'customer_name' => $customer_name,
-                        'phone' => $phone,
-                        'pick_up' => $pick_up,
-                        'pick_up_time' => $pick_up_time,
-                        'expected_drop' => $expected_drop,
-                        'expected_drop_time' => $expected_drop_time,
-                        'total_amount' => $total_amount,
-                        'booking_status' => $booking_status,
-                        'status' => $status,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ]);
-
-                    $booking_no = "EZR".date('YmdHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
-        
-                    VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
-
-                    $status_code = $success = '1';
-                    $message = 'Bike Enquiry Booked Successfully';
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Live')->first();
+                    if($customer_doc){
+                        $status = 'In';
+                        $booking_status = '0';
+                        $customer_name = $customer->name;
+                        $phone = $customer->mobile;
+                        $pick_up = date('Y-m-d',strtotime($from_date));
+                        $pick_up_time = date('H:i',strtotime($from_date));
+                        $expected_drop = date('Y-m-d',strtotime($to_date));
+                        $expected_drop_time = date('H:i',strtotime($to_date));
                         
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
+                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                        $user_id = DB::table('stations')->where('id', $station_id)->pluck('employee_id')[0];
+                        $booking_id = VehicleRegister::insertGetId([
+                            'user_id' => $user_id,
+                            'station' => $station_name,
+                            'vehicle_model_id' => $bike_model_id,
+                            'customer_name' => $customer_name,
+                            'phone' => $phone,
+                            'pick_up' => $pick_up,
+                            'pick_up_time' => $pick_up_time,
+                            'expected_drop' => $expected_drop,
+                            'expected_drop_time' => $expected_drop_time,
+                            'total_amount' => $total_amount,
+                            'booking_status' => $booking_status,
+                            'status' => $status,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        $booking_no = "EZR".date('YmdHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
+            
+                        VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+
+                        $status_code = $success = '1';
+                        $message = 'Bike Enquiry Booked Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
                 } else{
                     $status_code = $success = '0';
                     $message = 'Customer not valid';
