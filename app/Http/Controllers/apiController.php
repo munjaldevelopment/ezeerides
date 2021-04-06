@@ -900,16 +900,18 @@ class apiController extends Controller
                     $bike_feature = array();
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->model;
-                        $allowed_km_per_hour = '₹ '.$bikeDetail->allowed_km_per_hour;
+                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
                         $excess_km_charges = '₹ 0 / KM';
                         $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour;
+                        $bikecharges = $bikeDetail->charges_per_hour;
                         $insurance_charges_per_hour = '₹ '.$bikeDetail->insurance_charges_per_hour;
+                        $insurance_charges = $bikeDetail->insurance_charges_per_hour;
                         $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour;
                         $helmet_charges = '₹ 0';
                         $helmet_status = '1';
                         $document_status = '1';
 
-                        $bike_feature[] = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $vehicle_gal_image, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
+                        $bike_feature = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $excess_km_charges, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
 
@@ -924,7 +926,7 @@ class apiController extends Controller
 
 
 
-                        $total_price = $charges_per_hour+$insurance_charges_per_hour;
+                        $total_price = $bikecharges+$insurance_charges;
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -938,7 +940,7 @@ class apiController extends Controller
                         if(count($bikegallery) >0){
                             
                             foreach($bikegallery as $bike_gallery)
-                            {
+                            {   
                                 if($bike_gallery->image){
                                     $title = $bike_gallery->title;
                                     $vehicle_gal_image  =  $baseUrl."/public/".$bike_gallery->image;
@@ -971,7 +973,7 @@ class apiController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            $message = $e->getTraceAsString();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
