@@ -55,7 +55,7 @@ class apiController extends Controller
 
                         $otp = rand(11111, 99999);
                         
-                       $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
+                       $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
 
                         $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     
@@ -70,7 +70,7 @@ class apiController extends Controller
                     }else{
                         $otp = rand(11111, 99999);
                         
-                       $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
+                       $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
 
                         $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     
@@ -85,7 +85,7 @@ class apiController extends Controller
                 }else{
                 		
                     $otp = rand(11111, 99999);
-                    $smsmessage = str_replace(" ", '%20', "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone. ");
+                    $smsmessage = str_replace(" ", '%20', "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone.");
                         
                     $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
@@ -125,7 +125,7 @@ class apiController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $head = curl_exec($ch); 
         curl_close($ch);
-        print_r($head);
+        //print_r($head);
         return $head;
     }
 
