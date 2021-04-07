@@ -48,4 +48,5 @@ Route::group([
     Route::crud('old_bookings', 'Old_bookingsCrudController');
     Route::crud('canceled_bookings', 'Canceled_bookingsCrudController');
     Route::crud('overdue_bookings', 'Overdue_bookingsCrudController');
+    Route::crud('bookedvehicleimages', 'BookedVehicleImagesCrudController');
 }); // this should be the absolute last line of this file

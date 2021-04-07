@@ -60,6 +60,8 @@
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('old_bookings') }}'><i class='nav-icon la la-biking'></i> OLD Bookings</a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('canceled_bookings') }}'><i class='nav-icon la la-biking'></i> Canceled Bookings</a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('overdue_bookings') }}'><i class='nav-icon la la-biking'></i> Overdue Bookings</a></li>
+
+	 <!--  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('bookedvehicleimages') }}'><i class='nav-icon la la-question'></i> Booked Vehicle Images</a></li> -->
 	  
 	</ul>
 </li>
