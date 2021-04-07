@@ -50,9 +50,9 @@ class apiController extends Controller
 
                         $otp = rand(11111, 99999);
                         
-                       $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
-                        
-                         $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
+                       $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
+
+                        $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     
                         DB::table('customers')->where('id', '=', $customerid)->update(['otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
@@ -65,9 +65,9 @@ class apiController extends Controller
                     }else{
                         $otp = rand(11111, 99999);
                         
-                       $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
-                        
-                         $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
+                       $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
+
+                        $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     
                         DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
@@ -80,9 +80,9 @@ class apiController extends Controller
                 }else{
                 		
                     $otp = rand(11111, 99999);
-                    $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
+                    $smsmessage = "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone. ";
                         
-                    $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
+                    $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
                     $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not live',  'updated_at' => $date]); 
 
@@ -257,9 +257,9 @@ class apiController extends Controller
                     $customerid = $customer->id;
                     $otp = rand(11111, 99999);
                     
-                    $smsmessage = str_replace(" ", "%20", "Dear Customer, Your verify OTP is ".$otp.". Please DO NOT share OTP with anyone.");
-                        
-                    $this->httpGet("http://opensms.microprixs.com/api/mt/SendSMS?user=jmvd&password=jmvd&senderid=OALERT&channel=TRANS&DCS=0&flashsms=0&number=".$mobile."&text=".$smsmessage."&route=15");
+                    $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
+
+                    $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
 
                      DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'updated_at' => $date]);
@@ -909,7 +909,12 @@ class apiController extends Controller
                         $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
                         $helmet_charges = '₹ 0';
                         $helmet_status = '1';
-                        $document_status = '1';
+                        $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->first();
+                        if($customer_doc){
+                            $document_status = 'Attached';
+                        }else{
+                            $document_status = 'Not Attached';
+                        }
 
                         $pick_upDateTime = $from_date;
                         $expected_dropDateTime = $to_date;
@@ -918,8 +923,46 @@ class apiController extends Controller
 
                         $hours = abs($timestamp2 - $timestamp1)/(60*60);
 
+                        if($allowed_km_per_hour > 0){
+                            $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
+                            
+                        }
+                        if($excess_km_charges){
+                             $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
+                        }
 
-                        $bike_feature[] = ['Allowed KM' => $allowed_km_per_hour, 'Excess KM Charges' => $excess_km_charges, 'Charges' => $charges_per_hour, 'Penalty' => $penalty_amount_per_hour, 'Number of Helmet (2)' => $helmet_charges , 'Insurance for your Ride' => $insurance_charges_per_hour , 'Documents Status ' => $document_status];
+                        if($charges_per_hour > 0){
+                          
+                            $bike_feature[] =  ['title' => 'Charges', 'subtitle' => $charges_per_hour];
+                            
+                        }
+
+                        if($penalty_amount_per_hour > 0){
+                             
+                             $bike_feature[] =  ['title' => 'Penalty', 'subtitle' => $penalty_amount_per_hour];
+
+                        }
+
+                       
+
+                        if($insurance_charges_per_hour > 0){
+                            
+                            $bike_feature[] =  ['title' => 'Insurance for your Ride', 'subtitle' => $insurance_charges_per_hour];
+
+                            
+                        }
+
+                         if($helmet_charges){
+                            $bike_feature[] =  ['title' => 'Number of Helmet (2)', 'subtitle' => $helmet_charges];
+
+                        }
+
+                        if($document_status){
+                            $bike_feature[] =  ['title' => 'Documents Status', 'subtitle' => $document_status];
+
+                        }
+
+                       
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
 
