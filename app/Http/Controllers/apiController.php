@@ -85,7 +85,7 @@ class apiController extends Controller
                 }else{
                 		
                     $otp = rand(11111, 99999);
-                    $smsmessage = "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone. ";
+                    $smsmessage = str_replace(" ", '%20', "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone. ");
                         
                     $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
@@ -125,7 +125,7 @@ class apiController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $head = curl_exec($ch); 
         curl_close($ch);
-        //print_r($head);
+        print_r($head);
         return $head;
     }
 
@@ -1317,7 +1317,51 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+     public function customer_booking(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+                    $booking_list = array();
+                    if($bookingList){
+                        foreach($bookingList as $booking)
+                        {
+                            
+                            $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+
+                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
+                           
+                        } 
+
+                        $status_code = '1';
+                        $message = 'My Bookings List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'booking_list' => $booking_list);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No notification found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
 
     public function notification_list(Request $request)
     {
@@ -1336,7 +1380,7 @@ class apiController extends Controller
                         
                         foreach($notifyList as $notifylist)
                         {
-                            $notification_type = "";
+                            $notification_type = $notifylist->notification_type;
                             
                             $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
                            

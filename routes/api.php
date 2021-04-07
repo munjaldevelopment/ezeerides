@@ -45,6 +45,8 @@ Route::post('make-payment', 'apiController@make_payment');
 
 Route::post('notification-list', 'apiController@notification_list');
 
+Route::post('booking-list', 'apiController@customer_booking');
+
 Route::post('contact-us', 'apiController@contact_us');
 
 Route::post('about-us', 'apiController@about_us');
