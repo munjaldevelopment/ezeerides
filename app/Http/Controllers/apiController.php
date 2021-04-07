@@ -1373,7 +1373,7 @@ class apiController extends Controller
             $booking_id = $request->booking_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','vehicle', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
                     
                     $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
                     $booked_vehicle_before_list = array();
