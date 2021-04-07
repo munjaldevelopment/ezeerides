@@ -92,12 +92,12 @@ class apiController extends Controller
                     $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not live',  'updated_at' => $date]); 
 
                     $date   = date('Y-m-d H:i:s');
-                    /*if($refer_code != ""){
-                        $referCustomerid = str_replace('krvrefer', '', $refer_code); 
+                    if($refer_code != ""){
+                        $referCustomerid = str_replace('ezeerdrefer', '', $refer_code); 
                         $referal_customer_id = $referCustomerid;
                         $refercustomerid = DB::table('customer_refer_register')->insertGetId(['customer_id' => $customerid, 'referal_customer_id' => $referal_customer_id, 'created_at' => $date]);    
                         
-                    }*/
+                    }
 
                     $status_code = $success = '1';
                     $message = 'Customer Otp Send, Please Process Next Step';
@@ -163,7 +163,7 @@ class apiController extends Controller
                     $fcmToken = $customer->fcmToken;
                     $customerid = $customer->id;
 
-                    //$customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'updated_at' => $date, 'status' => 'Live']); 
+                    /
                      DB::table('customers')->where('id', '=', $customerid)->update(['status' => 'Live', 'updated_at' => $date]); 
                      $usersChk = DB::table('users')->where('phone', $mobile)->first();
                     if($usersChk) 
@@ -178,7 +178,7 @@ class apiController extends Controller
                             DB::table('customers')->where('id', '=', $customerid)->update(['user_id' => $userid, 'updated_at' => $date]);
                     }      
 
-                     //DB::table('customers_tmp')->where('mobile', $mobile)->delete();
+                     
                     
                     $refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.ezeerides&referrer=ezeerdrefer".$customer->id;
 
@@ -1402,7 +1402,7 @@ class apiController extends Controller
 
                         $status_code = '1';
                         $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
                     }else{
                          $status_code = '0';
                         $message = 'No notification found.';
