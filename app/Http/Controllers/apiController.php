@@ -163,7 +163,7 @@ class apiController extends Controller
                     $fcmToken = $customer->fcmToken;
                     $customerid = $customer->id;
 
-                    /
+                    
                      DB::table('customers')->where('id', '=', $customerid)->update(['status' => 'Live', 'updated_at' => $date]); 
                      $usersChk = DB::table('users')->where('phone', $mobile)->first();
                     if($usersChk) 
