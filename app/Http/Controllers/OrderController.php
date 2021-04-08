@@ -76,10 +76,14 @@ class OrderController  extends BaseController
         
         $response = $transaction->response(); // To get raw response as array
         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=interpreting-response-sent-by-paytm
+
+        $order_id = $transaction->getOrderId(); // Get order id
+        $transaction_id = $transaction->getTransactionId(); // Get transaction id
+        $response_message = $transaction->getResponseMessage(); //Get Response Message If Available
         
         if($transaction->isSuccessful()){
           //Transaction Successful
-            return redirect(route('initiate.payment'))->with('message', "Your payment is successfull.");
+            return redirect(route('initiate.payment'))->with('message', "Your payment is successful.".$order_id);
         }else if($transaction->isFailed()){
           //Transaction Failed
             return redirect(route('initiate.payment'))->with('message', "Your payment is failed.");
@@ -87,9 +91,8 @@ class OrderController  extends BaseController
           //Transaction Open/Processing
             return redirect(route('initiate.payment'))->with('message', "Your payment is processing.");
         }
-        $transaction->getResponseMessage(); //Get Response Message If Available
+        
         //get important parameters via public methods
-        $transaction->getOrderId(); // Get order id
-        $transaction->getTransactionId(); // Get transaction id
+        
     } 
 }
