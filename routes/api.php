@@ -41,6 +41,8 @@ Route::post('vehicle-filter', 'apiController@vehicle_filter');
 
 Route::post('bike-detail', 'apiController@bike_detail');
 
+Route::post('coupon-list', 'apiController@coupon_listing');
+
 Route::post('make-payment', 'apiController@make_payment');
 
 Route::post('notification-list', 'apiController@notification_list');

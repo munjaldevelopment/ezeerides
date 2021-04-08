@@ -894,6 +894,7 @@ class apiController extends Controller
             $station_id = $request->center_id;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
+            $coupon_code = $request->coupon_code;
             $error = "";
             if($ride_type == ""){
                 $error = "Please choose ride type for bike booking";
@@ -1021,7 +1022,7 @@ class apiController extends Controller
                             }
                         }       
                             
-                            
+                        
 
                         $status_code = $success = '1';
                         $message = 'Bike Details';
@@ -1066,6 +1067,7 @@ class apiController extends Controller
             $city_id = $request->city_id;
             $station_id = $request->center_id;
             $hours = $request->hours;
+            $coupon_code = $request->coupon_code;
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
@@ -1397,6 +1399,56 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+    public function coupon_listing(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code','discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    $coupon_list = array();
+                    if($referCouponList){
+                        foreach($referCouponList as $couponlist)
+                        {
+                            
+                            $coupon_list[] = array('coupon_code' => "".$couponlist->coupon_code, 'discount' => $couponlist->discount, 'description' => $couponlist->description); 
+                           
+                        }
+                    } 
+
+                    $generalCouponList = DB::table('coupons')->select('id','title','discount','description')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    if($generalCouponList){
+                        foreach($generalCouponList as $gencouponlist)
+                        {
+                            
+                            $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
+                           
+                        }
+                    } 
+
+                    $status_code = '1';
+                    $message = 'Coupon List';
+                    $json = array('status_code' => $status_code,  'message' => $message, 'coupon_list' => $coupon_list);
+                    
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
     //contact_us
     public function contact_us(Request $request)
     {
