@@ -54,7 +54,7 @@ class OrderController  extends BaseController
         if($booking){
             $payment = PaytmWallet::with('receive');
             $payment->prepare([
-              'order' => time().$booking->id,
+              'order' => $booking->id,
               'user' => $booking->customer_id,
               'mobile_number' => $booking->phone,
               'email' => 'ashok.sharma@microprixs.in',
@@ -76,14 +76,17 @@ class OrderController  extends BaseController
         
         $response = $transaction->response(); // To get raw response as array
         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=interpreting-response-sent-by-paytm
-
+        print_r($response);
+        exit;
         $order_id = $transaction->getOrderId(); // Get order id
-        $transaction_id = $transaction->getTransactionId(); // Get transaction id
-        $response_message = $transaction->getResponseMessage(); //Get Response Message If Available
+        $transactionId = $transaction->getTransactionId(); // Get transaction id
+        $responseMessage = $transaction->getResponseMessage(); //Get Response Message If Available
         
         if($transaction->isSuccessful()){
           //Transaction Successful
-            return redirect(route('initiate.payment'))->with('message', "Your payment is successful.".$order_id);
+            $payment_status = 'success';
+            DB::table('vehicle_registers')->where('id', '=', $order_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+            return redirect(route('initiate.payment'))->with('message', "Your payment is successful. for".$order_id);
         }else if($transaction->isFailed()){
           //Transaction Failed
             return redirect(route('initiate.payment'))->with('message', "Your payment is failed.");

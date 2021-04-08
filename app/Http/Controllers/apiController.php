@@ -1175,9 +1175,18 @@ class apiController extends Controller
                         
                         $response = $status->response(); // To get raw response as array
                         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
+
+                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
+                        //get important parameters via public methods
+                        $orderId = $status->getOrderId(); // Get order id
+                        
+                        $transactionId = $status->getTransactionId(); // Get transaction id
                         
                         if($status->isSuccessful()){
                           //Transaction Successful
+                            $payment_status = 'success';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
                             $status_code = $success = '1';
                             $message = 'Booking Transaction Successfully.';
                         
@@ -1185,21 +1194,25 @@ class apiController extends Controller
 
                         }else if($status->isFailed()){
                           //Transaction Failed
+                            
+                            $payment_status = 'failed';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
                             $status_code = $success = '1';
                             $message = 'Booking Transaction Failed.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message); 
                         }else if($status->isOpen()){
                           //Transaction Open/Processing
+                            $payment_status = 'pending';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
                             $status_code = $success = '1';
-                            $message = 'Booking Transaction Open/Processing.';
+                            $message = 'Booking Transaction is Pending / Processing.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);
                         }
-                        $status->getResponseMessage(); //Get Response Message If Available
-                        //get important parameters via public methods
-                        $status->getOrderId(); // Get order id
-                        $status->getTransactionId(); // Get transaction id
+                        
 
                         
                     }else{
