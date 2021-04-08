@@ -1177,8 +1177,8 @@ class apiController extends Controller
                         
                         $response = $status->response(); // To get raw response as array
                         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
-                        print_r($response);
-                        exit;
+                        /*print_r($response);
+                        exit;*/
 
                         $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
                         //get important parameters via public methods
