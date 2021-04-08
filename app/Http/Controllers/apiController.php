@@ -1192,7 +1192,7 @@ class apiController extends Controller
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
 
                             $status_code = $success = '1';
-                            $message = 'Booking Transaction Successfully.';
+                            $message = 'Your Booking Transaction Successfully Done.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);  
 
@@ -1204,7 +1204,7 @@ class apiController extends Controller
 
 
                             $status_code = $success = '1';
-                            $message = 'Booking Transaction Failed.';
+                            $message = 'Your Booking Transaction Failed.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message); 
                         }else if($status->isOpen()){
@@ -1212,7 +1212,7 @@ class apiController extends Controller
                             $payment_status = 'pending';
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
                             $status_code = $success = '1';
-                            $message = 'Booking Transaction is Pending / Processing.';
+                            $message = 'Your Booking Transaction is Pending / Processing.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);
                         }
