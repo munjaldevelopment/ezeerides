@@ -76,8 +76,7 @@ class OrderController  extends BaseController
         
         $response = $transaction->response(); // To get raw response as array
         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=interpreting-response-sent-by-paytm
-        print_r($response);
-        exit;
+       
         $order_id = $transaction->getOrderId(); // Get order id
         $transactionId = $transaction->getTransactionId(); // Get transaction id
         $responseMessage = $transaction->getResponseMessage(); //Get Response Message If Available
