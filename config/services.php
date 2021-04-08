@@ -31,12 +31,12 @@ return [
     ],
 
     'paytm-wallet' => [
-        'env' => env('PAYTM_ENVIRONMENT'), // values : (local | production)
-        'merchant_id' => env('PAYTM_MERCHANT_ID'),
-        'merchant_key' => env('PAYTM_MERCHANT_KEY'),
-        'merchant_website' => env('PAYTM_MERCHANT_WEBSITE'),
-        'channel' => env('PAYTM_CHANNEL'),
-        'industry_type' => env('PAYTM_INDUSTRY_TYPE'),
+        'env' => 'local', // values : (local | production)
+        'merchant_id' => 'FnAoux43246182437237',
+        'merchant_key' => '2fCkkMtPcbf###hr',
+        'merchant_website' => 'WEBSTAGING',
+        'channel' => 'WEB',
+        'industry_type' => 'Retail',
     ],
 
 ];
