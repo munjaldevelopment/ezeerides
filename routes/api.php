@@ -45,6 +45,8 @@ Route::post('coupon-list', 'apiController@coupon_listing');
 
 Route::post('make-payment', 'apiController@make_payment');
 
+Route::post('confirm-payment', 'apiController@confirm_payment');
+
 Route::post('notification-list', 'apiController@notification_list');
 
 Route::post('booking-list', 'apiController@customer_booking');
