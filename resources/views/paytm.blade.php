@@ -34,12 +34,12 @@
                         <strong>OrderID:</strong>
                         <input type="order_id" class="form-control" placeholder="Order ID" name="order_id" required>
                     </div>
-                    <div class="col-md-12" >
+                    <!-- <div class="col-md-12" >
                         <br/>
                         <div class="btn btn-info">
                             Term Fee : 1500 Rs/-
                         </div>
-                    </div>
+                    </div> -->
                     <div class="col-md-12">
                         <br/>
                         <button type="submit" class="btn btn-success">Paytm</button>

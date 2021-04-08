@@ -57,7 +57,7 @@ class OrderController  extends BaseController
               'order' => $booking->id,
               'user' => $booking->customer_id,
               'mobile_number' => $booking->phone,
-              'email' => 'ashok.sharma@microprixs.in',
+              'email' => $request->email,
               'amount' => $booking->total_amount,
               'callback_url' => route('status')
             ]);
@@ -87,7 +87,7 @@ class OrderController  extends BaseController
           //Transaction Successful
             $payment_status = 'success';
             DB::table('vehicle_registers')->where('id', '=', $order_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-            return redirect(route('initiate.payment'))->with('message', "Your payment is successful. for".$order_id);
+            return redirect(route('initiate.payment'))->with('message', "Your payment is successful. for #".$order_id);
         }else if($transaction->isFailed()){
           //Transaction Failed
             return redirect(route('initiate.payment'))->with('message', "Your payment is failed.");
