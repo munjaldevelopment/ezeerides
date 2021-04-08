@@ -181,6 +181,9 @@ return [
         //Barryvdh\Elfinder\ElfinderServiceProvider::class,
         LaravelFCM\FCMServiceProvider::class,
 
+        // Other service providers…
+        Anand\LaravelPaytmWallet\PaytmWalletServiceProvider::class,
+
     ],
 
     /*
@@ -235,6 +238,8 @@ return [
         'Input' => Illuminate\Support\Facades\Request::class,
         'FCM'      => LaravelFCM\Facades\FCM::class,
         'FCMGroup' => LaravelFCM\Facades\FCMGroup::class,
+        // Other aliases
+        'PaytmWallet' => Anand\LaravelPaytmWallet\Facades\PaytmWallet::class,
     ],
 
 ];

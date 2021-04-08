@@ -19,6 +19,8 @@ use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
 use FCM;
 
+use PaytmWallet;
+
 class apiController extends Controller
 {
     //START LOGIN
@@ -1103,6 +1105,7 @@ class apiController extends Controller
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
                             'station' => $station_name,
+                            'customer_id' => $customer_id,
                             'vehicle_model_id' => $bike_model_id,
                             'customer_name' => $customer_name,
                             'phone' => $phone,
@@ -1142,6 +1145,242 @@ class apiController extends Controller
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
         
+        return response()->json($json, 200);
+    }
+
+    public function confirm_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $error = "";
+           if($booking_id == ""){
+                $error = "Please send valid booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','total_amount', 'payment_status', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+
+                        $status = PaytmWallet::with('status');
+                        $status->prepare(['order' => $booking_id]);
+                        $status->check();
+                        
+                        $response = $status->response(); // To get raw response as array
+                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
+                        
+                        if($status->isSuccessful()){
+                          //Transaction Successful
+                            $status_code = $success = '1';
+                            $message = 'Booking Transaction Successfully.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else if($status->isFailed()){
+                          //Transaction Failed
+                            $status_code = $success = '1';
+                            $message = 'Booking Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }else if($status->isOpen()){
+                          //Transaction Open/Processing
+                            $status_code = $success = '1';
+                            $message = 'Booking Transaction Open/Processing.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);
+                        }
+                        $status->getResponseMessage(); //Get Response Message If Available
+                        //get important parameters via public methods
+                        $status->getOrderId(); // Get order id
+                        $status->getTransactionId(); // Get transaction id
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+     public function customer_booking(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','created_at')->where('customer_id', $customer_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
+                    $booking_list = array();
+                    if($bookingList){
+                        foreach($bookingList as $booking)
+                        {
+                            
+                            $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+
+                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
+                           
+                        } 
+
+                        $status_code = '1';
+                        $message = 'My Bookings List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'booking_list' => $booking_list);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No notification found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function booking_detail(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','vehicle', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    
+                    $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                    $booked_vehicle_before_list = array();
+                    foreach($before_ride_img as $beforeimg)
+                    {
+                        if($beforeimg->image){
+                            $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
+                            
+                            $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
+                        }
+                    } 
+
+                    $after_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
+                    $booked_vehicle_after_list = array();
+                    foreach($after_ride_img as $afterimg)
+                    {
+                        if($afterimg->image){
+                            $afterimgurl = $baseUrl."/public/".$afterimg->image; 
+                            
+                            $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
+                        }
+                    } 
+                    if($booking){
+                        
+                         $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+
+                        $status_code = '1';
+                        $message = 'My Bookings List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No notification found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function notification_list(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('user_type', 'customer')->orderBy('id', 'DESC')->count();
+                    $notify_List = array();
+                    if($notificationExists > 0){
+                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+
+                        
+                        foreach($notifyList as $notifylist)
+                        {
+                            $notification_type = $notifylist->notification_type;
+                            
+                            $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'Notification List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'notify_List' => $notify_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No notification found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
         return response()->json($json, 200);
     }
 
@@ -1317,163 +1556,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-     public function customer_booking(Request $request)
-    {
-        try 
-        {   
-            
-            $json       =   array();
-            $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','created_at')->where('customer_id', $customer_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
-                    $booking_list = array();
-                    if($bookingList){
-                        foreach($bookingList as $booking)
-                        {
-                            
-                            $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
-
-                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
-                           
-                        } 
-
-                        $status_code = '1';
-                        $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'booking_list' => $booking_list);
-                    }else{
-                         $status_code = '0';
-                        $message = 'No notification found.';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
-                    }
-                }else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-                }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
-
-    public function booking_detail(Request $request)
-    {
-        try 
-        {   
-            
-            $json       =   array();
-            $customer_id = $request->customer_id;
-            $booking_id = $request->booking_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','vehicle', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
-                    
-                    $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
-                    $booked_vehicle_before_list = array();
-                    foreach($before_ride_img as $beforeimg)
-                    {
-                        if($beforeimg->image){
-                            $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
-                            
-                            $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
-                        }
-                    } 
-
-                    $after_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
-                    $booked_vehicle_after_list = array();
-                    foreach($after_ride_img as $afterimg)
-                    {
-                        if($afterimg->image){
-                            $afterimgurl = $baseUrl."/public/".$afterimg->image; 
-                            
-                            $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
-                        }
-                    } 
-                    if($booking){
-                        
-                         $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
-
-                        $status_code = '1';
-                        $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
-                    }else{
-                         $status_code = '0';
-                        $message = 'No notification found.';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
-                    }
-                }else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-                }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
-
-    public function notification_list(Request $request)
-    {
-        try 
-        {   
-            
-            $json       =   array();
-            $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('user_type', 'customer')->orderBy('id', 'DESC')->count();
-                    $notify_List = array();
-                    if($notificationExists > 0){
-                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
-
-                        
-                        foreach($notifyList as $notifylist)
-                        {
-                            $notification_type = $notifylist->notification_type;
-                            
-                            $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
-                           
-                        } 
-
-                        //print_r($odr_List);
-                        //exit;
-                        $status_code = '1';
-                        $message = 'Notification List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'notify_List' => $notify_List);
-                    }else{
-                         $status_code = '0';
-                        $message = 'No notification found.';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
-                    }
-                }else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-                }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
 
     public function push_notification($data, $device_tokens)
         {

@@ -39,3 +39,7 @@ Route::get('/history', 'HistoryController@Index')->name('history');
 
 Route::post('/showVehicle', 'HomeController@showVehicle');
 Route::post('/save_booking_verify', 'RegisterController@saveBookingVerify');
+
+Route::get('/initiate','OrderController@initiate')->name('initiate.payment');
+Route::post('/payment','OrderController@pay')->name('make.payment');
+Route::post('/payment/status', 'OrderController@paymentCallback')->name('status');
