@@ -80,7 +80,7 @@ class OrderController  extends BaseController
         $order_id = $transaction->getOrderId(); // Get order id
         $transactionId = $transaction->getTransactionId(); // Get transaction id
         $responseMessage = $transaction->getResponseMessage(); //Get Response Message If Available
-        
+        $date   = date('Y-m-d H:i:s');
         if($transaction->isSuccessful()){
           //Transaction Successful
             $payment_status = 'success';
