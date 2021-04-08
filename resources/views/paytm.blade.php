@@ -30,6 +30,10 @@
                         <strong>Email:</strong>
                         <input type="email" class="form-control" placeholder="Email" name="email" required>
                     </div>
+                    <div class="col-md-12">
+                        <strong>OrderID:</strong>
+                        <input type="order_id" class="form-control" placeholder="Order ID" name="order_id" required>
+                    </div>
                     <div class="col-md-12" >
                         <br/>
                         <div class="btn btn-info">

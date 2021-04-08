@@ -46,9 +46,9 @@ class OrderController  extends BaseController
         ]);
         return $payment->receive();  // initiate a new payment
     }
-    public function pay()
+    public function pay(Request $request)
     {
-        $booking_id = 15;
+        $booking_id = $request->order_id;
         $booking = DB::table('vehicle_registers')->select('id','booking_no','total_amount', 'payment_status', 'customer_id','phone', 'created_at')->where('id', $booking_id)->orderBy('id', 'DESC')->first();
         
         if($booking){
@@ -62,6 +62,8 @@ class OrderController  extends BaseController
               'callback_url' => route('status')
             ]);
             return $payment->receive();
+        }else{
+            return redirect(route('initiate.payment'))->with('message', "Your Order Id is wrong.");
         }
     }
 
@@ -76,7 +78,7 @@ class OrderController  extends BaseController
         
         $response = $transaction->response(); // To get raw response as array
         //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=interpreting-response-sent-by-paytm
-       
+
         $order_id = $transaction->getOrderId(); // Get order id
         $transactionId = $transaction->getTransactionId(); // Get transaction id
         $responseMessage = $transaction->getResponseMessage(); //Get Response Message If Available
