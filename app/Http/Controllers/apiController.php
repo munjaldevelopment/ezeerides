@@ -1053,7 +1053,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-    //contact_us
+    //Make Payment
     public function make_payment(Request $request)
     {
         try 
@@ -1348,6 +1348,147 @@ class apiController extends Controller
             $json = array('status_code' => $status_code, 'message' => $message);
         }
     
+        return response()->json($json, 200);
+    }
+
+    //Make Payment
+    public function add_money(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $amount = $request->amount;
+            $error = "";
+            if($amount == "" && $amount <= "0"){
+                $error = "Please add valid amount";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $comment = 'Online Amount added';
+                    $payment_type = 'Online';
+                    $payment_status = "pending";
+                    $walletAmtid = DB::table('customer_wallet_payments')->insertGetId(['customer_id' => $customer_id, 'amount' => "".$amount, 'comment' => $comment, 'payment_type' => $payment_type, 'payment_status' => $payment_status, 'created_at' => $date, 'isactive' => '1',  'updated_at' => $date]); 
+
+                    $order_id = $walletAmtid.'_'.time();
+                    $status_code = '1';
+                    $message = 'Wallet Amount';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'order_id' => $order_id, 'amount' => $amount); 
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function confirm_wallet_amount(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $order_id = $request->order_id;
+            $error = "";
+           if($order_id == ""){
+                $error = "Please send valid order id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $odridarr = explode('_', $order_id);
+                    $walletchk = DB::table('customer_wallet_payments')->select('id','amount','created_at')->where('customer_id', $customer_id)->where('id', $odridarr[0])->orderBy('id', 'Asc')->first();
+                    if($walletchk){
+
+                        $status = PaytmWallet::with('status');
+                        $status->prepare(['order' => $order_id]);
+                        $status->check();
+                        
+                        $response = $status->response(); // To get raw response as array
+                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
+                        /*print_r($response);
+                        exit;*/
+
+                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
+                        //get important parameters via public methods
+                        $orderId = $status->getOrderId(); // Get order id
+                        
+                        $transactionId = $status->getTransactionId(); // Get transaction id
+                        
+                        if($status->isSuccessful()){
+                          //Transaction Successful
+                            $payment_status = 'success';
+                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+                            $status_code = $success = '1';
+                            $message = 'Your Wallet Amount Added Successfully.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else if($status->isFailed()){
+                          //Transaction Failed
+                            
+                            $payment_status = 'failed';
+                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
+                            $status_code = $success = '1';
+                            $message = 'Your Wallet Amount Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }else if($status->isOpen()){
+                          //Transaction Open/Processing
+                            $payment_status = 'pending';
+                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+                            $status_code = $success = '1';
+                            $message = 'Your Wallet Amount Transaction is Pending / Processing.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);
+                        }
+                        
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
         return response()->json($json, 200);
     }
 

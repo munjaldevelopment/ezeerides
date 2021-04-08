@@ -47,6 +47,10 @@ Route::post('make-payment', 'apiController@make_payment');
 
 Route::post('confirm-payment', 'apiController@confirm_payment');
 
+Route::post('add-money', 'apiController@add_money');
+
+Route::post('confirm-wallet-payment', 'apiController@confirm_wallet_amount');
+
 Route::post('notification-list', 'apiController@notification_list');
 
 Route::post('booking-list', 'apiController@customer_booking');
