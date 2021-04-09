@@ -47,7 +47,12 @@ class CouponCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
+        //CRUD::setFromDb(); // columns
+
+       $this->crud->addColumn('title');
+       $this->crud->addColumn('discount_type');
+       $this->crud->addColumn('start_date');
+       $this->crud->addColumn('end_date');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -81,6 +86,15 @@ class CouponCrudController extends CrudController
             'type' => 'textarea',
             'hint' => '',
         ]);
+
+        $this->crud->addField([
+            'name' => 'discount_type',
+            'label' => 'Discount Type',
+            'type' => 'select2_from_array',
+            'options' => ['percentage' => 'Percentage', 'amount' => 'Amount'],
+            'hint' => '',
+        ]);
+
         $this->crud->addField([
             'name' => 'discount',
             'label' => 'Discount',
