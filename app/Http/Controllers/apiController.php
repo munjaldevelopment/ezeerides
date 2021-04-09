@@ -1592,23 +1592,23 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code','discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->orderBy('id', 'ASC')->get();
                     $coupon_list = array();
                     if($referCouponList){
                         foreach($referCouponList as $couponlist)
                         {
                             
-                            $coupon_list[] = array('coupon_code' => "".$couponlist->coupon_code, 'discount' => $couponlist->discount, 'description' => $couponlist->description); 
+                            $coupon_list[] = array('coupon_code' => "".$couponlist->coupon_code, 'discount_type' => 'percentage', 'discount' => $couponlist->discount, 'description' => $couponlist->description); 
                            
                         }
                     } 
 
-                    $generalCouponList = DB::table('coupons')->select('id','title','discount','description')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->orderBy('id', 'ASC')->get();
                     if($generalCouponList){
                         foreach($generalCouponList as $gencouponlist)
                         {
                             
-                            $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
+                            $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount_type' => $gencouponlist->discount_type, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
                            
                         }
                     } 
