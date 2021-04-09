@@ -1620,7 +1620,9 @@ class apiController extends Controller
                     $bookedCoupons = \DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', 'success')->distinct()->select('coupon_code')->get();
                     if($bookedCoupons){
                         foreach ($bookedCoupons as $usedCoupons) {
-                            $usedCouponList[] = $usedCoupons->coupon_code;
+                            if($usedCoupons->coupon_code){
+                                $usedCouponList[] = $usedCoupons->coupon_code;
+                            }
                         }
                     }
                     //print_r($usedCouponList);
