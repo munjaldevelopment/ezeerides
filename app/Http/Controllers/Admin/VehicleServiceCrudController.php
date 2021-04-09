@@ -54,6 +54,13 @@ class VehicleServiceCrudController extends CrudController
     {
         //CRUD::setFromDb(); // columns
        $this->crud->addColumn([
+            'name'      => 'VehicleModel',
+            'label'     => 'Vehicle Model',
+            'type'      => 'text',
+            
+         ]);
+       
+       $this->crud->addColumn([
             'label'     => 'Vehicle Number',
             'type'      => 'select',
             'name'      => 'vehicle_id',
@@ -98,12 +105,12 @@ class VehicleServiceCrudController extends CrudController
         $vehicle_list = array();
             
         $vehicle_list[0] = 'Select';
-        $vehicle = \DB::table('vehicles')->orderBy('id')->get();
+        $vehicle = \DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->where('v.status','Live')->orderBy('v.id')->select('v.id','v.vehicle_number','vm.model')->get();
         if($vehicle)
         {
             foreach($vehicle as $row)
             {
-                $vehicle_list[$row->id] = $row->vehicle_number ;
+                $vehicle_list[$row->id] = $row->model." - ".$row->vehicle_number ;
             }
         }
 

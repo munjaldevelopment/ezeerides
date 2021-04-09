@@ -48,7 +48,7 @@ class Station_vehiclesCrudController extends CrudController
         $this->crud->addFilter([
               'type' => 'select2',
               'name' => 'station_id',
-              'label'=> 'Center Name'
+              'label'=> 'Station Name'
             ],
             $stationData,
             function($value) {
@@ -65,6 +65,23 @@ class Station_vehiclesCrudController extends CrudController
 
          ]);
 
+        /*$this->crud->addColumn([
+            'label'     => 'Vehicle Model',
+            'type'      => 'select',
+            'name'      => 'VehicleModel',
+            'entity'    => 'allVehicleModel', //function name
+            'attribute' => 'model', //name of fields in models table like districts
+            'model'     => "App\Models\VehicleModels", //name of Models
+
+        ]);*/
+
+         $this->crud->addColumn([
+            'name'      => 'VehicleModel',
+            'label'     => 'Vehicle Model',
+            'type'      => 'text',
+            
+         ]);
+       
        $this->crud->addColumn([
             'label'     => 'Vehicle Number',
             'type'      => 'select',
@@ -95,12 +112,12 @@ class Station_vehiclesCrudController extends CrudController
        // print_r($vehicleidarr);
             
         $vehicle_list[0] = 'Select';
-        $vehicles = \DB::table('vehicles')->whereNotIn('id', $vehicleidarr)->orderBy('id')->get();
+        $vehicles = \DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->whereNotIn('v.id', $vehicleidarr)->where('v.status','Live')->orderBy('v.id')->select('v.id','v.vehicle_number','vm.model')->get();
         if($vehicles)
         {
             foreach($vehicles as $row)
             {
-                $vehicle_list[$row->id] = $row->vehicle_number;
+                $vehicle_list[$row->id] = $row->model." - ".$row->vehicle_number;
             }
         }
         $this->crud->addField([

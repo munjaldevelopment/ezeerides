@@ -18,8 +18,8 @@ class Station_vehicles extends Model
     protected $table = 'station_has_vehicles';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
-    //protected $guarded = ['station_id'];
-    protected $fillable = ['station_id','vehicle_id'];
+    protected $guarded = ['id'];
+    //protected $fillable = ['station_id','vehicle_id'];
     // protected $hidden = [];
     // protected $dates = [];
 
@@ -37,6 +37,8 @@ class Station_vehicles extends Model
     {
         return $this->belongsTo('App\Models\Vehicle', 'vehicle_id');
     }
+
+    
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -60,4 +62,11 @@ class Station_vehicles extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+
+    public function GetVehicleModelAttribute()
+    {
+        $vehicle_model = $this->allVehicle()->first()->vehicle_model;
+        $modelName = \DB::table('vehicle_models')->where('id', $vehicle_model)->pluck('model')[0];
+        return $modelName;
+    }
 }

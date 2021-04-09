@@ -210,14 +210,14 @@ class StationCrudController extends CrudController
                 'label' => 'Station Address',
                 'type'  => 'textarea',
             ],
-            [
+           /* [
                 'type' => 'select2_multiple',
                 'name' => 'station_vehicles', // the relationship name in your Model
                 'entity' => 'station_vehicles', // the relationship name in your Model
                 //'options'   => $employee_list,
                 'attribute' => 'vehicle_number', // attribute on Article that is shown to admin
                 'pivot' => true,
-            ],
+            ],*/
 
 
         ]);

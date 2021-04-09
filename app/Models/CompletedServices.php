@@ -55,4 +55,11 @@ class CompletedServices extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+
+    public function GetVehicleModelAttribute()
+    {
+        $vehicle_model = $this->allVehicle()->first()->vehicle_model;
+        $modelName = \DB::table('vehicle_models')->where('id', $vehicle_model)->pluck('model')[0];
+        return $modelName;
+    }
 }

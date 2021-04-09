@@ -35,6 +35,13 @@ class CompletedServicesCrudController extends CrudController
         $this->crud->addClause('where', 'next_date', '>=', $current_date);
 
          $this->crud->addColumn([
+            'name'      => 'VehicleModel',
+            'label'     => 'Vehicle Model',
+            'type'      => 'text',
+            
+         ]);
+         
+         $this->crud->addColumn([
             'label'     => 'Vehicle Number',
             'type'      => 'select',
             'name'      => 'vehicle_id',
