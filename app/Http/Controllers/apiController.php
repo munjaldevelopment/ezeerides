@@ -1616,14 +1616,14 @@ class apiController extends Controller
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){
                     /* Used Coupon List */
-                    $usedCouponList = array('REFER00');
+                    $usedCouponList = array('REFFER00');
                     $bookedCoupons = \DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', 'success')->distinct()->select('coupon_code')->get();
                     if($bookedCoupons){
                         foreach ($bookedCoupons as $usedCoupons) {
                             $usedCouponList[] = $usedCoupons->coupon_code;
                         }
                     }
-
+                    print_r($usedCouponList);
                     $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                     $coupon_list = array();
                     if($referCouponList){
