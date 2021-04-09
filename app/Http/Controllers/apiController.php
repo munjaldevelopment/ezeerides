@@ -1092,7 +1092,28 @@ class apiController extends Controller
                         $message = 'Customer Document not verified yet.';
                         
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                    }else{    
+                    }else{
+
+                        $coupon_discount = 0;
+                        $referDisc = DB::table('customer_referal_coupons')->where('coupon_code', $coupon_code)->where('status', '=', 'Live')->first();
+                        if($referDisc){
+                            
+                            if($referDisc->discount > 0){
+                                $perval = ($referDisc->discount/100);
+                                $coupon_discount = $perval*$total_amount;   
+                            }
+                        }
+                        $couponDisc = DB::table('coupons')->where('title', $coupon_code)->where('status', '=', 'Live')->first();
+                        if($couponDisc){
+                            if($couponDisc->discount_type == 'amount'){
+                                $coupon_discount = $couponDisc->discount;
+                            }
+                            if($couponDisc->discount_type == 'percentage'){
+                                $perval = ($couponDisc->discount/100);
+                                $coupon_discount = $perval*$total_amount;   
+                            }
+                        }
+
                         $status = 'In';
                         $booking_status = '0';
                         $customer_name = $customer->name;
@@ -1115,6 +1136,8 @@ class apiController extends Controller
                             'pick_up_time' => $pick_up_time,
                             'expected_drop' => $expected_drop,
                             'expected_drop_time' => $expected_drop_time,
+                            'coupon_code' => $coupon_code,
+                            'coupon_discount' => $coupon_discount,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
                             'status' => $status,
@@ -1591,8 +1614,17 @@ class apiController extends Controller
             $json       =   array();
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                if($customer){
+                    /* Used Coupon List */
+                    $usedCouponList = array('REFER00');
+                    $bookedCoupons = \DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', 'success')->distinct()->select('coupon_code')->get();
+                    if($bookedCoupons){
+                        foreach ($bookedCoupons as $usedCoupons) {
+                            $usedCouponList[] = $usedCoupons->coupon_code;
+                        }
+                    }
+
+                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                     $coupon_list = array();
                     if($referCouponList){
                         foreach($referCouponList as $couponlist)
@@ -1603,7 +1635,7 @@ class apiController extends Controller
                         }
                     } 
 
-                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
                     if($generalCouponList){
                         foreach($generalCouponList as $gencouponlist)
                         {
