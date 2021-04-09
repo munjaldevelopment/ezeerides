@@ -153,6 +153,7 @@ class StationCrudController extends CrudController
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
          */
+        $this->crud->addButtonFromView('line', 'station_vehicles', 'station_vehicles', 'end');
     }
 
     /**

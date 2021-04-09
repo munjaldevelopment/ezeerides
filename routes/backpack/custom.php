@@ -51,4 +51,5 @@ Route::group([
     Route::crud('bookedvehicleimages', 'BookedVehicleImagesCrudController');
 
     Route::get('getVehicle', 'VehicleRegisterCrudController@getVehicle');
+    Route::crud('station_vehicles', 'Station_vehiclesCrudController');
 }); // this should be the absolute last line of this file
