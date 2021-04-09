@@ -1623,8 +1623,8 @@ class apiController extends Controller
                             $usedCouponList[] = $usedCoupons->coupon_code;
                         }
                     }
-                    print_r($usedCouponList);
-                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
+                    //print_r($usedCouponList);
+                    $referCouponList = DB::table('customer_referal_coupons1')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                     $coupon_list = array();
                     if($referCouponList){
                         foreach($referCouponList as $couponlist)
