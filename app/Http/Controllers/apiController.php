@@ -915,10 +915,10 @@ class apiController extends Controller
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->model;
                         $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
-                        $excess_km_charges = '₹ 0 / KM';
+                        $excess_km_charges = '0';
                         $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
                         $bikecharges = $bikeDetail->charges_per_hour;
-                        $insurance_charges_per_hour = '₹ '.$bikeDetail->insurance_charges_per_hour;
+                        $insurance_charges_per_hour =$bikeDetail->insurance_charges_per_hour;
                         $insurance_charges = $bikeDetail->insurance_charges_per_hour;
                         $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
                         $helmet_charges = '₹ 0';
@@ -945,23 +945,21 @@ class apiController extends Controller
                              $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
                         }
 
-                        if($charges_per_hour > 0){
+                        if($charges_per_hour){
                           
                             $bike_feature[] =  ['title' => 'Charges', 'subtitle' => $charges_per_hour];
                             
                         }
 
-                        if($penalty_amount_per_hour > 0){
+                        if($penalty_amount_per_hour){
                              
                              $bike_feature[] =  ['title' => 'Penalty', 'subtitle' => $penalty_amount_per_hour];
 
                         }
 
-                       
-
                         if($insurance_charges_per_hour > 0){
                             
-                            $bike_feature[] =  ['title' => 'Insurance for your Ride', 'subtitle' => $insurance_charges_per_hour];
+                            $bike_feature[] =  ['title' => 'Insurance for your Ride', 'subtitle' => '₹ '.$insurance_charges_per_hour];
 
                             
                         }
