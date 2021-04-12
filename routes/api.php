@@ -64,3 +64,7 @@ Route::post('contact-us', 'apiController@contact_us');
 Route::post('about-us', 'apiController@about_us');
 
 Route::post('privacy', 'apiController@privacy');
+
+
+/* Employee API */
+Route::post('employee-login', 'apiEmployeeController@employeeLogin');

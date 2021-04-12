@@ -21,10 +21,10 @@ use FCM;
 
 use PaytmWallet;
 
-class apiController extends Controller
+class apiEmployeeController extends Controller
 {
     //START LOGIN
-	public function customerLogin(Request $request)
+	public function employeeLogin(Request $request)
     {
         try 
         {
@@ -43,17 +43,16 @@ class apiController extends Controller
             }
             if($error == ""){
                 $json = $userData = array();
-                $mobile = $mobile;
+                $email = $email;
                 $date   = date('Y-m-d H:i:s');
-                $customer = DB::table('customers')->where('mobile', $mobile)->first();
-                if($customer) 
+                $employee = DB::table('users as u')->join('model_has_roles as rol', 'u.id', '=', 'rol.model_id')->where('u.phone', $mobile)->where('rol.role_id', 2)->first();
+                if($employee) 
                 {
                     
-                    $customerid = $customer->id;
-                    $deviceid = $customer->device_id;
-                    $customer_status = $customer->status;
+                    $empid = $employee->id;
+                    $emp_status = $employee->status;
                     
-                    if($customer_status == 'Live'){
+                    if($emp_status == 'Live'){
 
                         $otp = rand(11111, 99999);
                         
@@ -61,49 +60,22 @@ class apiController extends Controller
 
                         $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     
-                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
+                        DB::table('users')->where('id', '=', $empid)->update(['otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
-                       
-                        //$refer_url = "https://play.google.com/store/apps/details?id=com.microprixs.krishimulya&referrer=krvrefer".$customerid;
-                        
                         $status_code = '1';
-                        $message = 'Customer login OTP Send';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' =>"".$customerid, "customer_type" => "already" , 'otp' => "".$otp);
+                        $message = 'Employee login OTP Send';
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' =>"".$empid, 'otp' => "".$otp);
                     }else{
-                        $otp = rand(11111, 99999);
-                        
-                       $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
-
-                        $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
-                    
-                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
-
-                        $status_code = $success = '1';
-                        $message = 'Customer Otp Send, Please Process Next Step';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, "customer_type" => "already", 'otp' => "".$otp);
+                        $status_code = $success = '0';
+                        $message = 'Employee Not Active, Please contact to support';
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => "".$empid, 'email' => $email, 'otp' => "".$otp);
                     }
                         
                    
                 }else{
-                		
-                    $otp = rand(11111, 99999);
-                    $smsmessage = str_replace(" ", '%20', "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone.");
-                        
-                    $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
-
-                    $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not live',  'updated_at' => $date]); 
-
-                    $date   = date('Y-m-d H:i:s');
-                    if($refer_code != ""){
-                        $referCustomerid = str_replace('ezeerdrefer', '', $refer_code); 
-                        $referal_customer_id = $referCustomerid;
-                        $refercustomerid = DB::table('customer_refer_register')->insertGetId(['customer_id' => $customerid, 'referal_customer_id' => $referal_customer_id, 'created_at' => $date]);    
-                        
-                    }
-
-                    $status_code = $success = '1';
-                    $message = 'Customer Otp Send, Please Process Next Step';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "".$customerid, 'mobile' => $mobile, "customer_type" => "new", 'otp' => "".$otp);
+                	$status_code = $success = '0';
+                    $message = 'Employee not found, Please contact to support';
+                   $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => "".$empid, 'email' => $email, 'otp' => "".$otp);
 	           }   
             }   
         }
@@ -134,12 +106,12 @@ class apiController extends Controller
     public function sendNotification($customer_id, $title, $message, $image = '')
     {
         $date = date('Y-m-d H:i:s');
-        $saveNotification = DB::table('notifications')->insertGetId(['customer_id' => $customer_id,'notification_title' => $title, 'notification_content' => $message, 'notification_type' => 'customer_notification', 'user_type' => 'customer', 'isactive' => '1', 'created_at' => $date, 'updated_at' => $date]);
+        $saveNotification = DB::table('notifications')->insertGetId(['customer_id' => $customer_id,'notification_title' => $title, 'notification_content' => $message, 'notification_type' => 'employee_notification', 'user_type' => 'employee', 'isactive' => '1', 'created_at' => $date, 'updated_at' => $date]);
         //echo $success.",".$fail.",".$total; exit;
     }
 
     //START VERIFY
-    public function customerVerify(Request $request)
+    public function employeeVerify(Request $request)
     {
         try 
         {
@@ -1022,42 +994,12 @@ class apiController extends Controller
                             }
                         }       
                             
-                        /* Used Coupon List */
-                        $usedCouponList = array('REFFER00');
-                        $bookedCoupons = \DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', 'success')->distinct()->select('coupon_code')->get();
-                        if($bookedCoupons){
-                            foreach ($bookedCoupons as $usedCoupons) {
-                                if($usedCoupons->coupon_code){
-                                    $usedCouponList[] = $usedCoupons->coupon_code;
-                                }
-                            }
-                        }
-                        //print_r($usedCouponList);
-                        $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
-                        $coupon_list = array();
-                        if($referCouponList){
-                            foreach($referCouponList as $couponlist)
-                            {
-                                
-                                $coupon_list[] = array('coupon_code' => "".$couponlist->coupon_code, 'discount_type' => 'percentage', 'discount' => $couponlist->discount, 'description' => $couponlist->description); 
-                               
-                            }
-                        } 
-
-                        $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
-                        if($generalCouponList){
-                            foreach($generalCouponList as $gencouponlist)
-                            {
-                                
-                                $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount_type' => $gencouponlist->discount_type, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
-                               
-                            }
-                        } 
+                        
 
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
