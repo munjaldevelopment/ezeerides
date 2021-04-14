@@ -712,7 +712,7 @@ class apiEmployeeController extends Controller
 
     //Booking Detail
 
-    public function booking_detail(Request $request)
+    public function booking_details(Request $request)
     {
         try 
         {   

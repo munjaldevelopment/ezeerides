@@ -20,6 +20,7 @@ class UserCrudController extends CrudController
     {
         $this->crud->setModel(config('backpack.permissionmanager.models.user'));
         $this->crud->setEntityNameStrings(trans('backpack::permissionmanager.user'), trans('backpack::permissionmanager.users'));
+       
         $this->crud->setRoute(backpack_url('employee'));
 
         $is_admin = backpack_user()->hasRole('Admin');

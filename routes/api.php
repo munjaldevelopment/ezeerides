@@ -82,3 +82,5 @@ Route::post('current-booking-vehicle', 'apiEmployeeController@current_booking_ve
 Route::post('upcoming-booking-vehicle', 'apiEmployeeController@upcoming_booking_vehicle');
 
 Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');
+
+Route::post('booking-details', 'apiEmployeeController@booking_details');
