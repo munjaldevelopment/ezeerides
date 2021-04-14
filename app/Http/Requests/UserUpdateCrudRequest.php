@@ -30,6 +30,7 @@ class UserUpdateCrudRequest extends FormRequest
         return [
             'email'    => 'required|unique:'.config('permission.table_names.users', 'users').',email,'.$id,
             'name'     => 'required',
+            'phone' => 'required|unique:users,phone,'.$this->get('id'),
             'password' => 'confirmed',
         ];
     }

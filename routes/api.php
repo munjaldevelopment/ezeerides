@@ -68,3 +68,17 @@ Route::post('privacy', 'apiController@privacy');
 
 /* Employee API */
 Route::post('employee-login', 'apiEmployeeController@employeeLogin');
+
+Route::post('employee-verify', 'apiEmployeeController@employeeVerify');
+
+Route::post('employee-resend-sms', 'apiEmployeeController@resendSMS');
+
+Route::post('employee-profile', 'apiEmployeeController@employee_profile');
+
+Route::post('employee-logout', 'apiEmployeeController@empoyee_logout');
+
+Route::post('current-booking-vehicle', 'apiEmployeeController@current_booking_vehicle');
+
+Route::post('upcoming-booking-vehicle', 'apiEmployeeController@upcoming_booking_vehicle');
+
+Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');

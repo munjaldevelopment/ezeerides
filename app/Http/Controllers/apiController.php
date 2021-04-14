@@ -1240,7 +1240,8 @@ class apiController extends Controller
                         if($status->isSuccessful()){
                           //Transaction Successful
                             $payment_status = 'success';
-                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+                            $payment_type = 'paytm';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
 
                             $status_code = $success = '1';
                             $message = 'Your Booking Transaction Successfully Done.';
