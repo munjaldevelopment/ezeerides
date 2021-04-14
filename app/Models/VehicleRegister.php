@@ -35,6 +35,69 @@ class VehicleRegister extends Model
         return $this->belongsTo('App\User', 'user_id');
     }
 
+    public function getFleetFare($hours = 0,$vehicle_amount=0)
+    {
+        if($hours > 4)
+        {
+            if($hours < 24){
+                $firstFourAmount = ($vehicle_amount * 1.5) * 4;
+                $diff = $hours - 4;
+                $dayTotalAmount = $diff * $vehicle_amount;
+                $amount = $firstFourAmount + $dayTotalAmount;
+            
+            }else if($hours == 24){
+                
+                $firstFourAmount = ($vehicle_amount * 1.5) * 4; 
+                $diff = 17;
+                $dayTotalAmount = $diff * $vehicle_amount;
+                $amount = $firstFourAmount + $dayTotalAmount;
+
+            }else if($hours  > 24 && $hours < 48){
+                
+                $firstFourAmount = ($vehicle_amount * 1.5) * 4; 
+                $diff = 17;
+                $dayTotalAmount = $diff * $vehicle_amount;
+
+                $extraDays = ($hours - 24) * $vehicle_amount;
+                
+                $amount = $firstFourAmount + $dayTotalAmount + $extraDays;      
+
+            }else if($hours  >= 48 && $hours < 72){
+                
+                $firstFourAmount = ($vehicle_amount * 1.5) * 4; 
+                $diff = 17;
+                $dayTotalAmount = $diff * $vehicle_amount;
+
+                $diff = 21;
+                $nextDayTotal = $diff * $vehicle_amount;
+
+                $reminaingHour = ($hours - 48) * $vehicle_amount;
+
+                
+                $amount = $firstFourAmount + $dayTotalAmount + $nextDayTotal + $reminaingHour;
+
+            }else if($hours  >= 72){
+                
+                $firstFourAmount = ($vehicle_amount * 1.5) * 4; 
+                $diff = 17;
+                 $dayTotalAmount = $diff * $vehicle_amount;
+
+                $diff = 21;
+                $daycount = floor($hours/24);
+                $nextDayTotal = ($diff * $vehicle_amount) * ($daycount-1);
+
+                $reminaingHour = ($hours - ($daycount*24)) * $vehicle_amount;
+
+                
+                $amount = $firstFourAmount + $dayTotalAmount + $nextDayTotal + $reminaingHour;          
+            }
+
+        }else{
+            $amount = $hours * ($vehicle_amount * 1.5);
+        }
+
+        return $amount;         
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

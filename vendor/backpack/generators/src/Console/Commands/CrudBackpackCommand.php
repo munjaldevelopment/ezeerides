@@ -50,5 +50,11 @@ class CrudBackpackCommand extends Command
         $this->call('backpack:add-sidebar-content', [
             'code' => "<li class='nav-item'><a class='nav-link' href='{{ backpack_url('$lowerName') }}'><i class='nav-icon la la-question'></i> $pluralName</a></li>",
         ]);
+
+        // if the application uses cached routes, we should rebuild the cache so the previous added route will
+        // be acessible without manually clearing the route cache.
+        if (app()->routesAreCached()) {
+            $this->call('route:cache');
+        }
     }
 }

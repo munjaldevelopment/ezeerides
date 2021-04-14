@@ -8,7 +8,7 @@
 [![Style CI](https://styleci.io/repos/53490941/shield)](https://styleci.io/repos/53490941)
 [![Total Downloads](https://img.shields.io/packagist/dt/backpack/generators.svg?style=flat-square)](https://packagist.org/packages/backpack/generators)
 
-Quickly generate Backpack templated Models, Requests, Views and Config files.
+Quickly generate Backpack templated Models, Requests, Views and Config files for projects using [Backpack for Laravel](https://backpackforlaravel.com) as their admin panel.
 
 > ### Security updates and breaking changes
 > Please **[subscribe to the Backpack Newsletter](http://backpackforlaravel.com/newsletter)** so you can find out about any security updates, breaking changes or major features. We send an email every 1-2 months.

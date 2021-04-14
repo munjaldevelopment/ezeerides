@@ -29,6 +29,11 @@ class Vehicle extends Model
     |--------------------------------------------------------------------------
     */
 
+     public function allVehicleModel()
+    {
+        return $this->belongsTo('App\Models\VehicleModels', 'vehicle_model');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

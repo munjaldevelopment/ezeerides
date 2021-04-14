@@ -30,4 +30,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'paytm-wallet' => [
+        'env' => 'local', // values : (local | production)
+        'merchant_id' => 'FnAoux43246182437237',
+        'merchant_key' => '2fCkkMtPcbf###hr',
+        'merchant_website' => 'WEBSTAGING',
+        'channel' => 'WEB',
+        'industry_type' => 'Retail',
+    ],
+
 ];

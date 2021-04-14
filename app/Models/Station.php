@@ -37,8 +37,19 @@ class Station extends Model
     public function station_vehicles()
     {
         return $this->belongsToMany('App\Models\Vehicle', 'station_has_vehicles');
+       
     }
 
+    
+    public function allCities()
+    {
+        return $this->belongsTo('App\Models\City', 'city_id');
+    }
+
+    public function allEmployes()
+    {
+        return $this->belongsTo('App\User', 'employee_id');
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES

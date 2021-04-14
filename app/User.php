@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'phone', 'password',
     ];
 
     /**
@@ -43,6 +43,6 @@ class User extends Authenticatable
 
     public function model_stations()
     {
-        return $this->belongsToMany('App\Models\Station', 'model_has_stations');
+        //return $this->belongsToMany('App\Models\Station', 'model_has_stations');
     }
 }

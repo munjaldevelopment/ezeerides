@@ -21,6 +21,16 @@ class UserCrudController extends CrudController
         $this->crud->setModel(config('backpack.permissionmanager.models.user'));
         $this->crud->setEntityNameStrings(trans('backpack::permissionmanager.user'), trans('backpack::permissionmanager.users'));
         $this->crud->setRoute(backpack_url('employee'));
+
+        $is_admin = backpack_user()->hasRole('Admin');
+        if($is_admin)
+        {
+            $this->crud->allowAccess(['list','create', 'update', 'delete']);
+        }else{
+            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
+        }
+
+       $value = 2;
     }
 
     public function setupListOperation()
@@ -36,6 +46,13 @@ class UserCrudController extends CrudController
                 'label' => trans('backpack::permissionmanager.email'),
                 'type'  => 'email',
             ],
+
+             [
+                'name'  => 'phone',
+                'label' => 'Mobile',
+                'type'  => 'text',
+            ],
+            
             [ // n-n relationship (with pivot table)
                 'label'     => trans('backpack::permissionmanager.roles'), // Table column heading
                 'type'      => 'select_multiple',
@@ -44,14 +61,14 @@ class UserCrudController extends CrudController
                 'attribute' => 'name', // foreign key attribute that is shown to user
                 'model'     => config('permission.models.role'), // foreign key model
             ],
-            [ // n-n relationship (with pivot table)
+            /*[ // n-n relationship (with pivot table)
                 'label'     => trans('backpack::permissionmanager.extra_permissions'), // Table column heading
                 'type'      => 'select_multiple',
                 'name'      => 'permissions', // the method that defines the relationship in your Model
                 'entity'    => 'permissions', // the method that defines the relationship in your Model
                 'attribute' => 'name', // foreign key attribute that is shown to user
                 'model'     => config('permission.models.permission'), // foreign key model
-            ],
+            ],*/
         ]);
 
         // Role Filter
@@ -161,6 +178,11 @@ class UserCrudController extends CrudController
                 'type'  => 'email',
             ],
             [
+                'name'  => 'phone',
+                'label' => 'Mobile',
+                'type'  => 'text',
+            ],
+            /*[
                 'name'  => 'password',
                 'label' => trans('backpack::permissionmanager.password'),
                 'type'  => 'password',
@@ -176,7 +198,7 @@ class UserCrudController extends CrudController
                 'entity' => 'model_stations', // the relationship name in your Model
                 'attribute' => 'station_name', // attribute on Article that is shown to admin
                 'pivot' => true,
-            ],
+            ],*/
             [
                 // two interconnected entities
                 'label'             => trans('backpack::permissionmanager.user_role_permission'),
