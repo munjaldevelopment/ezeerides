@@ -1591,6 +1591,55 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+     public function wallet_history(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $walletPaymentExists = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->count();
+                    $wallet_List = array();
+                    if($walletPaymentExists > 0){
+                        $walletList = DB::table('customer_wallet_payments')->select('id','amount','comment','payment_status','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+
+                        
+                        foreach($walletList as $rswallet)
+                        {
+                            
+                            $wallet_List[] = array('id' => "".$rswallet->id, 'comment' => $rswallet->comment,'payment_status' => $rswallet->payment_status, 'amount' => "".$rswallet->amount, 'date' => date('d-m-Y H:i:s', strtotime($rswallet->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'wallet History';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'wallet_history' => $wallet_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No history found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
     public function notification_list(Request $request)
     {
         try 

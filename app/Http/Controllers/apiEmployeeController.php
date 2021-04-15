@@ -104,6 +104,18 @@ class apiEmployeeController extends Controller
         //echo $success.",".$fail.",".$total; exit;
     }
 
+    public function getcashCollected($employee_id)
+    {
+        $empCashCollection = 0;
+        $cashCollected = DB::table('employee_cash_collections')->where('employee_id', $employee_id)->sum('amount');
+        
+        $transferAmount = DB::table('employee_cash_transfer')->where('employee_id', $employee_id)->where('is_paid', '=', 'yes')->sum('amount');
+
+
+        $empCashCollection = ($cashCollected-$transferAmount);
+        return $empCashCollection;
+    }
+
     //START VERIFY
     public function employeeVerify(Request $request)
     {
@@ -141,13 +153,10 @@ class apiEmployeeController extends Controller
                     
                     DB::table('users')->where('id', '=', $employeeid)->update(['device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
-                    $empCashCollection = 0;
-                    $cashCollected = DB::table('employee_cash_collections')->where('employee_id', $employeeid)->sum('amount');
-                    
-                    $empCashCollection = $cashCollected;
+                    $empCashCollection = $this->getcashCollected($employeeid);
                     $status_code = '1';
                     $message = 'Employee verified successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => "".$employeeid, 'mobile' => $mobile, 'name' => $name, 'email' => $email,'empCashCollection' => $empCashCollection);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => "".$employeeid, 'mobile' => $mobile, 'name' => $name, 'email' => $email,'empCashCollection' => "".$empCashCollection);
                 } 
                 else 
                 {
@@ -350,14 +359,16 @@ class apiEmployeeController extends Controller
         try 
         {   
             $baseUrl = URL::to("/");
-            $json       =   array();
+            $json    =   array();
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
             if($employee){
-                $transactionList = DB::table('employee_cash_transfer')->select('employee_id','employee_id')->where('is_paid', '=', 'yes')->orderBy('id', 'ASC')->get();
+                $transactionList = DB::table('employee_cash_transfer')->where('employee_id', $employee_id)->where('is_paid', '=', 'yes')->orderBy('id', 'ASC')->get();
+
+                $empCashCollection = $this->getcashCollected($employee_id);
 
                 $status_code = '1';
                 $message = 'ALL Transaction list';
-                $json = array('status_code' => $status_code,  'message' => $message, 'transactionList' => $transactionList);
+                $json = array('status_code' => $status_code,  'message' => $message, 'empCashCollection' => "".$empCashCollection,'transactionList' => $transactionList);
             } else{
                 $status_code = $success = '0';
                 $message = 'Customer not exists or not verified';
@@ -414,7 +425,7 @@ class apiEmployeeController extends Controller
 
                         
                         $status_code = $success = '1';
-                        $message = 'Cash Added Successfully';
+                        $message = 'Cash Transfered Successfully';
                             
                         $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
                     
@@ -434,6 +445,138 @@ class apiEmployeeController extends Controller
             $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
         }
         
+        return response()->json($json, 200);
+    }
+
+     public function expences_type(Request $request)
+    {
+        try 
+        {   
+            $json       =   array();
+            $expences_type[] = array('key' => 'service', "value" => 'Bike Service');
+            $expences_type[] = array('key' => 'damege', "value" => 'Bike Damege');
+            $expences_type[] = array('key' => 'other', "value" => 'Others');
+            $status_code = '1';
+            $message = 'All Expenses Type';
+            $json = array('status_code' => $status_code,  'message' => $message, 'expences_type' => $expences_type);
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function add_cash_expense(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $expences_type = $request->expences_type;
+            $amount = $request->amount;
+            $remark = $request->reason;
+            $is_paid = 'no';
+            $error = "";
+            if($amount == ""){
+                $error = "Please enter amount";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+
+            if($remark == ""){
+                $error = "Please add reason";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        $station_id = DB::table('stations')->where('employee_id', $employee_id)->pluck('id')[0];
+                        $booking_id = DB::table('employee_expences')->insert([
+                            'employee_id' => $employee_id,
+                            'station_id' => $station_id,
+                            'expences_type' => $expences_type,
+                            'amount' => $amount,
+                            'remark' => $remark,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        
+                        $status_code = $success = '1';
+                        $message = 'Cash / Expenses Added Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                    
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function fleet_calendar(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                    $employeeFleetExists = DB::table('stations as s')->join('station_has_vehicles as sv', 's.id', '=', 'sv.station_id')->join('vehicles as v', 'v.id', '=', 'sv.vehicle_id')->select('v.id','v.vehicle_model','v.vehicle_number')->where('v.status','Live')->where('s.employee_id', $employee_id)->orderBy('v.id', 'DESC')->get();
+                    $fleet_List = array();
+                    if($employeeFleetExists){
+                        foreach($employeeFleetExists as $rsfleet)
+                        {
+                            $model_id = $rsfleet->vehicle_model;
+                            $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
+                            
+                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_status' => 'In Service'); 
+                           
+                        } 
+
+                        
+                        $status_code = '1';
+                        $message = 'Fleet Calendar';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'fleet_List' => $fleet_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No Fleet found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
         return response()->json($json, 200);
     }
 
@@ -486,26 +629,7 @@ class apiEmployeeController extends Controller
     }
     //END 
 
-    public function rideType(Request $request)
-    {
-        try 
-        {   
-            $json       =   array();
-            $ridetype[] = array('key' => 'regular', "value" => 'Regualr Ride');
-            $ridetype[] = array('key' => 'long', "value" => 'Long Ride');
-            $status_code = '1';
-            $message = 'All Ride Type';
-            $json = array('status_code' => $status_code,  'message' => $message, 'ridetype' => $ridetype);
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
+   
     //END 
 
     

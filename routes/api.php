@@ -49,6 +49,8 @@ Route::post('confirm-payment', 'apiController@confirm_payment');
 
 Route::post('wallet-amount', 'apiController@wallet_amount');
 
+Route::post('wallet-history', 'apiController@wallet_history');
+
 Route::post('add-money', 'apiController@add_money');
 
 Route::post('confirm-wallet-payment', 'apiController@confirm_wallet_amount');
@@ -82,6 +84,12 @@ Route::post('pending-cash-transactions', 'apiEmployeeController@pending_cash_tra
 Route::post('all-cash-transactions', 'apiEmployeeController@all_cash_transactions');
 
 Route::post('tranfer-cash', 'apiEmployeeController@tranfer_cash');
+
+Route::post('expences-type', 'apiEmployeeController@expences_type');
+
+Route::post('add-cash-expense', 'apiEmployeeController@add_cash_expense');
+
+Route::post('fleet-calendar', 'apiEmployeeController@fleet_calendar');
 
 Route::post('current-booking-vehicle', 'apiEmployeeController@current_booking_vehicle');
 
