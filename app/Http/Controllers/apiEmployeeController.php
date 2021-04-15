@@ -13,6 +13,7 @@ use File;
 use Session;
 use QR_Code\QR_Code;
 use App\Models\VehicleRegister;
+use App\Models\CustomerDocuments;
 
 use LaravelFCM\Message\OptionsBuilder;
 use LaravelFCM\Message\PayloadDataBuilder;
@@ -140,9 +141,13 @@ class apiEmployeeController extends Controller
                     
                     DB::table('users')->where('id', '=', $employeeid)->update(['device_id' => $device_id, 'fcmToken' => $fcmToken, 'updated_at' => $date]);
 
+                    $empCashCollection = 0;
+                    $cashCollected = DB::table('employee_cash_collections')->where('employee_id', $employeeid)->sum('amount');
+                    
+                    $empCashCollection = $cashCollected;
                     $status_code = '1';
                     $message = 'Employee verified successfully';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => "".$employeeid, 'mobile' => $mobile, 'name' => $name, 'email' => $email);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => "".$employeeid, 'mobile' => $mobile, 'name' => $name, 'email' => $email,'empCashCollection' => $empCashCollection);
                 } 
                 else 
                 {
@@ -291,6 +296,135 @@ class apiEmployeeController extends Controller
                 $message = 'Customer not exists or not verified';
                 
                 $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //Pending Cash  
+    public function pending_cash_transactions(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        $device_id = $request->device_id;
+        try 
+        {   
+            $baseUrl = URL::to("/");
+            $json       =   array();
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+            if($employee){
+                $pendingTransactionList = DB::table('employee_cash_transfer')->select('employee_id','amount','is_paid','remark','created_at')->where('is_paid', '=', 'no')->orderBy('id', 'ASC')->get();
+
+                $status_code = '1';
+                $message = 'Pending Transaction list';
+                $json = array('status_code' => $status_code,  'message' => $message, 'pendingTransactionList' => $pendingTransactionList);
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }    
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+    //END 
+
+    //All Cash  
+    public function all_cash_transactions(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        $device_id = $request->device_id;
+        try 
+        {   
+            $baseUrl = URL::to("/");
+            $json       =   array();
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+            if($employee){
+                $transactionList = DB::table('employee_cash_transfer')->select('employee_id','employee_id')->where('is_paid', '=', 'yes')->orderBy('id', 'ASC')->get();
+
+                $status_code = '1';
+                $message = 'ALL Transaction list';
+                $json = array('status_code' => $status_code,  'message' => $message, 'transactionList' => $transactionList);
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }    
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+    //END 
+
+
+    public function tranfer_cash(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $amount = $request->amount;
+            $remark = $request->reason;
+            $is_paid = 'no';
+            $error = "";
+            if($amount == ""){
+                $error = "Please enter amount";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+
+            if($remark == ""){
+                $error = "Please add reason";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        
+                        $booking_id = DB::table('employee_cash_transfer')->insert([
+                            'employee_id' => $employee_id,
+                            'amount' => $amount,
+                            'remark' => $remark,
+                            'is_paid' => $is_paid,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        
+                        $status_code = $success = '1';
+                        $message = 'Cash Added Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                    
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
             }
         }
         catch(\Exception $e) {
@@ -716,7 +850,7 @@ class apiEmployeeController extends Controller
     {
         try 
         {   
-            
+            $baseUrl = URL::to("/");
             $json       =   array();
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
@@ -724,16 +858,115 @@ class apiEmployeeController extends Controller
 
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){ 
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
                     
                    
                     if($booking){
+                        $bike_options = array();
+                        $customer_id = $booking->customer_id;
+                        $customerImage = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->pluck('image')[0];
+
+                        if($customerImage){
+                            $selfi  =  $baseUrl."/public/".$customerImage;
+                        }else{
+                           $selfi  =  "";
+                        }
+                        /* Customer Licence */
+                        $custdoc = new CustomerDocuments();
+                        $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
+
+                        $licence_image  = '';
+                        if($customerLicense->front_image){
+                            $licence_image  .=  "Front Image: <br />".$baseUrl."/public/".$customerLicense->front_image.'<br />';
+                        }
+                        if($customerLicense->back_image){
+                            $licence_image  .=  "Back Image: <br />".$baseUrl."/public/".$customerLicense->back_image;
+                        }
+                        if($customerLicense->other_image){
+                            $licence_image  .=  "Other Image: <br />".$baseUrl."/public/".$customerLicense->other_image;
+                        }
+
+                        /* Customer Adhaar */
+                        $customeradaar = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'ID Proof (Adhaar Card)');
+                        
+                        $adaarimage  = '';
+                        if($customeradaar){
+                            if($customeradaar->front_image){
+                                $adaarimage  .=  "Front Image: <br />".$baseUrl."/public/".$customeradaar->front_image;
+                            }
+                            if($customeradaar->back_image){
+                                $adaarimage  .= "Back Image: <br />".$baseUrl."/public/".$customeradaar->back_image;
+                            }
+                            if($customeradaar->other_image){
+                                $adaarimage  .=  "Other Image: <br />".$baseUrl."/public/".$customeradaar->other_image;
+                            }
+                        }
                         
                          $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
 
+                         $vehicle_status = $booking->status;
+                         $vstatus ='';
+                         if($vehicle_status == 'In'){
+                                $vstatus = 'Prepare To Delivery';
+                            }
+
+                            if($vehicle_status == 'Out'){
+                                $vstatus = 'Customer Return at Center';
+                            }
+
+                            if($booking->receive_date != '' && $booking->is_amount_receive === 1){
+                                $vstatus = 'Completed';
+                            }
+
+                        $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                        $booked_vehicle_before_list = array();
+                        foreach($before_ride_img as $beforeimg)
+                        {
+                            if($beforeimg->image){
+                                $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
+                                
+                                $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
+                            }
+                        } 
+
+                        $after_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
+                        $booked_vehicle_after_list = array();
+                        foreach($after_ride_img as $afterimg)
+                        {
+                            if($afterimg->image){
+                                $afterimgurl = $baseUrl."/public/".$afterimg->image; 
+                                
+                                $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
+                            }
+                        }    
+
+                         $customerLogs[] = array('heading' => 'Customer Logs', 'content' => 'Not Found.');   
+   
+                         $selfiarr[] = array('heading' => 'Customer Selfi', 'content' => $selfi);
+
+                         $licensDocearr[] = array('heading' => 'Customer License', 'content' => $licence_image);
+
+                        $adhaarDocearr[] = array('heading' => 'Customer Adhaar ID', 'content' => $adaarimage);
+
+                        $trackVehicle[] = array('heading' => 'Track Vehicles', 'content' => 'Not found');
+
+                        
+                        $bike_options[] = array('optionTitle' => 'Show Logs', 'optionData' => $customerLogs);
+                        
+                        $bike_options[] = array('optionTitle' => 'View License', 'optionData' => $licensDocearr);
+
+                        $bike_options[] = array('optionTitle' => 'View Adhaar', 'optionData' => $adhaarDocearr);
+
+                        $bike_options[] = array('optionTitle' => 'Track Vehicle', 'optionData' => $trackVehicle);
+
+                        $bike_options[] = array('optionTitle' => 'Selfi', 'optionData' => $selfiarr);
+
+                        
+
                         $status_code = '1';
                         $message = 'Booking Details';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'employee_name' => $employee->name, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time,  'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
+
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'employee_name' => $employee->name, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time,  'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'bike_options' => $bike_options,  'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list );
                     }else{
                          $status_code = '0';
                         $message = 'No notification found.';

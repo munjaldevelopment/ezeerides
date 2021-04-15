@@ -77,7 +77,16 @@ Route::post('employee-profile', 'apiEmployeeController@employee_profile');
 
 Route::post('employee-logout', 'apiEmployeeController@empoyee_logout');
 
+Route::post('pending-cash-transactions', 'apiEmployeeController@pending_cash_transactions');
+
+Route::post('all-cash-transactions', 'apiEmployeeController@all_cash_transactions');
+
+Route::post('tranfer-cash', 'apiEmployeeController@tranfer_cash');
+
 Route::post('current-booking-vehicle', 'apiEmployeeController@current_booking_vehicle');
+
+Route::post('tranfer-cash', 'apiEmployeeController@tranfer_cash');
+
 
 Route::post('upcoming-booking-vehicle', 'apiEmployeeController@upcoming_booking_vehicle');
 

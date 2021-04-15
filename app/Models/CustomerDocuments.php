@@ -32,6 +32,14 @@ class CustomerDocuments extends Model
     {
         return $this->belongsTo('App\Models\Customers', 'customer_id');
     }
+
+   
+
+    public function getCustomerDocumentsByCustomerid($customer_id, $doctype)
+    {
+        $docdetail = Self::where('customer_id', $customer_id)->where('title', '=', $doctype)->first();
+        return $docdetail;
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
