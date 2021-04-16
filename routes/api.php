@@ -91,6 +91,14 @@ Route::post('add-cash-expense', 'apiEmployeeController@add_cash_expense');
 
 Route::post('fleet-calendar', 'apiEmployeeController@fleet_calendar');
 
+Route::post('fleet-detail', 'apiEmployeeController@fleet_detail');
+
+Route::post('all-emp-city', 'apiEmployeeController@allCities');
+
+Route::post('all-emp-center', 'apiEmployeeController@all_emp_center');
+
+Route::post('fleet-booking', 'apiEmployeeController@fleet_booking');
+
 Route::post('current-booking-vehicle', 'apiEmployeeController@current_booking_vehicle');
 
 Route::post('tranfer-cash', 'apiEmployeeController@tranfer_cash');
@@ -101,3 +109,5 @@ Route::post('upcoming-booking-vehicle', 'apiEmployeeController@upcoming_booking_
 Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');
 
 Route::post('booking-details', 'apiEmployeeController@booking_details');
+
+Route::post('employee-attendance', 'apiEmployeeController@employee_attendance');
