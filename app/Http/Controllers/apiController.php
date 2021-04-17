@@ -1995,7 +1995,7 @@ class apiController extends Controller
             $title = $request->title;
             $description = $request->comment;
             $error = "";
-            if($comment == ""){
+            if($description == ""){
                 $error = "Please enter comment for feedback";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
@@ -2004,13 +2004,13 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     
-                    $supportid = DB::table('customer_supports')->insertGetId(['customer_id' => $customer_id, 'title' => $title, 'description' => $comment, 'status' => 'open', 'created_at' => $date, 'updated_at' => $date]);
+                    $supportid = DB::table('customer_supports')->insertGetId(['customer_id' => $customer_id, 'title' => $title, 'description' => $description, 'status' => 'open', 'created_at' => $date, 'updated_at' => $date]);
 
                     $ticket_no = "STKT".date('YmdHis').str_pad($supportid, 3, "0", STR_PAD_LEFT);
             
                     DB::table('customer_supports')->where('id', '=', $supportid)->update(['ticket_no' => "".$ticket_no, 'updated_at' => $date]);
                     $status_code = $success = '1';
-                    $message = $ticket_no.' Your Support Ticket created successfully';
+                    $message = 'Your Support Ticket ('.$ticket_no.') created successfully';
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
 
