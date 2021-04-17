@@ -1358,6 +1358,7 @@ class apiController extends Controller
         {   
             
             $json       =   array();
+            $baseUrl = URL::to("/");
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
