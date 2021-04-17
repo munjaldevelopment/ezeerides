@@ -2004,7 +2004,7 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     
-                    $supportid = DB::table('customer_supports')->insertGetId(['customer_id' => $customer_id, 'title' => $title,'comment' => $comment, 'status' => 'open', 'created_at' => $date, 'updated_at' => $date]);
+                    $supportid = DB::table('customer_supports')->insertGetId(['customer_id' => $customer_id, 'title' => $title, 'description' => $comment, 'status' => 'open', 'created_at' => $date, 'updated_at' => $date]);
 
                     $ticket_no = "STKT".date('YmdHis').str_pad($supportid, 3, "0", STR_PAD_LEFT);
             
