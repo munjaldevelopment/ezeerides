@@ -1368,8 +1368,12 @@ class apiController extends Controller
                         {
                             
                             $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
-
-                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
+                            $vehicle_image = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('vehicle_image')[0];
+                             $bike_image = '';
+                             if($vehicle_image){
+                                $bike_image = $baseUrl."/public/".$vehicle_image; 
+                             }
+                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_image' => $bike_image, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
                            
                         } 
 
@@ -1931,11 +1935,55 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-   
+    public function need_help(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $faqs = DB::table('faqs')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+                    $faq_List = array();
+                    if($faqs > 0){
+                        foreach($faqs as $rs)
+                        {
+                            
+                            $faq_List[] = array('id' => "".$rs->id, 'question' => $rs->title,'answer' => $rs->description, 'date' => date('d-m-Y H:i:s', strtotime($rswallet->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'Need Help';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'help_list' => $faq_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No help data found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
     
 
     //Agri Land Feedback
-    public function feedback(Request $request)
+    public function add_support_query(Request $request)
     {
         try 
         {
@@ -1943,7 +1991,8 @@ class apiController extends Controller
             
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
-            $comment = $request->comment;
+            $title = $request->title;
+            $description = $request->comment;
             $error = "";
             if($comment == ""){
                 $error = "Please enter comment for feedback";
@@ -1954,10 +2003,13 @@ class apiController extends Controller
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     
-                    DB::table('feedback')->insert(['customer_id' => $customer_id, 'comment' => $comment, 'status' => 'live', 'created_at' => $date, 'updated_at' => $date]);
+                    $supportid = DB::table('customer_supports')->insertGetId(['customer_id' => $customer_id, 'title' => $title,'comment' => $comment, 'status' => 'open', 'created_at' => $date, 'updated_at' => $date]);
 
+                    $ticket_no = "STKT".date('YmdHis').str_pad($supportid, 3, "0", STR_PAD_LEFT);
+            
+                    DB::table('customer_supports')->where('id', '=', $supportid)->update(['ticket_no' => "".$ticket_no, 'updated_at' => $date]);
                     $status_code = $success = '1';
-                    $message = 'Feedback added successfully';
+                    $message = $ticket_no.' Your Support Ticket created successfully';
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
 
@@ -1980,7 +2032,51 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+     public function ticket_history(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $tickets = DB::table('customer_supports')->where('customer_id', $customer_id)->orderBy('id', 'ASC')->get();
+                    $ticket_List = array();
+                    if($tickets > 0){
+                        foreach($tickets as $rs)
+                        {
+                            
+                            $ticket_List[] = array('id' => "".$rs->id, 'ticket_no' => $rs->ticket_no, 'question' => $rs->title, 'comment' => $rs->description, 'answer' => $rs->answer, 'date' => date('d-m-Y H:i:s', strtotime($rswallet->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'Customer Ticket List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'ticket_List' => $ticket_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No ticket data found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
 
     public function push_notification($data, $device_tokens)
         {

@@ -67,6 +67,12 @@ Route::post('about-us', 'apiController@about_us');
 
 Route::post('privacy', 'apiController@privacy');
 
+Route::post('need-help', 'apiController@need_help');
+
+Route::post('create-ticket', 'apiController@add_support_query');
+
+Route::post('ticket-history', 'apiController@ticket_history');
+
 
 /* Employee API */
 Route::post('employee-login', 'apiEmployeeController@employeeLogin');
