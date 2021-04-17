@@ -1945,12 +1945,13 @@ class apiController extends Controller
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     $faqs = DB::table('faqs')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+
                     $faq_List = array();
-                    if($faqs > 0){
+                    if($faqs){
                         foreach($faqs as $rs)
                         {
                             
-                            $faq_List[] = array('id' => "".$rs->id, 'question' => $rs->title,'answer' => $rs->description, 'date' => date('d-m-Y H:i:s', strtotime($rswallet->created_at))); 
+                            $faq_List[] = array('id' => "".$rs->id, 'question' => $rs->title, 'answer' => $rs->description, 'date' => date('d-m-Y H:i:s', strtotime($rs->created_at))); 
                            
                         } 
 
@@ -2043,11 +2044,11 @@ class apiController extends Controller
                 if($customer){ 
                     $tickets = DB::table('customer_supports')->where('customer_id', $customer_id)->orderBy('id', 'ASC')->get();
                     $ticket_List = array();
-                    if($tickets > 0){
+                    if($tickets){
                         foreach($tickets as $rs)
                         {
                             
-                            $ticket_List[] = array('id' => "".$rs->id, 'ticket_no' => $rs->ticket_no, 'question' => $rs->title, 'comment' => $rs->description, 'answer' => $rs->answer, 'date' => date('d-m-Y H:i:s', strtotime($rswallet->created_at))); 
+                            $ticket_List[] = array('id' => "".$rs->id, 'ticket_no' => $rs->ticket_no, 'question' => $rs->title, 'comment' => $rs->description, 'answer' => $rs->answer, 'date' => date('d-m-Y H:i:s', strtotime($rs->created_at))); 
                            
                         } 
 
