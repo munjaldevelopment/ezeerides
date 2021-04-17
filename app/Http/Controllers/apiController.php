@@ -21,6 +21,8 @@ use FCM;
 
 use PaytmWallet;
 
+
+
 class apiController extends Controller
 {
     //START LOGIN
@@ -1177,10 +1179,65 @@ class apiController extends Controller
             
                         VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
 
+                        $enviroment='local';
+                        $merchent_id ='FnAoux43246182437237';
+                        $merchantKey='2fCkkMtPcbf###hr';
+                        $merchantwebsite='WEBSTAGING';
+                        $channel='WEB';
+                        $industryType='Retail';
+
+                       
+
+                        $paytmParams = array();
+                        $orderid = $booking_id;
+                        $paytmParams["body"] = array(
+                            'requestType' => 'Payment',
+                            'mid' => $merchent_id,
+                            'websiteName' => 'WEBSTAGING',
+                            'orderId' => $orderid,
+                            'callbackUrl' => "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ",
+                            'txnAmount'     => array(
+                                'value'     => $total_amount,
+                                'currency'  => 'INR',
+                            ),
+                            'userInfo'      => array(
+                                'custId'    => $customer_id,
+                            )
+                        );
+
+                        /*
+                        * Generate checksum by parameters we have in body
+                        * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+                        */
+                        $payment = PaytmWallet::with('receive');
+                        $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
+
+                        $paytmParams["head"] = array('signature'=>$checksum);
+
+                        $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
+
+                        /* for Staging */
+                        $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
+
+                        /* for Production */
+                        // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
+
+                        $ch = curl_init($url);
+                        curl_setopt($ch, CURLOPT_POST, 1);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
+                        $response = curl_exec($ch);
+                        $gettxnarr = json_decode($response);
+                        $txnToken = $gettxnarr->body->txnToken;
+
+                       
+
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." " );
                     
                     }
                 } else{
