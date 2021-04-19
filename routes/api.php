@@ -117,4 +117,10 @@ Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');
 
 Route::post('booking-details', 'apiEmployeeController@booking_details');
 
+Route::post('confirm-bike-detail', 'apiEmployeeController@booking_bike_detail');
+
+Route::post('get-customer-detail', 'apiEmployeeController@getCustomerDetail');
+
+Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
+
 Route::post('employee-attendance', 'apiEmployeeController@employee_attendance');

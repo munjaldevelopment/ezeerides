@@ -792,7 +792,7 @@ class apiEmployeeController extends Controller
             $error = "";
             if($center == ""){
                 $error = "Please enter center for ride";
-                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
             }
             
             if($error == ""){
@@ -848,19 +848,227 @@ class apiEmployeeController extends Controller
                         $status_code = $success = '1';
                         $message = 'Fleet Result';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'center_name' => $station_name, 'vehicle_list' => $v_list);
+                        $start_date_time = date("d-m-Y H:i:s",strtotime($request->start_date));
+                        $end_date_time = date("d-m-Y H:i:s",strtotime($request->end_date));
+
+                        $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'center_name' => $station_name, 'start_date' => $start_date_time, 'end_date' => $end_date_time, 'vehicle_list' => $v_list);
                     }else{
                         $status_code = $success = '0';
                         $message = 'Fleet not available right now';
                     
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);    
                     }
 
                 } else{
                     $status_code = $success = '0';
                     $message = 'Employee not valid';
                     
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+    //END 
+
+    //Confirm booking
+    public function booking_bike_detail(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $bike_model_id = $request->bike_id;
+            $city_id = $request->city_id;
+            $station_id = $request->center_id;
+            $from_date = $request->start_date;
+            $to_date = $request->end_date;
+            $error = "";
+            if($station_id == ""){
+                $error = "Please choose ride type for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+
+            if($bike_model_id == ""){
+                $error = "Please choose bike model for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                    
+                    $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
+                    $bike_feature = array();
+                    if($bikeDetail){ 
+                        $vehicle_model = $bikeDetail->model;
+                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
+                        $excess_km_charges = '0';
+                        $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
+                        $bikecharges = $bikeDetail->charges_per_hour;
+                        $insurance_charges_per_hour =$bikeDetail->insurance_charges_per_hour;
+                        $insurance_charges = $bikeDetail->insurance_charges_per_hour;
+                        $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
+                        $helmet_charges = '₹ 0';
+                        $helmet_status = '1';
+                        $document_status = '';
+
+                        $pick_upDateTime = $from_date;
+                        $expected_dropDateTime = $to_date;
+                        $timestamp1 = strtotime($pick_upDateTime);
+                        $timestamp2 = strtotime($expected_dropDateTime);
+
+                        $hours = abs($timestamp2 - $timestamp1)/(60*60);
+
+                        if($allowed_km_per_hour > 0){
+                            $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
+                            
+                        }
+                        if($excess_km_charges){
+                             $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
+                        }
+
+                        if($charges_per_hour){
+                          
+                            $bike_feature[] =  ['title' => 'Charges', 'subtitle' => $charges_per_hour];
+                            
+                        }
+
+                        if($penalty_amount_per_hour){
+                             
+                             $bike_feature[] =  ['title' => 'Penalty', 'subtitle' => $penalty_amount_per_hour];
+
+                        }
+
+                        if($insurance_charges_per_hour > 0){
+                            
+                            $bike_feature[] =  ['title' => 'Insurance for your Ride', 'subtitle' => '₹ '.$insurance_charges_per_hour];
+
+                            
+                        }
+
+                         if($helmet_charges){
+                            $bike_feature[] =  ['title' => 'Number of Helmet (2)', 'subtitle' => $helmet_charges];
+
+                        }
+
+                        if($document_status){
+                            $bike_feature[] =  ['title' => 'Documents Status', 'subtitle' => $document_status];
+
+                        }
+
+                       
+                        
+                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+
+                        $booking_time = $from_date."-".$to_date;
+
+                        $start_trip_date = date('d-m-Y',strtotime($from_date));
+                        $start_trip_time = date('H:i',strtotime($from_date));
+                        $end_trip_date = date('d-m-Y',strtotime($to_date));
+                        $end_trip_time = date('H:i',strtotime($to_date));
+
+                        $fleetFare = 0;
+                         $total_price = 0;
+                        if($hours > 0){
+                            //echo $bikecharges;
+                            $VehicleRegister = new VehicleRegister();
+                            $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                            $total_price = $fleetFare+$insurance_charges;
+                        }
+
+                        
+
+                        $baseUrl = URL::to("/");
+                        $vehicle_image  = "";
+                        if($bikeDetail->vehicle_image){
+                            $vehicle_image  =  $baseUrl."/public/".$bikeDetail->vehicle_image;
+                        
+                        }
+                        
+                        $bikegallery = DB::table('vehicle_galleries')->where('vehicle_model_id', $bike_model_id)->where('status', '=', 'Live')->get();
+                        $bgallery = array();
+                        if(count($bikegallery) >0){
+                            
+                            foreach($bikegallery as $bike_gallery)
+                            {   
+                                if($bike_gallery->image){
+                                    $title = $bike_gallery->title;
+                                    $vehicle_gal_image  =  $baseUrl."/public/".$bike_gallery->image;
+
+                                    $bgallery[] = ['title' => $title, 'gallery_img' => $vehicle_gal_image];
+                                }      
+                            }
+                        } 
+
+                        $status_code = $success = '1';
+                        $message = 'Bike Details';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'Bike not valid';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message);
+                    } 
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function getCustomerDetail(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $mobile = $request->mobile;
+            $error = "";
+            if($error == ""){
+                $customer = DB::table('customers')->where('mobile', $mobile)->where('status', '=', 'Live')->first();
+                if($customer){
+                    if($customer->name){
+                        $name = $customer->name;
+                    }else{
+                        $name = "";
+                    }
+                    if($customer->email){
+                        $email = $customer->email; 
+                    }else{
+                        $email = "";
+                    }
+                    if($customer->address){
+                        $address = $customer->address;    
+                    }else{
+                        $address = "";
+                    }
+                    $status_code = '1';
+                    $message = 'Customer Info';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer->id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'address' => $address ); 
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '' );
                 }
             }
         }
@@ -873,8 +1081,126 @@ class apiEmployeeController extends Controller
         
         return response()->json($json, 200);
     }
-    //END 
 
+    //Reserve Bike
+    public function reserve_bike(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $customer_id = $request->customer_id;
+            $customer_name = $request->customer_name;
+            $customer_phone = $request->customer_mobile;
+            $customer_email = $request->customer_email;
+            $bike_model_id = $request->bike_id;
+            $city_id = $request->city_id;
+            $station_id = $request->center_id;
+            $hours = $request->hours;
+            $total_amount = $request->total_amount;
+            $from_date = $request->start_date;
+            $to_date = $request->end_date;
+            $document_status = 0;
+            $error = "";
+            
+            if($bike_model_id == ""){
+                $error = "Please choose bike model for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
+                    if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                        $coupon_code = '';
+                        $coupon_discount = 0;
+                        $referDisc = DB::table('customer_referal_coupons')->where('coupon_code', $coupon_code)->where('status', '=', 'Live')->first();
+                        if($referDisc){
+                            
+                            if($referDisc->discount > 0){
+                                $perval = ($referDisc->discount/100);
+                                $coupon_discount = $perval*$total_amount;   
+                            }
+                        }
+                        $couponDisc = DB::table('coupons')->where('title', $coupon_code)->where('status', '=', 'Live')->first();
+                        if($couponDisc){
+                            if($couponDisc->discount_type == 'amount'){
+                                $coupon_discount = $couponDisc->discount;
+                            }
+                            if($couponDisc->discount_type == 'percentage'){
+                                $perval = ($couponDisc->discount/100);
+                                $coupon_discount = $perval*$total_amount;   
+                            }
+                        }
+
+                        $status = 'In';
+                        $booking_status = '0';
+                        $customer_name = $customer_name;
+                        $phone = $customer_phone;
+                        $pick_up = date('Y-m-d',strtotime($from_date));
+                        $pick_up_time = date('H:i',strtotime($from_date));
+                        $expected_drop = date('Y-m-d',strtotime($to_date));
+                        $expected_drop_time = date('H:i',strtotime($to_date));
+                        
+                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                        $user_id = $employee_id;
+                        $booking_id = VehicleRegister::insertGetId([
+                            'user_id' => $user_id,
+                            'station' => $station_name,
+                            'customer_id' => $customer_id,
+                            'vehicle_model_id' => $bike_model_id,
+                            'customer_name' => $customer_name,
+                            'phone' => $phone,
+                            'pick_up' => $pick_up,
+                            'pick_up_time' => $pick_up_time,
+                            'expected_drop' => $expected_drop,
+                            'expected_drop_time' => $expected_drop_time,
+                            'coupon_code' => $coupon_code,
+                            'coupon_discount' => $coupon_discount,
+                            'total_amount' => $total_amount,
+                            'booking_status' => $booking_status,
+                            'status' => $status,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        $booking_no = "EZR".date('YmdHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
+            
+                        VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+
+                        
+                        $status_code = $success = '1';
+                        $message = 'Bike Enquiry Reserved Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr" );
+                    
+                    }
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
     
     //Current Booking
     public function current_booking_vehicle(Request $request)
@@ -986,7 +1312,7 @@ class apiEmployeeController extends Controller
             $status_code = '0';
             $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
         }
         
         return response()->json($json, 200);
@@ -1102,7 +1428,7 @@ class apiEmployeeController extends Controller
             $status_code = '0';
             $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
         }
         
         return response()->json($json, 200);
@@ -1203,7 +1529,7 @@ class apiEmployeeController extends Controller
             $status_code = '0';
             $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
         }
         
         return response()->json($json, 200);
@@ -1337,12 +1663,12 @@ class apiEmployeeController extends Controller
                     }else{
                          $status_code = '0';
                         $message = 'No notification found.';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                        $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => $employee_id);
                     }
                 }else{
                     $status_code = $success = '0';
                     $message = 'Customer not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    $json = array('status_codemployee_ide' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
 
                 }
         }
@@ -1417,187 +1743,7 @@ class apiEmployeeController extends Controller
 
     
 
-    //Make Payment
-    public function add_money(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $amount = $request->amount;
-            $error = "";
-            if($amount == "" && $amount <= "0"){
-                $error = "Please add valid amount";
-                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
-            }
-
-            
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $comment = 'Online Amount added';
-                    $payment_type = 'Online';
-                    $payment_status = "pending";
-                    $walletAmtid = DB::table('customer_wallet_payments')->insertGetId(['customer_id' => $customer_id, 'amount' => "".$amount, 'comment' => $comment, 'payment_type' => $payment_type, 'payment_status' => $payment_status, 'created_at' => $date, 'isactive' => '1',  'updated_at' => $date]); 
-
-                    $order_id = $walletAmtid.'_'.time();
-                    $status_code = '1';
-                    $message = 'Wallet Amount';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'order_id' => $order_id, 'amount' => $amount); 
-                    
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-    public function wallet_amount(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $error = "";
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
-
-                    $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
-                    
-                    $totalamount = '₹ '.($walletAmt-$orderWalletAmt);
-
-                    
-                    $status_code = '1';
-                    $message = 'Total Wallet Amount';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'wallet_amount' => $totalamount); 
-                    
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-    public function confirm_wallet_amount(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $order_id = $request->order_id;
-            $error = "";
-           if($order_id == ""){
-                $error = "Please send valid order id.";
-                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
-            }
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $odridarr = explode('_', $order_id);
-                    $walletchk = DB::table('customer_wallet_payments')->select('id','amount','created_at')->where('customer_id', $customer_id)->where('id', $odridarr[0])->orderBy('id', 'Asc')->first();
-                    if($walletchk){
-
-                        $status = PaytmWallet::with('status');
-                        $status->prepare(['order' => $order_id]);
-                        $status->check();
-                        
-                        $response = $status->response(); // To get raw response as array
-                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
-                        /*print_r($response);
-                        exit;*/
-
-                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
-                        //get important parameters via public methods
-                        $orderId = $status->getOrderId(); // Get order id
-                        
-                        $transactionId = $status->getTransactionId(); // Get transaction id
-                        
-                        if($status->isSuccessful()){
-                          //Transaction Successful
-                            $payment_status = 'success';
-                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-
-                            $status_code = $success = '1';
-                            $message = 'Your Wallet Amount Added Successfully.';
-                        
-                            $json = array('status_code' => $status_code, 'message'  => $message);  
-
-                        }else if($status->isFailed()){
-                          //Transaction Failed
-                            
-                            $payment_status = 'failed';
-                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-
-
-                            $status_code = $success = '1';
-                            $message = 'Your Wallet Amount Transaction Failed.';
-                        
-                            $json = array('status_code' => $status_code, 'message'  => $message); 
-                        }else if($status->isOpen()){
-                          //Transaction Open/Processing
-                            $payment_status = 'pending';
-                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-                            $status_code = $success = '1';
-                            $message = 'Your Wallet Amount Transaction is Pending / Processing.';
-                        
-                            $json = array('status_code' => $status_code, 'message'  => $message);
-                        }
-                        
-
-                        
-                    }else{
-                        $status_code = '0';
-                        $message = 'Booking id not valid';
-                    
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                    }
-                } else{
-                    $status_code = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
 
     public function notification_list(Request $request)
     {
@@ -1605,13 +1751,13 @@ class apiEmployeeController extends Controller
         {   
             
             $json       =   array();
-            $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('user_type', 'customer')->orderBy('id', 'DESC')->count();
+            $employee_id = $request->employee_id;
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                    $notificationExists = DB::table('notifications')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->count();
                     $notify_List = array();
                     if($notificationExists > 0){
-                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->get();
 
                         
                         foreach($notifyList as $notifylist)
@@ -1649,289 +1795,5 @@ class apiEmployeeController extends Controller
         return response()->json($json, 200);
     }
 
-    public function coupon_listing(Request $request)
-    {
-        try 
-        {   
-            
-            $json       =   array();
-            $customer_id = $request->customer_id;
-            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    /* Used Coupon List */
-                    $usedCouponList = array('REFFER00');
-                    $bookedCoupons = \DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', 'success')->distinct()->select('coupon_code')->get();
-                    if($bookedCoupons){
-                        foreach ($bookedCoupons as $usedCoupons) {
-                            if($usedCoupons->coupon_code){
-                                $usedCouponList[] = $usedCoupons->coupon_code;
-                            }
-                        }
-                    }
-                    //print_r($usedCouponList);
-                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
-                    $coupon_list = array();
-                    if($referCouponList){
-                        foreach($referCouponList as $couponlist)
-                        {
-                            
-                            $coupon_list[] = array('coupon_code' => "".$couponlist->coupon_code, 'discount_type' => 'percentage', 'discount' => $couponlist->discount, 'description' => $couponlist->description); 
-                           
-                        }
-                    } 
-
-                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
-                    if($generalCouponList){
-                        foreach($generalCouponList as $gencouponlist)
-                        {
-                            
-                            $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount_type' => $gencouponlist->discount_type, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
-                           
-                        }
-                    } 
-
-                    $status_code = '1';
-                    $message = 'Coupon List';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'coupon_list' => $coupon_list);
-                    
-                }else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-                }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message);
-        }
-    
-        return response()->json($json, 200);
-    }
-    //contact_us
-    public function contact_us(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $error = "";
-            $contactusid = 1;
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $rspage = DB::table('pages')->where('id', $contactusid)->first();
-                    $pagecontent = $rspage->content;
-                    $pagetitle = $rspage->title;
-
-                    $status_code = $success = '1';
-                    $message = 'Contact Us';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
-
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-    //contact_us
-    public function about_us(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $error = "";
-            $pageid = 2;
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $rspage = DB::table('pages')->where('id', $pageid)->first();
-                    $pagecontent = $rspage->content;
-                    $pagetitle = $rspage->title;
-
-                    $status_code = $success = '1';
-                    $message = 'About Us';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
-
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-    //contact_us
-    public function privacy(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $error = "";
-            $pageid = 3;
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){
-                    $rspage = DB::table('pages')->where('id', $pageid)->first();
-                    $pagecontent = $rspage->content;
-                    $pagetitle = $rspage->title;
-
-                    $status_code = $success = '1';
-                    $message = 'privacy';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'heading' => $pagetitle, 'content' => $pagecontent);
-
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-   
-    
-
-    //Agri Land Feedback
-    public function feedback(Request $request)
-    {
-        try 
-        {
-            $json = $userData = array();
-            
-            $date   = date('Y-m-d H:i:s');
-            $customer_id = $request->customer_id;
-            $comment = $request->comment;
-            $error = "";
-            if($comment == ""){
-                $error = "Please enter comment for feedback";
-                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
-            }
-            
-            if($error == ""){
-                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
-                if($customer){ 
-                    
-                    DB::table('feedback')->insert(['customer_id' => $customer_id, 'comment' => $comment, 'status' => 'live', 'created_at' => $date, 'updated_at' => $date]);
-
-                    $status_code = $success = '1';
-                    $message = 'Feedback added successfully';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-
-                } else{
-                    $status_code = $success = '0';
-                    $message = 'Customer not valid';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-                }
-            }
-        }
-        catch(\Exception $e) {
-            $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-    
-            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
-        }
-        
-        return response()->json($json, 200);
-    }
-
-    
-
-    public function push_notification($data, $device_tokens)
-        {
-            $senderid = '789600431472';
-            $msg = array
-            (
-                'title'  => $data[0],
-                'name' => $data[1],
-                'body' => $data[2],
-                //'image' => $data[3],
-                //'product_id' => $data[4],
-                'vibrate' => 1,
-                'sound'  => 'mySound',      
-                'driverData'=>$data,        
-            );
-
-            $dataarr['data'] = array
-            (
-                'title'  => $data[0],
-                'name' => $data[1],
-                'body' => $data[2],
-                //'image' => $data[3],
-                //'product_id' => $data[4],
-                        
-            );
-
-            $fields = array
-            (
-                'to'        => $device_tokens,
-                'notification'  => $msg,
-                'data'  => $dataarr
-            ); 
-            $serverKey = 'AAAAt9fabXA:APA91bFYHHT1fn136eJoJS2qNormp-KGZugqxTsSb859REUYAdVr9mWp7qsKgCeEmGVvygGIhybVOrc49S79DGknfMqVfvc_wi8piLb0TjjcKzIjJOY2snY763yCQeAEuDo32Wj6fA26'; 
-            $headers = array
-            (
-                'Authorization: key=' . $serverKey,
-                'Content-Type: application/json'
-            );
-            $ch = curl_init();
-            curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-            curl_setopt( $ch,CURLOPT_POST, true );
-            curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-            curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-            curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
-            curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-            $result = curl_exec($ch );
-
-            curl_close( $ch );
-            return true;
-        }
     
 }
