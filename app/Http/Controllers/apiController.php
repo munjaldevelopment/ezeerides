@@ -1451,7 +1451,7 @@ class apiController extends Controller
                         $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
                     }else{
                          $status_code = '0';
-                        $message = 'No notification found.';
+                        $message = 'No booking found.';
                         $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
                     }
                 }else{
@@ -1763,6 +1763,56 @@ class apiController extends Controller
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
                     $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('user_type', 'customer')->orderBy('id', 'DESC')->count();
+                    $notify_List = array();
+                    if($notificationExists > 0){
+                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+
+                        
+                        foreach($notifyList as $notifylist)
+                        {
+                            $notification_type = $notifylist->notification_type;
+                            
+                            $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'Notification List';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'notify_List' => $notify_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No notification found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function home_notification_list(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('notification_type', 'home-screen')->orderBy('id', 'DESC')->count();
                     $notify_List = array();
                     if($notificationExists > 0){
                         $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
