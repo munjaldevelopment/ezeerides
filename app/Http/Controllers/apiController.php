@@ -1812,10 +1812,10 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $notificationExists = DB::table('notifications')->where('customer_id', $customer_id)->where('user_type', 'home')->where('notification_type', 'home-screen')->orderBy('id', 'DESC')->count();
+                    $notificationExists = DB::table('notifications')->where('user_type', 'home')->where('notification_type', 'home-screen')->orderBy('id', 'DESC')->count();
                     $notify_List = array();
                     if($notificationExists > 0){
-                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('user_type', 'home')->where('notification_type', 'home-screen')->orderBy('id', 'DESC')->get();
 
                         
                         foreach($notifyList as $notifylist)
