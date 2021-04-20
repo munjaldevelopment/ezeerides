@@ -37,6 +37,10 @@ Route::post('vehicle-center', 'apiController@all_center');
 
 Route::get('ride-type', 'apiController@rideType');
 
+Route::get('vehicle-rides', 'apiController@vehicleRides');
+
+Route::post('vehicle-model-center', 'apiController@centerByModel');
+
 Route::post('vehicle-filter', 'apiController@vehicle_filter');
 
 Route::post('bike-detail', 'apiController@bike_detail');

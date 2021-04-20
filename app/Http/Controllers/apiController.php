@@ -778,9 +778,65 @@ class apiController extends Controller
     }
     //END 
 
+    //START show cities 
+    public function vehicleRides(Request $request)
+    {
+        try 
+        {   
+            $json       =   array();
+            $baseUrl = URL::to("/");
+            
+            $rideList = DB::table('vehicle_rides')->select('id','title','description','vehicle_icon','ride_type')->orderBy('id', 'ASC')->get();
+            $ride_list = array();
+            foreach($rideList as $rlist)
+            {
+                $vehicle_icon  = "";
+                if($rlist->vehicle_icon){
+                    $vehicle_icon  =  $baseUrl."/public/".$rlist->vehicle_icon;
+                
+                }
+               
+                
+                $ride_list[] = ['id' => (string)$rlist->id, 'title' =>$rlist->title,'description' =>$rlist->description,'vehicle_icon' => $vehicle_icon, 'ride_type' =>$rlist->ride_type,]; 
+            }    
+            $status_code = '1';
+            $message = 'All Vehicle Ride';
+            $json = array('status_code' => $status_code,  'message' => $message, 'ride_list' => $ride_list);
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
 
-
+    public function centerByModel(Request $request)
+    {
+        $bike_model_id = $request->bike_model_id;
+        try 
+        {   
+            $baseUrl = URL::to("/");
+            $json       =   array();
+            
+            $centerList = DB::table('stations as s')->join('station_has_vehicles as sv', 's.id', '=', 'sv.station_id')->join('vehicles as v', 'sv.vehicle_id', '=', 'v.id')->select('s.id','s.city_id','s.station_name')->where('v.vehicle_model', $bike_model_id)->orderBy('station_name', 'ASC')->groupBy('s.id')->get();
+            
+            $status_code = '1';
+            $message = 'Center list';
+            $json = array('status_code' => $status_code,  'message' => $message, 'centerList' => $centerList);
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+    //END
     //Rent IN Result
     public function vehicle_filter(Request $request)
     {
@@ -808,7 +864,7 @@ class apiController extends Controller
                     $vehicleList = DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->select('vm.id','vm.model','vm.allowed_km_per_hour','vm.charges_per_hour','vm.insurance_charges_per_hour', 'vm.penalty_amount_per_hour','vm.vehicle_image')->where('v.status','Live')->groupBy('vm.id');
 
                     if($center){
-                        $vehicleList = $vehicleList->where('sv.station_id',$center);    
+                        //$vehicleList = $vehicleList->where('sv.station_id',$center);    
                     }
 
                    /* if($ride_type){

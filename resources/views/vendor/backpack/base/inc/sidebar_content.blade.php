@@ -10,6 +10,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Master</a>
 	<ul class="nav-dropdown-items">
 	  <li class='nav-item'><a class='nav-link' href="{{ backpack_url('helmets') }}"><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('ridetype') }}'><i class='nav-icon la la-motorcycle'></i> Ride Types</a></li>
 	</ul>
 </li>
 <li class="nav-item nav-dropdown">
@@ -92,6 +93,7 @@
 @php
 	endif;
 @endphp
+
 
 
 
