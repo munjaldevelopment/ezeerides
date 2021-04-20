@@ -72,8 +72,10 @@
 
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('employeeattendance') }}'><i class='nav-icon la la-user'></i> Employee Attendances</a></li>
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('supporttickets') }}'><i class='nav-icon la la-support'></i> Support Tickets</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('needhelp') }}'><i class='nav-icon la la-phone'></i> Need Help</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('supporttickets') }}'><i class='nav-icon la la-support'></i> Support Tickets</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('policies') }}'><i class='nav-icon la la-support'></i> Policies</a></li>
+
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('log') }}'><i class='nav-icon la la-terminal'></i> Logs</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('setting') }}'><i class='nav-icon la la-cog'></i> Settings</a></li>
 <!-- Users, Roles, Permissions -->
@@ -90,5 +92,6 @@
 @php
 	endif;
 @endphp
+
 
 

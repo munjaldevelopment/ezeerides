@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\NeedHelpRequest;
+use App\Http\Requests\PoliciesRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class NeedHelpCrudController
+ * Class PoliciesCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class NeedHelpCrudController extends CrudController
+class PoliciesCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class NeedHelpCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\NeedHelp::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/needhelp');
-        CRUD::setEntityNameStrings('Need Help', 'Need Help');
+        CRUD::setModel(\App\Models\Policies::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/policies');
+        CRUD::setEntityNameStrings('policies', 'policies');
 
         $is_admin = backpack_user()->hasRole('Admin');
         if($is_admin)
@@ -48,8 +48,10 @@ class NeedHelpCrudController extends CrudController
     protected function setupListOperation()
     {
         //CRUD::setFromDb(); // columns
+
         CRUD::column('title');
-        CRUD::column('status');    
+        CRUD::column('status'); 
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -65,9 +67,10 @@ class NeedHelpCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(NeedHelpRequest::class);
+        CRUD::setValidation(PoliciesRequest::class);
 
         //CRUD::setFromDb(); // fields
+
         CRUD::field('title');
         
         $this->crud->addField([

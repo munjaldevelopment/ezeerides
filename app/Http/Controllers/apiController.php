@@ -2188,6 +2188,53 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+    public function policies(Request $request)
+    {
+        try 
+        {   
+            
+            $json       =   array();
+            $customer_id = $request->customer_id;
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $policies = DB::table('policies')->where('status', 'Live')->orderBy('id', 'ASC')->get();
+
+                    $policies_List = array();
+                    if($policies){
+                        foreach($policies as $rs)
+                        {
+                            
+                            $policies_List[] = array('id' => "".$rs->id, 'title' => $rs->title, 'description' => $rs->description, 'date' => date('d-m-Y H:i:s', strtotime($rs->created_at))); 
+                           
+                        } 
+
+                        //print_r($odr_List);
+                        //exit;
+                        $status_code = '1';
+                        $message = 'Policies';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'policies_list' => $policies_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No policies data found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+                }else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+                }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
     public function push_notification($data, $device_tokens)
         {
             $senderid = '789600431472';

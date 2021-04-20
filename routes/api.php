@@ -73,6 +73,8 @@ Route::post('create-ticket', 'apiController@add_support_query');
 
 Route::post('ticket-history', 'apiController@ticket_history');
 
+Route::post('policies', 'apiController@policies');
+
 Route::post('home-notification-list', 'apiController@home_notification_list');
 
 /* Employee API */
