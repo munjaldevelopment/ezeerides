@@ -2148,7 +2148,7 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $tickets = DB::table('customer_supports')->where('customer_id', $customer_id)->orderBy('id', 'ASC')->get();
+                    $tickets = DB::table('customer_supports')->where('customer_id', $customer_id)->where('status', 'solved')->orderBy('id', 'ASC')->get();
                     $ticket_List = array();
                     if($tickets){
                         foreach($tickets as $rs)
