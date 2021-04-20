@@ -143,7 +143,7 @@ class SupportTicketsCrudController extends CrudController
             'name' => 'status',
             'label' => 'Status',
             'type' => 'select2_from_array',
-            'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
+            'options' => ['open' => 'Open', 'solved' => 'Solved'],
             'hint' => '',
         ]);
    
