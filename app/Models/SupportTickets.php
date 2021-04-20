@@ -28,7 +28,10 @@ class SupportTickets extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-
+    public function allCustomer()
+    {
+        return $this->belongsTo('App\Models\Customers', 'customer_id');
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

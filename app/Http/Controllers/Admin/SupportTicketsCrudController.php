@@ -28,7 +28,15 @@ class SupportTicketsCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\SupportTickets::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/supporttickets');
-        CRUD::setEntityNameStrings('supporttickets', 'support_tickets');
+        CRUD::setEntityNameStrings('Support Ticket', 'Support Tickets');
+        $is_admin = backpack_user()->hasRole('Admin');
+        if($is_admin)
+        {
+            $this->crud->allowAccess(['list','create', 'update', 'delete']);
+             $this->crud->denyAccess(['create']);
+        }else{
+            $this->crud->denyAccess(['list', 'create', 'update', 'delete']);
+        } 
     }
 
     /**
@@ -39,7 +47,23 @@ class SupportTicketsCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
+        //CRUD::setFromDb(); // columns
+
+        CRUD::column('ticket_no');
+        
+        $this->crud->addColumn([
+            'label'     => 'Customer Name',
+            'type'      => 'select',
+            'name'      => 'customer_id',
+            'entity'    => 'allCustomer', //function name
+            'attribute' => 'name', //name of fields in models table like districts
+            'model'     => "App\Models\Customers", //name of Models
+
+         ]);
+        CRUD::column('title');
+        CRUD::column('created_at');
+        CRUD::column('status');
+
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -58,8 +82,71 @@ class SupportTicketsCrudController extends CrudController
     {
         CRUD::setValidation(SupportTicketsRequest::class);
 
-        CRUD::setFromDb(); // fields
+        //CRUD::setFromDb(); // fields
+        $customer_list = array();
+            
+        $customer_list[0] = 'Select';
+        $customers = \DB::table('customers')->orderBy('id')->get();
+        if($customers)
+        {
+            foreach($customers as $row)
+            {
+                $customer_list[$row->id] = $row->name ;
+            }
+        }
 
+        $this->crud->addField([
+            'name' => 'customer_id',
+            'label' => 'Customer',
+            'type'      => 'select2_from_array',
+            'options'   => $customer_list,
+            'hint' => '',
+            'attributes' => [
+                'disabled' => 'disabled'
+            ],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'ticket_no',
+            'label' => 'Ticket No',
+            'type' => 'text',
+            'attributes' => [
+                'readonly' => 'readonly'
+            ],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'title',
+            'label' => 'Title',
+            'type' => 'text',
+            'attributes' => [
+                'readonly' => 'readonly'
+            ],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'description',
+            'label' => 'Description',
+            'type' => 'textarea',
+            'attributes' => [
+                'readonly' => 'readonly'
+            ],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'answer',
+            'label' => 'Answer',
+            'type' => 'textarea',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'status',
+            'label' => 'Status',
+            'type' => 'select2_from_array',
+            'options' => ['Live' => 'Live', 'Not Live' => 'Not Live'],
+            'hint' => '',
+        ]);
+   
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
