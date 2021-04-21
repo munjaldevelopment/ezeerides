@@ -26,7 +26,8 @@
 			if (value) {
 				$.ajax({
 			      url: route,
-			      type: 'DELETE',
+			      type: 'POST',
+			      data: {_method: 'delete'},
 			      success: function(result) {
 			          if (result == 1) {
 						  // Redraw the table
