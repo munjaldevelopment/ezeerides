@@ -849,8 +849,8 @@ class apiController extends Controller
             $city_id = $request->city_id;
             $center = $request->center_id;
             $ride_type = $request->ride_type;
-            $from_date = date("Y-m-d",strtotime($request->from_date));
-            $to_date = date("Y-m-d",strtotime($request->to_date));
+            $from_date = date("Y-m-d H:i:s",strtotime($request->from_date));
+            $to_date = date("Y-m-d  H:i:s",strtotime($request->to_date));
             $error = "";
             if($center == ""){
                 $error = "Please enter center for ride";
@@ -893,8 +893,33 @@ class apiController extends Controller
                             
                             }
                             $premium_charges_per_hour = '0.00';
+
+                            $pick_upDateTime = $from_date;
+                            $expected_dropDateTime = $to_date;
+                            $timestamp1 = strtotime($pick_upDateTime);
+                            $timestamp2 = strtotime($expected_dropDateTime);
+
+                            $hours = abs($timestamp2 - $timestamp1)/(60*60);
+                            $day = floor($hours/24);
+                            if($ride_type == 'long'){
+                                
+                                $bikecharges = $charges_per_hour;
+                                $fleetFare = 0;
+                                $total_price = 0;
+                                if($hours > 0){
+                                   
+                                    $VehicleRegister = new VehicleRegister();
+                                    $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                    $total_price = $fleetFare+$insurance_charges_per_hour;
+                                }
+                                $charges = '₹ '.$total_price.' / '.$day.'d';
+
+                            }else{
+                                
+                                $charges = '₹ '.$charges_per_hour.' / Hr';
+                            }
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
                          }
 
                          if($center != 0){
@@ -1438,7 +1463,9 @@ class apiController extends Controller
                             if($booking->booking_status == 1){
                                $booking_status = 'Open';
                             }else if($booking->booking_status == 0){
-                               $booking_status = 'Canceled';   
+                               $booking_status = 'Canceled'; 
+                            }else if($booking->booking_status == 2){
+                               $booking_status = 'Completed';      
                             }
                             
                             $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_image' => $bike_image, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_status' => $booking_status, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
@@ -1516,7 +1543,9 @@ class apiController extends Controller
                          if($booking->booking_status == 1){
                             $booking_status = 'Open';
                          }else if($booking->booking_status == 0){
-                            $booking_status = 'Canceled';   
+                            $booking_status = 'Canceled'; 
+                         }else if($booking->booking_status == 2){
+                               $booking_status = 'Completed';     
                          }
 
                         $status_code = '1';
