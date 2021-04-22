@@ -65,6 +65,8 @@ Route::post('booking-list', 'apiController@customer_booking');
 
 Route::post('booking-detail', 'apiController@booking_detail');
 
+Route::post('cancel-Booking', 'apiController@canceledBooking');
+
 Route::post('contact-us', 'apiController@contact_us');
 
 Route::post('about-us', 'apiController@about_us');
