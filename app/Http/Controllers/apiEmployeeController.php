@@ -1767,8 +1767,18 @@ class apiEmployeeController extends Controller
                                 $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
                             }
                         } 
-
-                        $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->join("vehicle_registers as vr", 'vr.vehicle', '=', 'v.vehicle_number')->select('v.id','v.vehicle_number')->where('v.vehicle_model', $booking->vehicle_model_id)->where('s.employee_id', $employee_id)->where('vr.status', 'In')->orderBy('v.id', 'DESC')->get();
+                        
+                        $usedVehList = array('01');
+                        $bookedvehicle = \DB::table('vehicle_registers')->where('user_id', $employee_id)->where('status', 'Out')->where('station', $booking->station)->distinct()->select('vehicle')->get();
+                        if($bookedvehicle){
+                            foreach ($bookedvehicle as $usedvehicle) {
+                                if($usedvehicle->vehicle){
+                                    $usedVehList[] = $usedvehicle->vehicle;
+                                }
+                            }
+                        }
+                        
+                        $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $booking->vehicle_model_id)->where('s.employee_id', $employee_id)->orderBy('v.id', 'DESC')->get();
                         $vehicle_list = array();
                         foreach($vehiclelist as $bikelist)
                         {
