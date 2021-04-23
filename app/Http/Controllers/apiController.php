@@ -1238,6 +1238,10 @@ class apiController extends Controller
                         $user_id = DB::table('stations')->where('id', $station_id)->pluck('employee_id')[0];
                         
                         $otp = rand(111111, 999999);
+                        
+                        $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
+
+                        $allowed_km = ($allowed_km_per_hour*$hours);
 
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
@@ -1253,6 +1257,8 @@ class apiController extends Controller
                             'expected_drop_time' => $expected_drop_time,
                             'coupon_code' => $coupon_code,
                             'coupon_discount' => $coupon_discount,
+                            'booking_hours' => $hours,
+                            'allowed_km' => $allowed_km,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
                             'status' => $status,
@@ -1477,7 +1483,7 @@ class apiController extends Controller
                         $json = array('status_code' => $status_code,  'message' => $message, 'booking_list' => $booking_list);
                     }else{
                          $status_code = '0';
-                        $message = 'No notification found.';
+                        $message = 'No booking found.';
                         $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
                     }
                 }else{

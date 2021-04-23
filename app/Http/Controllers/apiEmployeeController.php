@@ -1153,6 +1153,11 @@ class apiEmployeeController extends Controller
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
                         $user_id = $employee_id;
+                        
+                        $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
+
+                        $allowed_km = ($allowed_km_per_hour*$hours);
+
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
                             'station' => $station_name,
@@ -1166,6 +1171,8 @@ class apiEmployeeController extends Controller
                             'expected_drop_time' => $expected_drop_time,
                             'coupon_code' => $coupon_code,
                             'coupon_discount' => $coupon_discount,
+                            'booking_hours' => $hours,
+                            'allowed_km' => $allowed_km,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
                             'status' => $status,
@@ -1662,7 +1669,7 @@ class apiEmployeeController extends Controller
                         $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'employee_name' => $employee->name, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time,  'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'bike_options' => $bike_options,  'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list );
                     }else{
                          $status_code = '0';
-                        $message = 'No notification found.';
+                        $message = 'No booking data found.';
                         $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => $employee_id);
                     }
                 }else{
@@ -1682,7 +1689,124 @@ class apiEmployeeController extends Controller
         return response()->json($json, 200);
     }
 
+    public function prepareToDelivery(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $baseUrl = URL::to("/");
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $booking_no = $request->booking_no;
+            $error = "";
+            if($booking_no == ""){
+                $error = "Please enter booking no as send you at booking enquiry";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->where('status', 'In')->orderBy('id', 'DESC')->first();
+                    
+                   
+                    if($booking){
+                        $bike_options = array();
+                        $customer_id = $booking->customer_id;
+                        $customer_address = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->pluck('address')[0];
+
+                        
+                        /* Customer Licence */
+                        $custdoc = new CustomerDocuments();
+                        $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
+
+                        $licence_image  = '';
+                        if($customerLicense->front_image){
+                            $licence_image  .=  "Front Image: <br />".$baseUrl."/public/".$customerLicense->front_image.'<br />';
+                        }
+                        if($customerLicense->back_image){
+                            $licence_image  .=  "Back Image: <br />".$baseUrl."/public/".$customerLicense->back_image;
+                        }
+                        if($customerLicense->other_image){
+                            $licence_image  .=  "Other Image: <br />".$baseUrl."/public/".$customerLicense->other_image;
+                        }
+
+                        /* Customer Adhaar */
+                        $customeradaar = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'ID Proof (Adhaar Card)');
+                        
+                        $adaarimage  = '';
+                        if($customeradaar){
+                            if($customeradaar->front_image){
+                                $adaarimage  .=  "Front Image: <br />".$baseUrl."/public/".$customeradaar->front_image;
+                            }
+                            if($customeradaar->back_image){
+                                $adaarimage  .= "Back Image: <br />".$baseUrl."/public/".$customeradaar->back_image;
+                            }
+                            if($customeradaar->other_image){
+                                $adaarimage  .=  "Other Image: <br />".$baseUrl."/public/".$customeradaar->other_image;
+                            }
+                        }
+                        
+                         $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+
+                         $vehicle_status = $booking->status;
+                         $vstatus ='';
+                         if($vehicle_status == 'In'){
+                            $vstatus = 'Prepare To Delivery';
+                         }
+  
+
+                        $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                        $booked_vehicle_before_list = array();
+                        foreach($before_ride_img as $beforeimg)
+                        {
+                            if($beforeimg->image){
+                                $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
+                                
+                                $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
+                            }
+                        } 
+
+                        $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->join("vehicle_registers as vr", 'vr.vehicle', '=', 'v.vehicle_number')->select('v.id','v.vehicle_number')->where('v.vehicle_model', $booking->vehicle_model_id)->where('s.employee_id', $employee_id)->where('vr.status', 'In')->orderBy('v.id', 'DESC')->get();
+                        $vehicle_list = array();
+                        foreach($vehiclelist as $bikelist)
+                        {
+                            if($bikelist->vehicle_number){
+                                $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
+                            }
+                        } 
+                       
+                        
+                        $status_code = '1';
+                        $message = 'Prepare To Delivery Detail';
+
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model,  'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'customer_address' => $customer_address, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'allowed_helmet' => '2', 'check_side_mirrors' => 'f', 'check_key' => 'f', 'fuel_reading' => '', 'meter_reading' => '', 'secondary_number' => '', 'parents_number' => '', 'booking_hours' => $booking->booking_hours, 'allowed_km' => $booking->allowed_km, 'total_amount' => $booking->total_amount, 'licence_image' => $licence_image, 'adaarimage' => $adaarimage, 'vehicle_number' => $vehicle_list, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)),  'vehicle_image_before_ride' => $booked_vehicle_before_list );
+                    }else{
+                         $status_code = '0';
+                        $message = 'No booking data found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => $employee_id);
+                    }
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+
     public function employee_attendance(Request $request)
     {
         try 
@@ -1742,9 +1866,6 @@ class apiEmployeeController extends Controller
     }
 
     
-
-    
-
     public function notification_list(Request $request)
     {
         try 
