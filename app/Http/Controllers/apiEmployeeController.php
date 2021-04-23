@@ -1817,6 +1817,72 @@ class apiEmployeeController extends Controller
     }
 
 
+    public function deliver_vehicle(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $vehicle_number = $request->vehicle_number;
+            $allowed_helmets = $request->allowed_helmets;
+            $check_side_mirrors = $request->check_side_mirrors;
+            $check_key = $request->check_key;
+            $fuel_reading = $request->fuel_reading;
+            $meter_reading = $request->meter_reading;
+            $secondary_number = $request->secondary_number;
+            $parents_number = $request->parents_number;
+            $error = "";
+            
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        
+                        if($booking_id){
+                            $prepare_delivery = DB::table('vehicle_prepare_to_delivery')->insert([
+                                'booking_id' => $booking_id,
+                                'allowed_helmets' => $allowed_helmets,
+                                'check_key' => $check_key,
+                                'fuel_reading' => $fuel_reading,
+                                'meter_reading' => $meter_reading,
+                                'secondary_number' => $secondary_number,
+                                'parents_number' => $parents_number,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            ]);
+
+                            /* Assigne vehicle number */
+                            $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['vehicle' => $vehicle_number, 'status' => 'Out', 'updated_at' => $date]);
+
+                           
+                        }
+                        
+                        $status_code = $success = '1';
+                        $message = "Vehicle delivery done successfully";
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                    
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
     public function employee_attendance(Request $request)
     {
         try 
