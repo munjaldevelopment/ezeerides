@@ -131,6 +131,10 @@ Route::post('prepare-to-delivery', 'apiEmployeeController@prepareToDelivery');
 
 Route::post('deliver-vehicle', 'apiEmployeeController@deliver_vehicle');
 
+Route::post('customer-return-vehicle', 'apiEmployeeController@customerReturnVehicle');
+
+Route::post('return-vehicle', 'apiEmployeeController@return_vehicle');
+
 Route::post('get-customer-detail', 'apiEmployeeController@getCustomerDetail');
 
 Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
