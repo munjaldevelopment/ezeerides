@@ -125,6 +125,8 @@ Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');
 
 Route::post('booking-details', 'apiEmployeeController@booking_details');
 
+Route::post('track-vehicle', 'apiEmployeeController@track_vehicle');
+
 Route::post('confirm-bike-detail', 'apiEmployeeController@booking_bike_detail');
 
 Route::post('prepare-to-delivery', 'apiEmployeeController@prepareToDelivery');
