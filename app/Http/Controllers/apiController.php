@@ -715,11 +715,16 @@ class apiController extends Controller
             $baseUrl = URL::to("/");
             $json       =   array();
             $language = $request->language;
+            $centerArr[] = array('id' => '0', "city_id" => '0', "station_name" => 'All');
             $centerList = DB::table('stations')->select('id','city_id','station_name')->where('city_id', $city_id)->orderBy('station_name', 'ASC')->get();
             
+            foreach($centerList as $rlist)
+            {
+                $centerArr[] = ['id' => (string)$rlist->id, 'city_id' =>$rlist->city_id,'station_name' =>$rlist->station_name]; 
+            }    
             $status_code = '1';
             $message = 'Center list';
-            $json = array('status_code' => $status_code,  'message' => $message, 'centerList' => $centerList);
+            $json = array('status_code' => $status_code,  'message' => $message, 'centerList' => $centerArr);
         }
         catch(\Exception $e) {
             $status_code = '0';
@@ -863,8 +868,8 @@ class apiController extends Controller
 
                     $vehicleList = DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->select('vm.id','vm.model','vm.allowed_km_per_hour','vm.charges_per_hour','vm.insurance_charges_per_hour', 'vm.penalty_amount_per_hour','vm.vehicle_image')->where('v.status','Live')->groupBy('vm.id');
 
-                    if($center){
-                        //$vehicleList = $vehicleList->where('sv.station_id',$center);    
+                    if($center > 0){
+                        $vehicleList = $vehicleList->where('sv.station_id',$center);    
                     }
 
                    /* if($ride_type){
