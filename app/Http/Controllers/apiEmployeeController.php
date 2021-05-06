@@ -792,7 +792,7 @@ class apiEmployeeController extends Controller
                                 $vstatus = 'Out of Station';
                             }
 
-                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_image' => $vehicle_image, 'bike_feature' => $bike_feature ); 
+                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_image' => $vehicle_image, 'bike_feature' => $bike_feature ); 
                            
                         } 
 
