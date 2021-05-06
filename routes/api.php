@@ -106,6 +106,8 @@ Route::post('add-cash-expense', 'apiEmployeeController@add_cash_expense');
 
 Route::post('fleet-calendar', 'apiEmployeeController@fleet_calendar');
 
+Route::post('our-fleet', 'apiEmployeeController@our_fleet');
+
 Route::post('fleet-detail', 'apiEmployeeController@fleet_detail');
 
 Route::post('all-emp-city', 'apiEmployeeController@allCities');
@@ -122,6 +124,8 @@ Route::post('tranfer-cash', 'apiEmployeeController@tranfer_cash');
 Route::post('upcoming-booking-vehicle', 'apiEmployeeController@upcoming_booking_vehicle');
 
 Route::post('old-booking-vehicle', 'apiEmployeeController@old_booking_vehicle');
+
+Route::post('search-order', 'apiEmployeeController@search_order');
 
 Route::post('booking-details', 'apiEmployeeController@booking_details');
 
