@@ -189,7 +189,7 @@ class VehicleRegisterCrudController extends CrudController
         //CRUD::field('additional_hours');
         //CRUD::field('additional_amount');
 
-        $statusData = array('0' => 'Inactive', '1' => 'Active');
+        $statusData = array('0' => 'Cancelled', '1' => 'Open' , '2' => 'Completed');
         CRUD::addField([
             'label'     => 'Booking Status',
             'type'      => 'select2_from_array',

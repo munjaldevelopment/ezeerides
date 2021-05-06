@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Model;
 
-class CustomerDocuments extends Model
+class SupportTickets extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class CustomerDocuments extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'customer_documents';
+    protected $table = 'customer_supports';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -28,17 +28,9 @@ class CustomerDocuments extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-     public function allCustomers()
+    public function allCustomer()
     {
         return $this->belongsTo('App\Models\Customers', 'customer_id');
-    }
-
-   
-
-    public function getCustomerDocumentsByCustomerid($customer_id, $doctype)
-    {
-        $docdetail = Self::where('customer_id', $customer_id)->where('title', '=', $doctype)->first();
-        return $docdetail;
     }
     /*
     |--------------------------------------------------------------------------

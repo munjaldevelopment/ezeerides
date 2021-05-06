@@ -93,6 +93,7 @@ class VehicleRegister extends Model
             }
 
         }else{
+            $hours = 4;
             $amount = $hours * ($vehicle_amount * 1.5);
         }
 

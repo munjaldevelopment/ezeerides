@@ -10,6 +10,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Master</a>
 	<ul class="nav-dropdown-items">
 	  <li class='nav-item'><a class='nav-link' href="{{ backpack_url('helmets') }}"><i class='nav-icon la la-hard-hat'></i> Helmets</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('ridetype') }}'><i class='nav-icon la la-motorcycle'></i> Ride Types</a></li>
 	</ul>
 </li>
 <li class="nav-item nav-dropdown">
@@ -66,11 +67,20 @@
 	</ul>
 </li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('coupon') }}'><i class='nav-icon la la-wallet'></i> Coupons</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('customers') }}'><i class='nav-icon la la-user'></i> Customers</a></li>
+<li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i>User Management</a>
+	<ul class="nav-dropdown-items">
+		<li class='nav-item'><a class='nav-link' href='{{ backpack_url('customers') }}'><i class='nav-icon la la-user'></i> Customers</a></li>
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-user'></i> Employee</a></li>
+		<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employee') }}'><i class='nav-icon la la-user'></i> Employee</a></li>
+	</ul>
+</li>	
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employeeattendance') }}'><i class='nav-icon la la-user'></i> Employee Attendances</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('employeeattendance') }}'><i class='nav-icon la la-user'></i>Employee Management</a></li>
+
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('needhelp') }}'><i class='nav-icon la la-phone'></i> Need Help</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('supporttickets') }}'><i class='nav-icon la la-support'></i> Support Tickets</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('policies') }}'><i class='nav-icon la la-support'></i> Policies</a></li>
 
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('log') }}'><i class='nav-icon la la-terminal'></i> Logs</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('setting') }}'><i class='nav-icon la la-cog'></i> Settings</a></li>
@@ -83,8 +93,12 @@
 	  <li class="nav-item"><a class="nav-link" href="{{ backpack_url('permission') }}"><i class="nav-icon la la-key"></i> <span>Permissions</span></a></li>
 	</ul>
 </li>
+
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('page') }}'><i class='nav-icon la la-file-o'></i> <span>Pages</span></a></li>
 @php
 	endif;
 @endphp
+
+
+
 
