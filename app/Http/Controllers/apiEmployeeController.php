@@ -2015,7 +2015,7 @@ class apiEmployeeController extends Controller
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
             $booking_id = $request->booking_id;
-            $booking_otp = $request->booking_otp;
+            $booking_otp = $request->booking_no;
             $error = "";
             if($booking_otp == ""){
                 $error = "Please enter booking no as send you at booking enquiry";
