@@ -1788,40 +1788,49 @@ class apiEmployeeController extends Controller
                         $bike_options = array();
                         $customer_id = $booking->customer_id;
                         $customerImage = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->pluck('image')[0];
-
+                        $selfi  = array();
                         if($customerImage){
-                            $selfi  =  $baseUrl."/public/".$customerImage;
-                        }else{
-                           $selfi  =  "";
+                            $selfi_img  =  $baseUrl."/public/".$customerImage;
+                            $selfi[] =  array("label" => "Selfi Image", "dataval"=> $selfi_img);
+
                         }
                         /* Customer Licence */
                         $custdoc = new CustomerDocuments();
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
 
-                        $licence_image  = '';
+                        $licence_image  = array();
                         if($customerLicense->front_image){
-                            $licence_image  .=  "Front Image: <br />".$baseUrl."/public/".$customerLicense->front_image.'<br />';
+                            $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
                         }
                         if($customerLicense->back_image){
-                            $licence_image  .=  "Back Image: <br />".$baseUrl."/public/".$customerLicense->back_image;
+                            $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
+
                         }
                         if($customerLicense->other_image){
-                            $licence_image  .=  "Other Image: <br />".$baseUrl."/public/".$customerLicense->other_image;
+                            $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
+
                         }
 
                         /* Customer Adhaar */
                         $customeradaar = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'ID Proof (Adhaar Card)');
                         
-                        $adaarimage  = '';
+                        $adaarimage  = array();
                         if($customeradaar){
                             if($customeradaar->front_image){
-                                $adaarimage  .=  "Front Image: <br />".$baseUrl."/public/".$customeradaar->front_image;
+                                
+                                 $adaarimage[] = array("label" => "Front Image", "dataval"=> $baseUrl."/public/".$customeradaar->front_image);
+
+                                
                             }
                             if($customeradaar->back_image){
-                                $adaarimage  .= "Back Image: <br />".$baseUrl."/public/".$customeradaar->back_image;
+                                $adaarimage[] =  array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customeradaar->back_image);
+
+                                
                             }
                             if($customeradaar->other_image){
-                                $adaarimage  .=  "Other Image: <br />".$baseUrl."/public/".$customeradaar->other_image;
+                                
+                                $adaarimage[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customeradaar->other_image);
+
                             }
                         }
                         
@@ -2015,7 +2024,7 @@ class apiEmployeeController extends Controller
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
             $booking_id = $request->booking_id;
-            $booking_otp = $request->booking_otp;
+            $booking_otp = $request->booking_no;
             $error = "";
             if($booking_otp == ""){
                 $error = "Please enter booking no as send you at booking enquiry";
@@ -2037,32 +2046,42 @@ class apiEmployeeController extends Controller
                         $custdoc = new CustomerDocuments();
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
 
-                        $licence_image  = '';
+                        $licence_image  = array();
                         if($customerLicense->front_image){
-                            $licence_image  .=  "Front Image: <br />".$baseUrl."/public/".$customerLicense->front_image.'<br />';
+                            $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
                         }
                         if($customerLicense->back_image){
-                            $licence_image  .=  "Back Image: <br />".$baseUrl."/public/".$customerLicense->back_image;
+                            $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
+
                         }
                         if($customerLicense->other_image){
-                            $licence_image  .=  "Other Image: <br />".$baseUrl."/public/".$customerLicense->other_image;
+                            $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
+
                         }
 
                         /* Customer Adhaar */
                         $customeradaar = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'ID Proof (Adhaar Card)');
                         
-                        $adaarimage  = '';
+                        $adaarimage  = array();
                         if($customeradaar){
                             if($customeradaar->front_image){
-                                $adaarimage  .=  "Front Image: <br />".$baseUrl."/public/".$customeradaar->front_image;
+                                
+                                 $adaarimage[] = array("label" => "Front Image", "dataval"=> $baseUrl."/public/".$customeradaar->front_image);
+
+                                
                             }
                             if($customeradaar->back_image){
-                                $adaarimage  .= "Back Image: <br />".$baseUrl."/public/".$customeradaar->back_image;
+                                $adaarimage[] =  array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customeradaar->back_image);
+
+                                
                             }
                             if($customeradaar->other_image){
-                                $adaarimage  .=  "Other Image: <br />".$baseUrl."/public/".$customeradaar->other_image;
+                                
+                                $adaarimage[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customeradaar->other_image);
+
                             }
                         }
+                        
                         
                          $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
 
@@ -2240,30 +2259,39 @@ class apiEmployeeController extends Controller
                         $custdoc = new CustomerDocuments();
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
 
-                        $licence_image  = '';
+                        $licence_image  = array();
                         if($customerLicense->front_image){
-                            $licence_image  .=  "Front Image: <br />".$baseUrl."/public/".$customerLicense->front_image.'<br />';
+                            $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
                         }
                         if($customerLicense->back_image){
-                            $licence_image  .=  "Back Image: <br />".$baseUrl."/public/".$customerLicense->back_image;
+                            $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
+
                         }
                         if($customerLicense->other_image){
-                            $licence_image  .=  "Other Image: <br />".$baseUrl."/public/".$customerLicense->other_image;
+                            $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
+
                         }
 
                         /* Customer Adhaar */
                         $customeradaar = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'ID Proof (Adhaar Card)');
                         
-                        $adaarimage  = '';
+                        $adaarimage  = array();
                         if($customeradaar){
                             if($customeradaar->front_image){
-                                $adaarimage  .=  "Front Image: <br />".$baseUrl."/public/".$customeradaar->front_image;
+                                
+                                 $adaarimage[] = array("label" => "Front Image", "dataval"=> $baseUrl."/public/".$customeradaar->front_image);
+
+                                
                             }
                             if($customeradaar->back_image){
-                                $adaarimage  .= "Back Image: <br />".$baseUrl."/public/".$customeradaar->back_image;
+                                $adaarimage[] =  array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customeradaar->back_image);
+
+                                
                             }
                             if($customeradaar->other_image){
-                                $adaarimage  .=  "Other Image: <br />".$baseUrl."/public/".$customeradaar->other_image;
+                                
+                                $adaarimage[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customeradaar->other_image);
+
                             }
                         }
                         
