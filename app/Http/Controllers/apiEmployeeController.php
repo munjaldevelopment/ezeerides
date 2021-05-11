@@ -25,7 +25,7 @@ use PaytmWallet;
 class apiEmployeeController extends Controller
 {
     //START LOGIN
-	public function employeeLogin(Request $request)
+    public function employeeLogin(Request $request)
     {
         try 
         {
@@ -67,10 +67,10 @@ class apiEmployeeController extends Controller
                         
                    
                 }else{
-                	$status_code = $success = '0';
+                    $status_code = $success = '0';
                     $message = 'Employee not found, Please contact to support';
                    $json = array('status_code' => $status_code, 'message' => $message, 'mobile' => $mobile);
-	           }   
+               }   
             }   
         }
         catch(\Exception $e) {
