@@ -498,11 +498,24 @@ class apiEmployeeController extends Controller
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
                         $station_id = DB::table('stations')->where('employee_id', $employee_id)->pluck('id')[0];
+                        if($expences_reciept != ''){
+                            $image_parts = explode(";base64,", $expences_reciept);
+                            $image_type_aux = explode("image/", $image_parts[0]);
+                            $image_type = $image_type_aux[1];
+
+                            $expencesreciept = rand(10000, 99999).'-'.time().'.'.$image_type;
+                            $destinationPath = public_path('/uploads/expences_reciept/').$expencesreciept;
+
+                            $data = base64_decode($image_parts[1]);
+                           // $data = $image_parts[1];
+                            file_put_contents($destinationPath, $data);
+                        }
                         $booking_id = DB::table('employee_expences')->insert([
                             'employee_id' => $employee_id,
                             'station_id' => $station_id,
                             'expences_type' => $expences_type,
                             'amount' => $amount,
+                            'expences_reciept' => 'uploads/expences_reciept/'.$expencesreciept,
                             'remark' => $remark,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
