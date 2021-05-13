@@ -715,12 +715,12 @@ class apiController extends Controller
             $baseUrl = URL::to("/");
             $json       =   array();
             $language = $request->language;
-            $centerArr[] = array('id' => "0", "city_id" => (int)$city_id, "station_name" => 'All');
+            $centerArr[] = array('id' => 0, "city_id" => (int)$city_id, "station_name" => 'All');
             $centerList = DB::table('stations')->select('id','city_id','station_name')->where('city_id', $city_id)->orderBy('station_name', 'ASC')->get();
             
             foreach($centerList as $rlist)
             {
-                $centerArr[] = ['id' => (string)$rlist->id, 'city_id' =>$rlist->city_id,'station_name' =>$rlist->station_name]; 
+                $centerArr[] = ['id' => $rlist->id, 'city_id' => $rlist->city_id,'station_name' =>$rlist->station_name]; 
             }    
             $status_code = '1';
             $message = 'Center list';
