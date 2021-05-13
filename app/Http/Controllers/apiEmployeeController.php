@@ -1885,8 +1885,9 @@ class apiEmployeeController extends Controller
                                 $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
                             }
                         }    
-
-                         $customerLogs[] = array('heading' => 'Customer Logs', 'content' => 'Not Found.');   
+                         $customerlog  = array();
+                         $vehicleTracking  = array();
+                         $customerLogs[] = array('heading' => 'Customer Logs', 'content' => $customerlog);   
    
                          $selfiarr[] = array('heading' => 'Customer Selfi', 'content' => $selfi);
 
@@ -1894,7 +1895,7 @@ class apiEmployeeController extends Controller
 
                         $adhaarDocearr[] = array('heading' => 'Customer Adhaar ID', 'content' => $adaarimage);
 
-                        $trackVehicle[] = array('heading' => 'Track Vehicles', 'content' => 'Not found');
+                        $trackVehicle[] = array('heading' => 'Track Vehicles', 'content' => $vehicleTracking);
 
                         
                         $bike_options[] = array('optionTitle' => 'Show Logs', 'optionData' => $customerLogs);
