@@ -146,3 +146,9 @@ Route::post('get-customer-detail', 'apiEmployeeController@getCustomerDetail');
 Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
 
 Route::post('employee-attendance', 'apiEmployeeController@employee_attendance');
+
+Route::post('due-penalties', 'apiEmployeeController@due_penalties');
+
+Route::post('noticeboard', 'apiEmployeeController@notification_list');
+
+Route::post('statics', 'apiEmployeeController@statics_info');
