@@ -2743,28 +2743,26 @@ class apiEmployeeController extends Controller
             $device_id = $request->device_id;
              $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
 
-                if($employee){
-                    $start_date = date("Y-04-01 00:00:01");
-                    $end_date = date("Y-m-30 23:55:01");
-                    $totalCompleted = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->orderBy('id', 'DESC')->count();
-                    
-                    $cashCollected = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->sum('total_amount');
+            if($employee){
+                $start_date = date("Y-04-01 00:00:01");
+                $end_date = date("Y-m-30 23:55:01");
+                $totalCompleted = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->orderBy('id', 'DESC')->count();
+                
+                $cashCollected = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->sum('total_amount');
 
-                    $totalPenalties = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->sum('additional_amount');
+                $totalPenalties = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->sum('additional_amount');
 
-                    $totalCustomer = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->distinct()->count('customer_id');
-                   
-                    
-                    $status_code = '1';
-                    $message = 'Statics Data';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'total_orders' => $totalCompleted, 'total_cash' => '₹ '.$cashCollected, 'total_penalty' => '₹ '.$totalPenalties, 'total_customer' => $totalCustomer);
-                    
-                }else{
-                    $status_code = $success = '0';
-                    $message = 'Employee not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
-                }
+                $totalCustomer = DB::table('vehicle_registers')->where('user_id', $employee_id)->where('is_amount_receive', 1)->wheredate('created_at',' > ',$start_date)->wheredate('created_at',' <= ',$end_date)->distinct()->count('customer_id');
+               
+                
+                $status_code = '1';
+                $message = 'Statics Data';
+                $json = array('status_code' => $status_code,  'message' => $message, 'total_orders' => $totalCompleted, 'total_cash' => '₹ '.$cashCollected, 'total_penalty' => '₹ '.$totalPenalties, 'total_customer' => $totalCustomer);
+            }else{
+                $status_code = $success = '0';
+                $message = 'Employee not valid';
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+            }
         }
         catch(\Exception $e) {
             $status_code = '0';
