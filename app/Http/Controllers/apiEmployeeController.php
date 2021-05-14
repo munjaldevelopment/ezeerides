@@ -2736,8 +2736,7 @@ class apiEmployeeController extends Controller
     public function statics_info(Request $request)
     {
         try 
-        {   
-            
+        {
             $json = $userData = array();
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
