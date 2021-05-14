@@ -942,6 +942,13 @@ class apiEmployeeController extends Controller
                     }
                     $vehicleList = $vehicleList->orderBy('v.id', 'asc')->get(); 
                     if(count($vehicleList) >0){
+                        $pick_upDateTime = $start_date;
+                        $expected_dropDateTime = $end_date;
+                        $timestamp1 = strtotime($pick_upDateTime);
+                        $timestamp2 = strtotime($expected_dropDateTime);
+
+                        $hours = abs($timestamp2 - $timestamp1)/(60*60);
+
                         $v_list = array();
                         foreach($vehicleList as $vlist)
                         {
@@ -958,9 +965,19 @@ class apiEmployeeController extends Controller
                             
                             }
                             $premium_charges_per_hour = '0.00';
+
+                            $fleetFare = 0;
+                            $total_price = 0;
+                            if($hours > 0){
+                                //echo $bikecharges;
+                                $VehicleRegister = new VehicleRegister();
+                                $fleetFare = $VehicleRegister->getFleetFare($hours,$charges_per_hour);
+                                $total_price = $fleetFare+$insurance_charges_per_hour;
+                            }
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image, 'booking_hour' => $hours , 'total_price' => $total_price]; 
                          }
+                          
 
                          if($center != 0){
                     
@@ -972,6 +989,8 @@ class apiEmployeeController extends Controller
                         if($city_id > 0){
                             $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
                         }
+
+
                         $status_code = $success = '1';
                         $message = 'Fleet Result';
                         
@@ -1105,7 +1124,7 @@ class apiEmployeeController extends Controller
                         $end_trip_time = date('H:i',strtotime($to_date));
 
                         $fleetFare = 0;
-                         $total_price = 0;
+                        $total_price = 0;
                         if($hours > 0){
                             //echo $bikecharges;
                             $VehicleRegister = new VehicleRegister();
