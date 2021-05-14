@@ -183,7 +183,7 @@ class UserCrudController extends CrudController
                 'label' => 'Mobile',
                 'type'  => 'text',
             ],
-            /*[
+            [
                 'name'  => 'password',
                 'label' => trans('backpack::permissionmanager.password'),
                 'type'  => 'password',
@@ -193,7 +193,7 @@ class UserCrudController extends CrudController
                 'label' => trans('backpack::permissionmanager.password_confirmation'),
                 'type'  => 'password',
             ],
-            [
+           /* [
                 'type' => 'select2_multiple',
                 'name' => 'model_stations', // the relationship name in your Model
                 'entity' => 'model_stations', // the relationship name in your Model
