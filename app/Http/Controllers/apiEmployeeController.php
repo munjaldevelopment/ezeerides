@@ -2523,39 +2523,36 @@ class apiEmployeeController extends Controller
             if($error == ""){
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
-                        
-                        if($booking_id){
-                            $prepare_delivery = DB::table('vehicle_return_to_station')->insert([
-                                'booking_id' => $booking_id,
-                                'recieve_helmets' => $recieve_helmets,
-                                'check_side_mirrors' => $check_side_mirrors,
-                                'check_key' => $check_key,
-                                'fuel_reading' => $fuel_reading,
-                                'meter_reading' => $meter_reading,
-                                'damage_charges' => $damage_charges,
-                                'extra_charges' => $extra_charges,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                            ]);
+                    if($booking_id){
+                        $prepare_delivery = DB::table('vehicle_return_to_station')->insert([
+                            'booking_id' => $booking_id,
+                            'recieve_helmets' => $recieve_helmets,
+                            'check_side_mirrors' => $check_side_mirrors,
+                            'check_key' => $check_key,
+                            'fuel_reading' => $fuel_reading,
+                            'meter_reading' => $meter_reading,
+                            'damage_charges' => $damage_charges,
+                            'extra_charges' => $extra_charges,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
 
-                            /* Assigne vehicle number */
-                            $return_time = date('Y-m-d H:i:s');
-                            $additional_hours = 0;
-                            $additional_amount = 0;
-                            if($damage_charges > 0 || $extra_charges > 0){
-                                $additional_amount = $damage_charges+$extra_charges;
-                            }
-                            
-                            $is_amount_receive = 1;
-                            $receive_date = date('Y-m-d H:i:s');
-                            $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'IN', 'updated_at' => $date]);
-
-                           
+                        /* Assigne vehicle number */
+                        $return_time = date('Y-m-d H:i:s');
+                        $additional_hours = 0;
+                        $additional_amount = 0;
+                        if($damage_charges > 0 || $extra_charges > 0){
+                            $additional_amount = $damage_charges+$extra_charges;
                         }
                         
-                        $status_code = $success = '1';
-                        $message = "Customer return vehicle successfully";
-                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                        $is_amount_receive = 1;
+                        $receive_date = date('Y-m-d H:i:s');
+                        $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'IN', 'updated_at' => $date]);
+                    }
+                    
+                    $status_code = $success = '1';
+                    $message = "Customer return vehicle successfully";
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
                     
                     
                 } else{
@@ -2589,7 +2586,7 @@ class apiEmployeeController extends Controller
             if($employee){ 
                 $start_date   = date('Y-m-d 08:00:00');
                 $end_date   = date('Y-m-d 20:00:00');
-               $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
+                $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
                 
                 $check_inTime = '';
                 $check_outTime = ''; 
@@ -2603,8 +2600,6 @@ class apiEmployeeController extends Controller
                 $message = 'Employee Today Attendance';
                 
                 $json = array('status_code' => $status_code, 'message' => $message, 'today_date' => date('Y-m-d H:i:s'), 'check_inTime' => $check_inTime, 'check_outTime' => $check_outTime);
-
-
             } else{
                 $status_code = $success = '0';
                 $message = 'Employee not exists';
@@ -2637,31 +2632,29 @@ class apiEmployeeController extends Controller
             if($error == ""){
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
-                        $attendance_date = date('Y-m-d');
-                        $time = date('H:i:s');
-                        if($attendanceType == 'IN'){
-                            $intime = DB::table('employee_attendance')->insert([
-                                'employee_id' => $employee_id,
-                                'attendance_date' => $attendance_date,
-                                'check_in' => $time,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                            ]);
-                            $message = 'You are Check IN Successfully';
+                    $attendance_date = date('Y-m-d');
+                    $time = date('H:i:s');
+                    if($attendanceType == 'IN'){
+                        $intime = DB::table('employee_attendance')->insert([
+                            'employee_id' => $employee_id,
+                            'attendance_date' => $attendance_date,
+                            'check_in' => $time,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        $message = 'You are Check IN Successfully';
+                    }
+                    if($attendanceType == 'OUT'){
+                        $employeeintime = DB::table('employee_attendance')->where('employee_id', $employee_id)->where('attendance_date', $attendance_date)->first();
+                        if($employeeintime){
+                            $outtime =  DB::table('employee_attendance')->where('employee_id', '=', $employee_id)->where('attendance_date', '=', $attendance_date)->update(['check_out' => "".$time, 'updated_at' => $date]);
                         }
-                        if($attendanceType == 'OUT'){
-                            $employeeintime = DB::table('employee_attendance')->where('employee_id', $employee_id)->where('attendance_date', $attendance_date)->first();
-                            if($employeeintime){
-                                $outtime =  DB::table('employee_attendance')->where('employee_id', '=', $employee_id)->where('attendance_date', '=', $attendance_date)->update(['check_out' => "".$time, 'updated_at' => $date]);
-                            }
 
-                            $message = 'You are Check Out Successfully';    
-                        }
-                        
-                        $status_code = $success = '1';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                        $message = 'You are Check Out Successfully';    
+                    }
                     
-                    
+                    $status_code = $success = '1';
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
                 } else{
                     $status_code = $success = '0';
                     $message = 'Employee not valid';
@@ -2684,44 +2677,43 @@ class apiEmployeeController extends Controller
     public function notification_list(Request $request)
     {
         try 
-        {   
-            
+        {
             $json = $userData = array();
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
              $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
 
-                if($employee){
-                    $notificationExists = DB::table('notifications')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->count();
-                    $notify_List = array();
-                    if($notificationExists > 0){
-                        $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->get();
+            if($employee){
+                $notificationExists = DB::table('notifications')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->count();
+                $notify_List = array();
+                if($notificationExists > 0){
+                    $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->get();
 
+                    
+                    foreach($notifyList as $notifylist)
+                    {
+                        $notification_type = $notifylist->notification_type;
                         
-                        foreach($notifyList as $notifylist)
-                        {
-                            $notification_type = $notifylist->notification_type;
-                            
-                            $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
-                           
-                        } 
+                        $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
+                       
+                    } 
 
-                        //print_r($odr_List);
-                        //exit;
-                        $status_code = '1';
-                        $message = 'Noticeboard List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'notify_List' => $notify_List);
-                    }else{
-                         $status_code = '0';
-                        $message = 'No notification found.';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
-                    }
+                    //print_r($odr_List);
+                    //exit;
+                    $status_code = '1';
+                    $message = 'Noticeboard List';
+                    $json = array('status_code' => $status_code,  'message' => $message, 'notify_List' => $notify_List);
                 }else{
-                    $status_code = $success = '0';
-                    $message = 'Employee not valid';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
-
+                     $status_code = '0';
+                    $message = 'No notification found.';
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
                 }
+            }else{
+                $status_code = $success = '0';
+                $message = 'Employee not valid';
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+
+            }
         }
         catch(\Exception $e) {
             $status_code = '0';
