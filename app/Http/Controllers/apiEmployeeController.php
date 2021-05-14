@@ -22,6 +22,7 @@ use FCM;
 
 use PaytmWallet;
 
+
 class apiEmployeeController extends Controller
 {
     //START LOGIN
@@ -254,10 +255,11 @@ class apiEmployeeController extends Controller
                 }
                 $mobile = $employee->phone;
                
+               $empCashCollection = $this->getcashCollected($employee_id);
                 $status_code = $success = '1';
                 $message = 'Employee Profile Info';
                 
-                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id , 'name' => $name, 'email' => $email, 'mobile' => $mobile);
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'empCashCollection' => $empCashCollection);
 
 
             } else{
@@ -975,7 +977,7 @@ class apiEmployeeController extends Controller
                                 $total_price = $fleetFare+$insurance_charges_per_hour;
                             }
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image, 'booking_hour' => $hours , 'total_price' => $total_price]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image, 'booking_hour' => "".$hours , 'total_price' => "".$total_price]; 
                          }
                           
 
@@ -2563,6 +2565,46 @@ class apiEmployeeController extends Controller
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
                 }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function empoyee_today_attendance(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                
+            if($employee){ 
+                $start_date   = date('Y-m-d 08:00:00');
+                $end_date   = date('Y-m-d 20:00:00');
+               $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
+                
+                $loginTime = '';
+                $logoutTime = ''; 
+                $status_code = $success = '1';
+                $message = 'Employee Today Attendance';
+                
+                $json = array('status_code' => $status_code, 'message' => $message);
+
+
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
             }
         }
         catch(\Exception $e) {
