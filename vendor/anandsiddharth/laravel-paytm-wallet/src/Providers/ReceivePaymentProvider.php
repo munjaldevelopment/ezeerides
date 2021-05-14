@@ -76,8 +76,8 @@ class ReceivePaymentProvider extends PaytmWalletProvider{
     }
 
 
-/* Paytm PaytmChecksum */
-	static public function encrypt($input, $key) {
+	/* Paytm PaytmChecksum */
+	public static function encrypt($input, $key) {
 		$key = html_entity_decode($key);
 
 		if(function_exists('openssl_encrypt')){
