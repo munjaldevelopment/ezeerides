@@ -2588,11 +2588,10 @@ class apiEmployeeController extends Controller
                 
             if($employee){ 
 
-                $device_id = '';
-                DB::table('users')->where('id', '=', $employee_id)->update(['device_id' => $device_id, 'updated_at' => $date]);
+               $employeeAttendance = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 
                 $status_code = $success = '1';
-                $message = 'Employee logout successfully';
+                $message = 'Employee Today Attendance';
                 
                 $json = array('status_code' => $status_code, 'message' => $message);
 
