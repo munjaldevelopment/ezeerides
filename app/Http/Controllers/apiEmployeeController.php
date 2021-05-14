@@ -2581,15 +2581,18 @@ class apiEmployeeController extends Controller
         try 
         {
             $json = $userData = array();
-            $date   = date('Y-m-d H:i:s');
+
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 
             if($employee){ 
-
-               $employeeAttendance = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                $start_date   = date('Y-m-d 08:00:00');
+                $end_date   = date('Y-m-d 20:00:00');
+               $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
                 
+                $loginTime = '';
+                $logoutTime = ''; 
                 $status_code = $success = '1';
                 $message = 'Employee Today Attendance';
                 
