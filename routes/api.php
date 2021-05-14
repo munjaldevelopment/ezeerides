@@ -147,6 +147,8 @@ Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
 
 Route::post('employee-attendance', 'apiEmployeeController@employee_attendance');
 
+Route::post('employee-today-attendance', 'apiEmployeeController@empoyee_today_attendance');
+
 Route::post('due-penalties', 'apiEmployeeController@due_penalties');
 
 Route::post('noticeboard', 'apiEmployeeController@notification_list');

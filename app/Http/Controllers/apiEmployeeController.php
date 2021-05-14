@@ -254,10 +254,11 @@ class apiEmployeeController extends Controller
                 }
                 $mobile = $employee->phone;
                
+               $empCashCollection = $this->getcashCollected($employee_id);
                 $status_code = $success = '1';
                 $message = 'Employee Profile Info';
                 
-                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id , 'name' => $name, 'email' => $email, 'mobile' => $mobile);
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'empCashCollection' => $empCashCollection);
 
 
             } else{
@@ -2563,6 +2564,44 @@ class apiEmployeeController extends Controller
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
                 }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function empoyee_today_attendance(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                
+            if($employee){ 
+
+                $device_id = '';
+                DB::table('users')->where('id', '=', $employee_id)->update(['device_id' => $device_id, 'updated_at' => $date]);
+                
+                $status_code = $success = '1';
+                $message = 'Employee logout successfully';
+                
+                $json = array('status_code' => $status_code, 'message' => $message);
+
+
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
             }
         }
         catch(\Exception $e) {
