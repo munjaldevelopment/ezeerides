@@ -2592,17 +2592,23 @@ class apiEmployeeController extends Controller
                 $end_date   = date('Y-m-d 20:00:00');
                $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
                 
-                $loginTime = '';
-                $logoutTime = ''; 
+                $check_inTime = '';
+                $check_outTime = ''; 
+
+                if($employeeAttendance){
+                    $check_inTime = $employeeAttendance->check_in;
+                    $check_outTime = $employeeAttendance->check_out; 
+                }
+
                 $status_code = $success = '1';
                 $message = 'Employee Today Attendance';
                 
-                $json = array('status_code' => $status_code, 'message' => $message);
+                $json = array('status_code' => $status_code, 'message' => $message, 'today_date' => date('Y-m-d H:i:s'), 'check_inTime' => $check_inTime, 'check_outTime' => $check_outTime);
 
 
             } else{
                 $status_code = $success = '0';
-                $message = 'Customer not exists or not verified';
+                $message = 'Employee not exists';
                 
                 $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
             }
