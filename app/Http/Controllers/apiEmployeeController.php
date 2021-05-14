@@ -2774,7 +2774,5 @@ class apiEmployeeController extends Controller
         }
     
         return response()->json($json, 200);
-    }
-
-    
+    }   
 }
