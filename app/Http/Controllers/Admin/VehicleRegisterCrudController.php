@@ -302,7 +302,7 @@ class VehicleRegisterCrudController extends CrudController
 
         $booking_no = "EZR".date('YMDHis').str_pad($id, 5, "0", STR_PAD_LEFT);
         
-        VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+        VehicleRegister::where('id', $id)->update(['booking_no' => $booking_no]);
          
         
         return $result;
