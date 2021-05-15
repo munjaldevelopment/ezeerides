@@ -301,7 +301,7 @@ class VehicleRegisterCrudController extends CrudController
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $booking_no = "EZR".date('YMDHis').str_pad($id, 5, "0", STR_PAD_LEFT);
+        $booking_no = "EZR".date('YmdHis').str_pad($id, 5, "0", STR_PAD_LEFT);
         
         VehicleRegister::where('id', $id)->update(['booking_no' => $booking_no]);
          
