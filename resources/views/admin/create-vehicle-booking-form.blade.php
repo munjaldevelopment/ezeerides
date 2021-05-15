@@ -61,16 +61,17 @@
 	{
 		if(station_id != "")
 		{
-			$("#user_id").html('<option value="">--Select--</option>');
+			$("#employee_id").html('<option value="">--Select--</option>');
 			$.ajax({
 				type:"GET",
 				url:"{{ backpack_url('getEmployee') }}/"+station_id,
 				success:function(res){ 
 					//alert(res);
 					if(res){
-						$("#user_id").append('<option value="0">None</option>');
+						$("#employee_id").append('<option value="0">None</option>');
 						$.each(res,function(key,value){
-							$("#user_id").append('<option value="'+key+'">'+value+'</option>');
+							
+							$("#employee_id").append('<option value="'+key+'">'+value+'</option>');
 						});
 				  	}
 				}
@@ -80,7 +81,7 @@
 		}
 		else
 		{
-			$("#user_id").html('<option value="">--Select--</option><option value="0">None</option>');
+			$("#employee_id").html('<option value="">--Select--</option><option value="0">None</option>');
 		}
 	}
 
