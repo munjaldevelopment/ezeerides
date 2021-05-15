@@ -123,12 +123,12 @@ class VehicleRegisterCrudController extends CrudController
         }
 
         $this->crud->addField([
-            'name' => 'user_id',
+            'name' => 'employee_id',
             'label' => 'Employee',
             'type'      => 'select2_from_array',
             'options'   => $employee_list,
             'attributes'   => [
-                'id' => 'user_id'
+                'id' => 'employee_id'
                 
             ],
             'hint' => '',
@@ -247,9 +247,10 @@ class VehicleRegisterCrudController extends CrudController
         
         // Save Data in user table
         $id = $this->crud->entry->id;
-        $user_id = $this->crud->getRequest()->user_id;
+        $employee_id = $this->crud->getRequest()->employee_id;
         $station = $this->crud->getRequest()->station;
-        $vehicle = $this->crud->getRequest()->vehicle;
+        //$vehicle = $this->crud->getRequest()->vehicle;
+        $vehicle = '';
         $customer_name = $this->crud->getRequest()->customer_name;
         $phone = $this->crud->getRequest()->phone;
         $pick_up = $this->crud->getRequest()->pick_up;
@@ -275,7 +276,7 @@ class VehicleRegisterCrudController extends CrudController
         $fleetFare += $insurance_charges_per_hour;
         
         $booking_id = VehicleRegister::insertGetId([
-            'user_id' => $user_id,
+            'user_id' => $employee_id,
             'station' => $station,
             'vehicle' => $vehicle,
             'customer_name' => $customer_name,
@@ -308,9 +309,10 @@ class VehicleRegisterCrudController extends CrudController
         $this->crud->unsetValidation(); // validation has already been run
 
         $id = $this->crud->getRequest()->id;
-        $user_id = $this->crud->getRequest()->user_id;
+        $employee_id = $this->crud->getRequest()->employee_id;
         $station = $this->crud->getRequest()->station;
-        $vehicle = $this->crud->getRequest()->vehicle;
+        //$vehicle = $this->crud->getRequest()->vehicle;
+        $vehicle = '';
         $customer_name = $this->crud->getRequest()->customer_name;
         $phone = $this->crud->getRequest()->phone;
         $pick_up = $this->crud->getRequest()->pick_up;
@@ -334,7 +336,7 @@ class VehicleRegisterCrudController extends CrudController
         $fleetFare += $insurance_charges_per_hour;
 
         $booking_id = VehicleRegister::where('id', $id)->update([
-            'user_id' => $user_id,
+            'user_id' => $employee_id,
             'station' => $station,
             'vehicle' => $vehicle,
             'customer_name' => $customer_name,
