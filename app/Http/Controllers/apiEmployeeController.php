@@ -198,15 +198,15 @@ class apiEmployeeController extends Controller
                     $employee_id = $employee->id;
                     $otp = rand(11111, 99999);
                     
-                    $smsmessage = "Here is the new OTP ".$otp." for your login id. Please do not share with anyone. ";
-
+                    $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
+                    
                     $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
 
                      DB::table('users')->where('id', '=', $employee_id)->update(['otp' => $otp, 'updated_at' => $date]);
 
                     $status_code = '1';
-                    $message = 'OTP Send sucessfully';
+                    $message = 'OTP Send sucessfully1';
                     $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => "".$employee_id,  'mobile' => $mobile, 'otp' => "".$otp);
                 } 
                 else 
