@@ -2584,9 +2584,10 @@ class apiEmployeeController extends Controller
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 
             if($employee){ 
-                $start_date   = date('Y-m-d 08:00:00');
-                $end_date   = date('Y-m-d 20:00:00');
-                $employeeAttendance = DB::table('employee_attendance')->where('id', $employee_id)->wheredate('attendance_date',' > ',$start_date)->wheredate('attendance_date',' <= ',$end_date)->first();
+                 $start_date   = date('Y-m-d');
+                //$end_date   = date('Y-m-d 21:00:00');
+               $employeeAttendance = DB::table('employee_attendance')->where('employee_id', $employee_id)->wheredate('attendance_date',' = ',$start_date)->first();
+                
                 
                 $check_inTime = '';
                 $check_outTime = ''; 
