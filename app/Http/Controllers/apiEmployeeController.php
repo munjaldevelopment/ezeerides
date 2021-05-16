@@ -199,7 +199,7 @@ class apiEmployeeController extends Controller
                     $otp = rand(11111, 99999);
                     
                     $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
-                    
+
                     $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
 
 
@@ -2288,6 +2288,83 @@ class apiEmployeeController extends Controller
         return response()->json($json, 200);
     }
 
+    public function add_vehicle_booking_image(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $baseUrl = URL::to("/");
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $customer_id = $request->customer_id;
+            $vehicle_image_type = $request->image_type;
+            $title = $request->title;
+            $vehicle_image = $request->vehicle_image;
+           
+            $error = "";
+            if($vehicle_image == ""){
+                $error = "Please add vehicle Image";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+
+           if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        
+                        if($vehicle_image != ''){
+                            $image_parts = explode(";base64,", $vehicle_image);
+                            $image_type_aux = explode("image/", $image_parts[0]);
+                            $image_type = $image_type_aux[1];
+
+                            $vehicleImage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                            $destinationPath = public_path('/uploads/vehicle_booking_image/').$vehicleImage;
+
+                            $data = base64_decode($image_parts[1]);
+                           // $data = $image_parts[1];
+                            file_put_contents($destinationPath, $data);
+                        }
+                        $status = 'Live';
+                        $vehicle_booking_image_id = DB::table('booked_vehicle_images')->insert([
+                            'booking_id' => $booking_id,
+                            'customer_id' => $customer_id,
+                            'title' => $title,
+                            'image' => 'uploads/vehicle_booking_image/'.$vehicleImage,
+                            'image_type' => $vehicle_image_type,
+                            'status' => $status,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        $vehicle_imageurl = $baseUrl."/public/uploads/vehicle_booking_image/".$vehicleImage; 
+                        
+                        $status_code = $success = '1';
+                        $message = 'Vihicle Image Added Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'title' => $title, 'vehicle_image_type' => $vehicle_image_type, "vehicle_image" => $vehicle_imageurl, 'employee_id' => $employee_id);
+                    
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
 
     public function deliver_vehicle(Request $request)
     {

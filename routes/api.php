@@ -141,6 +141,8 @@ Route::post('customer-return-vehicle', 'apiEmployeeController@customerReturnVehi
 
 Route::post('return-vehicle', 'apiEmployeeController@return_vehicle');
 
+Route::post('add-vehicle-booking-image', 'apiEmployeeController@add_vehicle_booking_image');
+
 Route::post('get-customer-detail', 'apiEmployeeController@getCustomerDetail');
 
 Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
