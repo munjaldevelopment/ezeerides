@@ -571,7 +571,7 @@ class apiEmployeeController extends Controller
 
                             $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
                             $vstatus = "At Station";
-                            if($vehicle_status)
+                            if($vehicle_status){
                                
                                 if($vehicle_status == 'In'){
                                     $vstatus = 'At Station';
