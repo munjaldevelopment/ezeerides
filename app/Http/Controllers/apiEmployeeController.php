@@ -587,7 +587,7 @@ class apiEmployeeController extends Controller
                             }    
 
                             $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_status' => $vstatus); 
-                           print_r($fleet_List);
+                          
                         } 
 
                         
