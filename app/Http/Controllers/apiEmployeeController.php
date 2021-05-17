@@ -560,7 +560,7 @@ class apiEmployeeController extends Controller
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
                     $employeeFleetExists = DB::table('stations as s')->join('station_has_vehicles as sv', 's.id', '=', 'sv.station_id')->join('vehicles as v', 'v.id', '=', 'sv.vehicle_id')->select('v.id','v.vehicle_model','v.vehicle_number')->where('v.status','Live')->where('s.employee_id', $employee_id)->orderBy('v.id', 'DESC')->get();
-                    print_r($employeeFleetExists);
+                   
                     $fleet_List = array();
                     if($employeeFleetExists){
                         foreach($employeeFleetExists as $rsfleet)
@@ -570,14 +570,17 @@ class apiEmployeeController extends Controller
                             $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
 
                             $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
-                           $vstatus = "In Service";
-                            if($vehicle_status == 'In'){
-                                $vstatus = 'At Station';
-                            }
+                            $vstatus = "At Station";
+                            if($vehicle_status)
+                               
+                                if($vehicle_status == 'In'){
+                                    $vstatus = 'At Station';
+                                }
 
-                            if($vehicle_status == 'Out'){
-                                $vstatus = 'Out of Station';
-                            }
+                                if($vehicle_status == 'Out'){
+                                    $vstatus = 'Out of Station';
+                                }
+                            }    
 
                             $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_status' => $vstatus); 
                            
