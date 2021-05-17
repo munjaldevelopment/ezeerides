@@ -570,6 +570,7 @@ class apiEmployeeController extends Controller
                             $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
 
                             $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
+                            echo $vehicle_status."hi";
                             $vstatus = "At Station";
                             if($vehicle_status){
                                
@@ -583,7 +584,8 @@ class apiEmployeeController extends Controller
                             }    
 
                             $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_status' => $vstatus); 
-                           
+                           print_r($fleet_List);
+                           exit;
                         } 
 
                         
@@ -604,7 +606,7 @@ class apiEmployeeController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            $message = $e->getTraceAsString();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message);
         }
