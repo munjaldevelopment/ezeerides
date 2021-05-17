@@ -569,7 +569,7 @@ class apiEmployeeController extends Controller
                             $vehicle_number = $rsfleet->vehicle_number;
                             $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
                            
-                            $vehicle_status_exist = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->count()
+                            $vehicle_status_exist = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->count();
                             
                            
                             $vstatus = "At Station";
