@@ -568,11 +568,14 @@ class apiEmployeeController extends Controller
                             $model_id = $rsfleet->vehicle_model;
                             $vehicle_number = $rsfleet->vehicle_number;
                             $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
-
-                            $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
-                            echo $vehicle_status."hi";
+                           
+                            $vehicle_status_exist = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->count()
+                            
+                           
                             $vstatus = "At Station";
-                            if($vehicle_status){
+                            if($vehicle_status_exist > 0){
+
+                                $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
                                
                                 if($vehicle_status == 'In'){
                                     $vstatus = 'At Station';
@@ -585,7 +588,6 @@ class apiEmployeeController extends Controller
 
                             $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel,'vehicle_number' => $rsfleet->vehicle_number,'vehicle_status' => $vstatus); 
                            print_r($fleet_List);
-                           exit;
                         } 
 
                         
