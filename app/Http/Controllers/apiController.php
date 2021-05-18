@@ -1232,7 +1232,7 @@ class apiController extends Controller
                         }
 
                         $status = 'In';
-                        $booking_status = '0';
+                        $booking_status = '1';
                         $customer_name = $customer->name;
                         $phone = $customer->mobile;
                         $pick_up = date('Y-m-d',strtotime($from_date));
