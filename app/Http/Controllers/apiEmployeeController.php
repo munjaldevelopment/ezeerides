@@ -2849,5 +2849,253 @@ class apiEmployeeController extends Controller
         }
     
         return response()->json($json, 200);
-    }   
+    }
+
+    public function service_fleet_on_ride(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $baseUrl = URL::to("/");
+             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+
+            if($employee){
+                $booked_vehicleList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','station','vehicle_model_id','vehicle' )->where('user_id', $employee_id)->where('payment_status', 'success')->where('booking_status','1')->where('status','out')->where('is_amount_receive','0')->orderBy('id', 'DESC')->get();
+                if(count($booked_vehicleList) >0){
+                    $v_list = array();
+                    foreach($booked_vehicleList as $vlist)
+                    {
+                        $model_id = $vlist->vehicle_model_id;
+                        
+                        $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
+
+                        $vehicle_image = DB::table('vehicle_models')->where('id', $model_id)->pluck('vehicle_image')[0];
+                         $bike_image = '';
+                         if($vehicle_image){
+                            $bike_image = $baseUrl."/public/".$vehicle_image; 
+                         }
+                        /* Customer info from prepare to delivery */
+                        $bookingid = $vlist->id;
+                        
+                        $vehicle_model = $vehicleModel;
+                        $booking_no = $vlist->booking_no;
+                        $station_name = $vlist->station;
+                        $customer_name = $vlist->customer_name;
+                        $customer_phone = $vlist->phone;
+                        $vehicle_number = $vlist->vehicle;
+                        
+                        
+                        $v_list[] = ['booking_id' => (string)$vlist->id, 'station_name' =>$station_name, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $bike_image]; 
+                    }
+
+                    
+                    
+                
+                
+                    $status_code = '1';
+                    $message = 'On Ride Fleets';
+                    $json = array('status_code' => $status_code,  'message' => $message, 'fleet_details' => $v_list);
+                }else{
+                        $status_code = '0';
+                        $message = 'No fleet found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'employee_id' => $employee_id);
+                    }
+            }else{
+                $status_code = $success = '0';
+                $message = 'Employee not valid';
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function service_fleet_on_pickup_center(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $baseUrl = URL::to("/");
+             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+
+            if($employee){
+                $employeeFleetExists = DB::table('stations as s')->join('station_has_vehicles as sv', 's.id', '=', 'sv.station_id')->join('vehicles as v', 'v.id', '=', 'sv.vehicle_id')->join('vehicle_models as vm', 'vm.id', '=', 'v.vehicle_model')->select('v.id','vm.model','v.vehicle_number', 'v.vehicle_model', 'vm.allowed_km_per_hour', 'vm.charges_per_hour', 'vm.insurance_charges_per_hour', 'vm.penalty_amount_per_hour','vm.vehicle_image')->where('v.status','Live')->where('s.employee_id', $employee_id)->orderBy('v.id', 'DESC')->get();
+                    $fleet_List = array();
+                    
+                    if($employeeFleetExists){
+                        foreach($employeeFleetExists as $rsfleet)
+                        {
+                           $vehicle_number = $rsfleet->vehicle_number;
+                           $vehicleModel = $rsfleet->model;
+                          $no_ofride = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1')->count();
+
+                          $totalKm = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1')->sum('allowed_km');
+
+                            $baseUrl = URL::to("/");
+                            $vehicle_image  = "";
+                            if($rsfleet->vehicle_image){
+                                $vehicle_image  =  $baseUrl."/public/".$rsfleet->vehicle_image;
+                            
+                            }
+
+                            $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
+                           
+                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'no_ofride' => "".$no_ofride, 'total_km' => "".$totalKm); 
+                           
+                        } 
+
+                        
+                        $status_code = '1';
+                        $message = 'Our Fleet on Pickup Center';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'fleet_List' => $fleet_List);
+                    }else{
+                         $status_code = '0';
+                        $message = 'No Fleet found.';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    }
+            }else{
+                $status_code = $success = '0';
+                $message = 'Employee not valid';
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }
+
+    public function save_service_fleet_request(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $vehicle_id = $request->vehicle_id;
+            $oil_check = $request->oil_check;
+            $engine_check = $request->engine_check;
+            $filter_check = $request->filter_check;
+            $tyre_check = $request->tyre_check;
+            $description = $request->description;
+            $status = 'Pending';
+            $error = "";
+            if($vehicle_id == ""){
+                $error = "Please enter vehicle";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+
+           
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+
+                    $employeeServiceFleet = DB::table('employee_service_fleet_request')->where('employee_id', $employee_id)->where('vehicle_id', $vehicle_id)->first();
+                   
+                    if($employeeServiceFleet){
+                        $serviceRequest_id = $employeeServiceFleet->id;
+                        $updateserviceRequest_id = DB::table('employee_service_fleet_request')->where('id', '=', $serviceRequest_id)->update([
+                            'oil_check' => $oil_check,
+                            'engine_check' => $engine_check,
+                            'filter_check' => $filter_check,
+                            'tyre_check' => $tyre_check,
+                            'description' => $description,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+
+                    }else{
+                        $insertserviceRequest_id = DB::table('employee_service_fleet_request')->insert([
+                            'employee_id' => $employee_id,
+                            'vehicle_id' => $vehicle_id,
+                            'oil_check' => $oil_check,
+                            'engine_check' => $engine_check,
+                            'filter_check' => $filter_check,
+                            'tyre_check' => $tyre_check,
+                            'description' => $description,
+                            'status' => $status,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                    }    
+
+                        
+                        $status_code = $success = '1';
+                        $message = 'Fleet Service Added Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                    
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    } 
+
+    public function service_fleet_request(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $vehicle_id = $request->vehicle_id;
+            $baseUrl = URL::to("/");
+             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+
+            if($employee){
+                    $employeeServiceFleet = DB::table('employee_service_fleet_request')->where('employee_id', $employee_id)->where('vehicle_id', $vehicle_id)->first();
+                   
+                    if($employeeServiceFleet){
+                        
+                        $status_code = '1';
+                        $message = 'Service Fleet Request';
+                        $json = array('status_code' => $status_code,  'message' => $message, 'vehicle_id' => $employeeServiceFleet->vehicle_id, 'oil_check' => $employeeServiceFleet->oil_check, 'engine_check' => $employeeServiceFleet->engine_check, 'filter_check' => $employeeServiceFleet->filter_check, 'tyre_check' => $employeeServiceFleet->tyre_check, 'description' => $employeeServiceFleet->description, 'status' => $employeeServiceFleet->status);
+                    }else{
+                        $status_code = '1';
+                        $message = 'Service Fleet Request';
+                        $json = array('status_code' => $status_code,  'message' => $message,  'vehicle_id' => $vehicle_id, 'oil_check' => 'No', 'engine_check' => 'No', 'filter_check' => 'No', 'tyre_check' => 'No', 'description' => '');
+                    }
+            }else{
+                $status_code = $success = '0';
+                $message = 'Employee not valid';
+                $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message);
+        }
+    
+        return response()->json($json, 200);
+    }  
 }

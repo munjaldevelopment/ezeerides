@@ -156,3 +156,11 @@ Route::post('due-penalties', 'apiEmployeeController@due_penalties');
 Route::post('noticeboard', 'apiEmployeeController@notification_list');
 
 Route::post('statics', 'apiEmployeeController@statics_info');
+
+Route::post('service-fleet-on-ride', 'apiEmployeeController@service_fleet_on_ride');
+
+Route::post('service-fleet-on-pickup-center', 'apiEmployeeController@service_fleet_on_pickup_center');
+
+Route::post('save-service-fleet-request', 'apiEmployeeController@save_service_fleet_request');
+
+Route::post('service-fleet-request', 'apiEmployeeController@service_fleet_request');
