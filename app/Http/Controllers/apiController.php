@@ -905,23 +905,24 @@ class apiController extends Controller
                             $timestamp2 = strtotime($expected_dropDateTime);
 
                             $hours = abs($timestamp2 - $timestamp1)/(60*60);
+                            $bikecharges = $charges_per_hour;
+                            $fleetFare = 0;
+                            $total_price = 0;
+                            if($hours > 0){
+                               
+                                $VehicleRegister = new VehicleRegister();
+                                $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                $total_price = $fleetFare+$insurance_charges_per_hour;
+                            }
                             $day = floor($hours/24);
                             if($ride_type == 'long'){
                                 
-                                $bikecharges = $charges_per_hour;
-                                $fleetFare = 0;
-                                $total_price = 0;
-                                if($hours > 0){
-                                   
-                                    $VehicleRegister = new VehicleRegister();
-                                    $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
-                                    $total_price = $fleetFare+$insurance_charges_per_hour;
-                                }
+                               
                                 $charges = '₹ '.$total_price.' / '.$day.'d';
 
                             }else{
                                 
-                                $charges = '₹ '.$charges_per_hour.' / Hr';
+                                $charges = '₹ '.$total_price.' / Hr';
                             }
                             
                             $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
