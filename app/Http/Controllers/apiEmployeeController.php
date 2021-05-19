@@ -2885,9 +2885,9 @@ class apiEmployeeController extends Controller
                         $customer_name = $vlist->customer_name;
                         $customer_phone = $vlist->phone;
                         $vehicle_number = $vlist->vehicle;
+                        $status = 'Green';
                         
-                        
-                        $v_list[] = ['booking_id' => (string)$vlist->id, 'station_name' =>$station_name, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $bike_image]; 
+                        $v_list[] = ['booking_id' => (string)$vlist->id, 'station_name' =>$station_name, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $bike_image, 'status_color' => $status]; 
                     }
 
                     
@@ -2947,10 +2947,18 @@ class apiEmployeeController extends Controller
                                 $vehicle_image  =  $baseUrl."/public/".$rsfleet->vehicle_image;
                             
                             }
+                            $status = 'Green';
+                            if($no_ofride >= 6){
+                                $status = 'Yellow';
+                            }
+
+                            if($no_ofride >= 60 || $totalKm >= 5000 ){
+                                $status = 'Red';
+                            }
 
                             $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
                            
-                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'no_ofride' => "".$no_ofride, 'total_km' => "".$totalKm); 
+                            $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'no_ofride' => "".$no_ofride, 'total_km' => "".$totalKm, 'status_color' => $status); 
                            
                         } 
 
