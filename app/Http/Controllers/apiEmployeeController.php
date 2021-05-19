@@ -1908,7 +1908,8 @@ class apiEmployeeController extends Controller
 
             $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){ 
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    //$booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->orderBy('id', 'DESC')->first();
                     
                    
                     if($booking){
@@ -2169,7 +2170,9 @@ class apiEmployeeController extends Controller
             if($error == ""){
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->where('status', 'In')->where('register_otp', $booking_otp)->orderBy('id', 'DESC')->first();
+                    //$booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->where('status', 'In')->where('register_otp', $booking_otp)->orderBy('id', 'DESC')->first();
+                    
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('status', 'In')->where('register_otp', $booking_otp)->orderBy('id', 'DESC')->first();
                     
                    
                     if($booking){
@@ -2459,7 +2462,8 @@ class apiEmployeeController extends Controller
             if($error == ""){
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->where('status', 'In')->orderBy('id', 'DESC')->first();
+                    //$booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('payment_status', 'success')->where('status', 'In')->orderBy('id', 'DESC')->first();
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','booking_hours','allowed_km','total_amount','receive_date','is_amount_receive','status','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('status', 'In')->orderBy('id', 'DESC')->first();
                     
                    
                     if($booking){
@@ -2862,7 +2866,8 @@ class apiEmployeeController extends Controller
              $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
 
             if($employee){
-                $booked_vehicleList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','station','vehicle_model_id','vehicle' )->where('user_id', $employee_id)->where('payment_status', 'success')->where('booking_status','1')->where('status','out')->where('is_amount_receive','0')->orderBy('id', 'DESC')->get();
+                //$booked_vehicleList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','station','vehicle_model_id','vehicle' )->where('user_id', $employee_id)->where('payment_status', 'success')->where('booking_status','1')->where('status','out')->where('is_amount_receive','0')->orderBy('id', 'DESC')->get();
+                $booked_vehicleList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','station','vehicle_model_id','vehicle' )->where('user_id', $employee_id)->where('booking_status','1')->where('status','out')->where('is_amount_receive','0')->orderBy('id', 'DESC')->get();
                 if(count($booked_vehicleList) >0){
                     $v_list = array();
                     foreach($booked_vehicleList as $vlist)
