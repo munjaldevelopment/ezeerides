@@ -2188,16 +2188,18 @@ class apiEmployeeController extends Controller
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
 
                         $licence_image  = array();
-                        if($customerLicense->front_image){
-                            $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
-                        }
-                        if($customerLicense->back_image){
-                            $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
+                        if($customerLicense){
+                            if($customerLicense->front_image){
+                                $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
+                            }
+                            if($customerLicense->back_image){
+                                $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
 
-                        }
-                        if($customerLicense->other_image){
-                            $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
+                            }
+                            if($customerLicense->other_image){
+                                $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
 
+                            }
                         }
 
                         /* Customer Adhaar */
@@ -2479,16 +2481,18 @@ class apiEmployeeController extends Controller
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
 
                         $licence_image  = array();
-                        if($customerLicense->front_image){
-                            $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
-                        }
-                        if($customerLicense->back_image){
-                            $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
+                        if($customerLicense){
+                            if($customerLicense->front_image){
+                                $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
+                            }
+                            if($customerLicense->back_image){
+                                $licence_image[] = array("label" => "Back Image", "dataval"=> $baseUrl."/public/".$customerLicense->back_image);
 
-                        }
-                        if($customerLicense->other_image){
-                            $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
+                            }
+                            if($customerLicense->other_image){
+                                $licence_image[] = array("label" => "Other Image", "dataval"=> $baseUrl."/public/".$customerLicense->other_image);
 
+                            }
                         }
 
                         /* Customer Adhaar */
