@@ -1298,7 +1298,7 @@ class apiEmployeeController extends Controller
                         }
 
                         $status = 'In';
-                        $booking_status = '0';
+                        $booking_status = '1';
                         $customer_name = $customer_name;
                         $phone = $customer_phone;
                         $pick_up = date('Y-m-d',strtotime($from_date));
