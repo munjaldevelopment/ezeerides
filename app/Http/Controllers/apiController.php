@@ -1609,12 +1609,22 @@ class apiController extends Controller
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $booking_status = 0;
-                    DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['booking_status' => $booking_status, 'cancel_date' => $date, 'cancel_reason' => $reason, 'updated_at' => $date]);
-                    $status_code = $success = '1';
-                    $message = 'Your booking canceled successfully';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    $today = date('Y-m-d');
+                    $current_time = date('H:i:s');
+                    $chkbooking = DB::table('vehicle_registers')->where('booking_id', $booking_id)->wheredate('pick_up' '>=', $today)->where('pick_up_time', '<=', $current_time)->first();
+                    if($chkbooking){
+                        $booking_status = 0;
+                        DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['booking_status' => $booking_status, 'cancel_date' => $date, 'cancel_reason' => $reason, 'updated_at' => $date]);
+                        $status_code = $success = '1';
+                        $message = 'Your booking canceled successfully';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                         $status_code = $success = '0';
+                        $message = 'You can not cancel this booking as pickup time is over.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }    
 
 
                 } else{
