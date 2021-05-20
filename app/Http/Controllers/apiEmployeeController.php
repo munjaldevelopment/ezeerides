@@ -1926,7 +1926,7 @@ class apiEmployeeController extends Controller
                         $custdoc = new CustomerDocuments();
                         $customerLicense = $custdoc->getCustomerDocumentsByCustomerid($customer_id,'Driving License');
                         $licence_image  = array();
-                        if($customerLicense)
+                        if($customerLicense){
                         
                             if($customerLicense->front_image){
                                 $licence_image[] = array("label" => "Front Image", "dataval" => $baseUrl."/public/".$customerLicense->front_image);
