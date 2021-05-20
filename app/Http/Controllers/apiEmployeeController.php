@@ -2406,18 +2406,35 @@ class apiEmployeeController extends Controller
                 if($employee){
                         
                         if($booking_id){
-                            $prepare_delivery = DB::table('vehicle_prepare_to_delivery')->insert([
-                                'booking_id' => $booking_id,
-                                'allowed_helmets' => $allowed_helmets,
-                                'check_side_mirrors' => $check_side_mirrors,
-                                'check_key' => $check_key,
-                                'fuel_reading' => $fuel_reading,
-                                'meter_reading' => $meter_reading,
-                                'secondary_number' => $secondary_number,
-                                'parents_number' => $parents_number,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                            ]);
+                            $chkPreparebooking = DB::table('vehicle_prepare_to_delivery')->where('booking_id', $booking_id)->first();
+                   
+                            if($chkPreparebooking){
+                                $bookingPrepare_id = $chkPreparebooking->id;
+                                $updateserviceRequest_id = DB::table('vehicle_prepare_to_delivery')->where('id', '=', $bookingPrepare_id)->update([
+                                    'allowed_helmets' => $allowed_helmets,
+                                    'check_side_mirrors' => $check_side_mirrors,
+                                    'check_key' => $check_key,
+                                    'fuel_reading' => $fuel_reading,
+                                    'meter_reading' => $meter_reading,
+                                    'secondary_number' => $secondary_number,
+                                    'parents_number' => $parents_number,
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+
+                            }else{
+                                $prepare_delivery = DB::table('vehicle_prepare_to_delivery')->insert([
+                                    'booking_id' => $booking_id,
+                                    'allowed_helmets' => $allowed_helmets,
+                                    'check_side_mirrors' => $check_side_mirrors,
+                                    'check_key' => $check_key,
+                                    'fuel_reading' => $fuel_reading,
+                                    'meter_reading' => $meter_reading,
+                                    'secondary_number' => $secondary_number,
+                                    'parents_number' => $parents_number,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                ]);
+                            }
 
                             /* Assigne vehicle number */
                             $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['vehicle' => $vehicle_number, 'status' => 'Out', 'updated_at' => $date]);
@@ -2619,6 +2636,22 @@ class apiEmployeeController extends Controller
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
                     if($booking_id){
+                        $chkreturnbooking = DB::table('vehicle_return_to_station')->where('booking_id', $booking_id)->first();
+                   
+                        if($chkreturnbooking){
+                            $bookingreturn_id = $chkreturnbooking->id;
+                            $updateserviceRequest_id = DB::table('vehicle_return_to_station')->where('id', '=', $bookingreturn_id)->update([
+                                'recieve_helmets' => $recieve_helmets,
+                                'check_side_mirrors' => $check_side_mirrors,
+                                'check_key' => $check_key,
+                                'fuel_reading' => $fuel_reading,
+                                'meter_reading' => $meter_reading,
+                                'damage_charges' => $damage_charges,
+                                'extra_charges' => $extra_charges,
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+
+                     }else{
                         $prepare_delivery = DB::table('vehicle_return_to_station')->insert([
                             'booking_id' => $booking_id,
                             'recieve_helmets' => $recieve_helmets,
@@ -2631,6 +2664,8 @@ class apiEmployeeController extends Controller
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
+
+                    }    
 
                         /* Assigne vehicle number */
                         $return_time = date('Y-m-d H:i:s');
