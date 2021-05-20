@@ -1988,7 +1988,7 @@ class apiEmployeeController extends Controller
                                 $vstatus = 'Completed';
                             }
 
-                        $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                        $before_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
                         $booked_vehicle_before_list = array();
                         foreach($before_ride_img as $beforeimg)
                         {
@@ -1999,7 +1999,7 @@ class apiEmployeeController extends Controller
                             }
                         } 
 
-                        $after_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
+                        $after_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
                         $booked_vehicle_after_list = array();
                         foreach($after_ride_img as $afterimg)
                         {
@@ -2242,7 +2242,7 @@ class apiEmployeeController extends Controller
                          }
   
 
-                        $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                        $before_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
                         $booked_vehicle_before_list = array();
                         foreach($before_ride_img as $beforeimg)
                         {
@@ -2278,7 +2278,7 @@ class apiEmployeeController extends Controller
                             $message = 'Prepare To Delivery Detail';
                         }
 
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model,  'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'customer_address' => $customer_address, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'allowed_helmet' => '2', 'check_side_mirrors' => 'f', 'check_key' => 'f', 'fuel_reading' => '', 'meter_reading' => '', 'secondary_number' => '', 'parents_number' => '', 'booking_hours' => "".$booking->booking_hours, 'allowed_km' => "".$booking->allowed_km, 'total_amount' => "".$booking->total_amount, 'licence_image' => $licence_image, 'adaarimage' => $adaarimage, 'vehicle_number' => $vehicle_list, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)),  'vehicle_image_before_ride' => $booked_vehicle_before_list );
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'customer_id' => $customer_id, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'customer_address' => $customer_address, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'allowed_helmet' => '2', 'check_side_mirrors' => 'f', 'check_key' => 'f', 'fuel_reading' => '', 'meter_reading' => '', 'secondary_number' => '', 'parents_number' => '', 'booking_hours' => "".$booking->booking_hours, 'allowed_km' => "".$booking->allowed_km, 'total_amount' => "".$booking->total_amount, 'licence_image' => $licence_image, 'adaarimage' => $adaarimage, 'vehicle_number' => $vehicle_list, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)),  'vehicle_image_before_ride' => $booked_vehicle_before_list );
                     }else{
                          $status_code = '0';
                         $message = 'No booking data found.';
@@ -2551,7 +2551,7 @@ class apiEmployeeController extends Controller
                          }
   
 
-                        $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                        $before_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
                         $booked_vehicle_before_list = array();
                         foreach($before_ride_img as $beforeimg)
                         {
@@ -2559,6 +2559,17 @@ class apiEmployeeController extends Controller
                                 $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
                                 
                                 $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
+                            }
+                        } 
+
+                        $after_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
+                        $booked_vehicle_after_list = array();
+                        foreach($after_ride_img as $afterimg)
+                        {
+                            if($afterimg->image){
+                                $afterimgurl = $baseUrl."/public/".$afterimg->image; 
+                                
+                                $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
                             }
                         } 
                         
@@ -2584,10 +2595,10 @@ class apiEmployeeController extends Controller
                         
                         $status_code = '1';
                         if($vehicle_status == 'In'){
-                            $message = 'Prepare To Delivery Detail';
+                            $message = 'Return To Station Detail';
                         }
 
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model,  'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'customer_address' => $customer_address, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'allowed_helmet' => '2', 'check_side_mirrors' => 'f', 'check_key' => 'f', 'fuel_reading' => '', 'meter_reading' => '', 'secondary_number' => '', 'parents_number' => '', 'booking_hours' => "".$booking->booking_hours, 'allowed_km' => "".$booking->allowed_km, 'total_amount' => "".$booking->total_amount, 'licence_image' => $licence_image, 'adaarimage' => $adaarimage, 'vehicle_number' => $vehicle_list, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)),  'vehicle_image_before_ride' => $booked_vehicle_before_list );
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'customer_id' => $customer_id, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'customer_address' => $customer_address, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'allowed_helmet' => '2', 'check_side_mirrors' => 'f', 'check_key' => 'f', 'fuel_reading' => '', 'meter_reading' => '', 'secondary_number' => '', 'parents_number' => '', 'booking_hours' => "".$booking->booking_hours, 'allowed_km' => "".$booking->allowed_km, 'total_amount' => "".$booking->total_amount, 'licence_image' => $licence_image, 'adaarimage' => $adaarimage, 'vehicle_number' => $vehicle_list, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)),  'vehicle_image_before_ride' => $booked_vehicle_before_list, 'booked_vehicle_after_list' => $booked_vehicle_after_list );
                     }else{
                          $status_code = '0';
                         $message = 'No booking data found.';
