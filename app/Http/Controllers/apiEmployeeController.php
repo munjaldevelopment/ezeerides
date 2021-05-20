@@ -1831,35 +1831,37 @@ class apiEmployeeController extends Controller
                     $center = $stationinfo->id;
                     $station_name = $stationinfo->station_name;
                    
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','additional_amount','receive_date','return_time','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','additional_amount','receive_amount','receive_date','return_time','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1);
                     $booked_vehicleList = $booked_vehicleList->orderBy('pick_up', 'asc')->get(); 
                     if(count($booked_vehicleList) >0){
                         $v_list = array();
                         foreach($booked_vehicleList as $vlist)
                         {
-                            $model_id = $vlist->vehicle_model_id;
-                            $vehicle_status = $vlist->status;
-                            $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
-                            /* Customer info from prepare to delivery */
-                            $bookingid = $vlist->id;
-                            $customerDeliveyinfo = DB::table('vehicle_prepare_to_delivery')->where('booking_id', $bookingid)->first();
+                            if($vlist->receive_amount < $vlist->additional_amount){
+                                $model_id = $vlist->vehicle_model_id;
+                                $vehicle_status = $vlist->status;
+                                $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
+                                /* Customer info from prepare to delivery */
+                                $bookingid = $vlist->id;
+                                $customerDeliveyinfo = DB::table('vehicle_prepare_to_delivery')->where('booking_id', $bookingid)->first();
 
-                            $vehicle_model = $vehicleModel;
-                            $booking_no = $vlist->booking_no;
-                            $penalty_amount = $vlist->additional_amount;
-                            $customer_name = $vlist->customer_name;
-                            $customer_phone = $vlist->phone;
-                            $secondary_number = $customerDeliveyinfo->secondary_number;
-                            $parents_number = $customerDeliveyinfo->parents_number;
-                            $vehicle_number = $vlist->vehicle;
-                            $pick_up = date("d M Y",strtotime($vlist->pick_up));
-                            $pick_up_time = $vlist->pick_up_time;
+                                $vehicle_model = $vehicleModel;
+                                $booking_no = $vlist->booking_no;
+                                $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                $customer_name = $vlist->customer_name;
+                                $customer_phone = $vlist->phone;
+                                $secondary_number = $customerDeliveyinfo->secondary_number;
+                                $parents_number = $customerDeliveyinfo->parents_number;
+                                $vehicle_number = $vlist->vehicle;
+                                $pick_up = date("d M Y",strtotime($vlist->pick_up));
+                                $pick_up_time = $vlist->pick_up_time;
 
-                            $receive_date = date("d M Y",strtotime($vlist->receive_date));
-                            $return_time = date("H:i:s",strtotime($vlist->return_time));
-                            
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'secondary_number' =>$secondary_number, 'parents_number' =>$parents_number, 'vehicle_number' => $vehicle_number, 'penalty_amount' => $penalty_amount, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'receive_date' => $receive_date, 'return_time' => $return_time]; 
-                         }
+                                $receive_date = date("d M Y",strtotime($vlist->receive_date));
+                                $return_time = date("H:i:s",strtotime($vlist->return_time));
+                                
+                                $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'secondary_number' =>$secondary_number, 'parents_number' =>$parents_number, 'vehicle_number' => $vehicle_number, 'penalty_amount' => $penalty_amount, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'receive_date' => $receive_date, 'return_time' => $return_time]; 
+                             }
+                        } 
 
                         
                         if($city_id > 0){
@@ -2641,6 +2643,7 @@ class apiEmployeeController extends Controller
 
             $damage_charges = $request->damage_charges;
             $extra_charges = $request->extra_charges;
+            $receive_amount = $request->receive_amount;
             $error = "";
             
             if($error == ""){
@@ -2688,7 +2691,7 @@ class apiEmployeeController extends Controller
                         
                         $is_amount_receive = 1;
                         $receive_date = date('Y-m-d H:i:s');
-                        $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'IN', 'updated_at' => $date]);
+                        $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'receive_amount' => $receive_amount, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'IN', 'updated_at' => $date]);
                     }
                     
                     $status_code = $success = '1';
