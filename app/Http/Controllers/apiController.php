@@ -1611,7 +1611,7 @@ class apiController extends Controller
                 if($customer){ 
                     $today = date('Y-m-d');
                     $current_time = date('H:i:s');
-                    $chkbooking = DB::table('vehicle_registers')->where('booking_id', $booking_id)->wheredate('pick_up' '>=', $today)->where('pick_up_time', '<=', $current_time)->first();
+                    $chkbooking = DB::table('vehicle_registers')->where('id', $booking_id)->wheredate('pick_up', '>=', $today)->where('pick_up_time', '<=', $current_time)->first();
                     if($chkbooking){
                         $booking_status = 0;
                         DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['booking_status' => $booking_status, 'cancel_date' => $date, 'cancel_reason' => $reason, 'updated_at' => $date]);
