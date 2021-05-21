@@ -1850,9 +1850,9 @@ class apiEmployeeController extends Controller
                                 $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
                                 $customer_name = $vlist->customer_name;
                                 $customer_phone = $vlist->phone;
-                                if($customerDeliveyinfo)
-                                $secondary_number = $customerDeliveyinfo->secondary_number;
-                                $parents_number = $customerDeliveyinfo->parents_number;
+                                if($customerDeliveyinfo){
+                                    $secondary_number = $customerDeliveyinfo->secondary_number;
+                                    $parents_number = $customerDeliveyinfo->parents_number;
                                 }else{
                                     $secondary_number = '';
                                     $parents_number = '';
