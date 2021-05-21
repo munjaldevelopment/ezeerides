@@ -1850,8 +1850,13 @@ class apiEmployeeController extends Controller
                                 $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
                                 $customer_name = $vlist->customer_name;
                                 $customer_phone = $vlist->phone;
+                                if($customerDeliveyinfo)
                                 $secondary_number = $customerDeliveyinfo->secondary_number;
                                 $parents_number = $customerDeliveyinfo->parents_number;
+                                }else{
+                                    $secondary_number = '';
+                                    $parents_number = '';
+                                }
                                 $vehicle_number = $vlist->vehicle;
                                 $pick_up = date("d M Y",strtotime($vlist->pick_up));
                                 $pick_up_time = $vlist->pick_up_time;
