@@ -1640,7 +1640,7 @@ class apiEmployeeController extends Controller
                     }
                     $current_time = date('H:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','status')->where('user_id',$employee_id)->where('is_amount_receive','1')->where('booking_status','1')->where('due_penalty','no')->wheredate('receive_date', '<= ', $filterdate);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','status')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->wheredate('receive_date', '<', $filterdate);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
