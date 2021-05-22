@@ -1640,7 +1640,7 @@ class apiEmployeeController extends Controller
                     }
                     $current_time = date('H:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','status')->where('user_id',$employee_id)->where('booking_status','1')->where('status','In')->where('due_penalty','no')->wheredate('pick_up', '<', $filterdate);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','is_amount_receive','receive_date','status')->where('user_id',$employee_id)->where('booking_status','1')->where('status','In')->where('due_penalty','no')->wheredate('pick_up', '<', $filterdate);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
@@ -1664,7 +1664,17 @@ class apiEmployeeController extends Controller
                             $vehicle_status = $vlist->status;
                             $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
 
-                            $vstatus = 'Completed';
+                            if($vehicle_status == 'In'){
+                                $vstatus = 'Prepare To Delivery';
+                            }
+
+                            if($vehicle_status == 'Out'){
+                                $vstatus = 'Customer Return at Center';
+                            }
+
+                            if($vlist->receive_date != '' && $vlist->is_amount_receive === 1){
+                                $vstatus = 'Completed';
+                            }
                             
 
                             $vehicle_model = $vehicleModel;
