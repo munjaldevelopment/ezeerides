@@ -1132,6 +1132,20 @@ class apiEmployeeController extends Controller
                         $end_trip_date = date('d-m-Y',strtotime($to_date));
                         $end_trip_time = date('H:i',strtotime($to_date));
 
+                        /* due penalties */
+                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                        $customer_penalty = 0;
+                        if(count($booked_vehicleList) >0){
+                            foreach($booked_vehicleList as $vlist)
+                            {
+                                if($vlist->receive_amount < $vlist->additional_amount){
+                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                    $customer_penalty = $penalty_amount;
+                                }
+                            }
+                        }        
+                        /* End */
+                        
                         $fleetFare = 0;
                         $total_price = 0;
                         if($hours > 0){
@@ -2039,12 +2053,24 @@ class apiEmployeeController extends Controller
 
                         $bike_options[] = array('optionTitle' => 'Selfi', 'optionData' => $selfiarr);
 
-                        
-
+                        /* due penalties */
+                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                        $customer_penalty = 0;
+                        if(count($booked_vehicleList) >0){
+                            foreach($booked_vehicleList as $vlist)
+                            {
+                                if($vlist->receive_amount < $vlist->additional_amount){
+                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                    $customer_penalty = $penalty_amount;
+                                }
+                            }
+                        }        
+                        /* End */
+                        $total_amount = $booking->total_amount+$customer_penalty;
                         $status_code = '1';
                         $message = 'Booking Details';
 
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_image' => $vehicle_image, 'vehicle_number' => $booking->vehicle, 'employee_name' => $employee->name, 'customer_id' => $customer_id,'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time,  'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'bike_options' => $bike_options,  'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list );
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'Type' => $vstatus, 'booking_no' => $booking->booking_no, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_image' => $vehicle_image, 'vehicle_number' => $booking->vehicle, 'employee_name' => $employee->name, 'customer_id' => $customer_id,'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'customer_penalty_amount' => $customer_penalty,  'total_amount' => $total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'bike_options' => $bike_options,  'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list );
                     }else{
                          $status_code = '0';
                         $message = 'No booking data found.';

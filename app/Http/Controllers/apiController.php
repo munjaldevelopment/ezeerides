@@ -1074,7 +1074,19 @@ class apiController extends Controller
                         $end_trip_date = date('d-m-Y',strtotime($to_date));
                         $end_trip_time = date('H:i',strtotime($to_date));
 
-                        
+                        /* due penalties */
+                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                        $customer_penalty = 0;
+                        if(count($booked_vehicleList) >0){
+                            foreach($booked_vehicleList as $vlist)
+                            {
+                                if($vlist->receive_amount < $vlist->additional_amount){
+                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                    $customer_penalty = $penalty_amount;
+                                }
+                            }
+                        }        
+                        /* End */
 
                          $fleetFare = 0;
                          $total_price = 0;
@@ -1085,7 +1097,7 @@ class apiController extends Controller
                             $total_price = $fleetFare+$insurance_charges;
                         }
 
-                        
+                        $total_price += $customer_penalty;
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -1144,7 +1156,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'customer_penalty_amount' => '₹ '.$customer_penalty, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
@@ -1162,7 +1174,7 @@ class apiController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            $message = $e->getTraceAsString();//$e->getTraceAsString(); getMessage //
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
