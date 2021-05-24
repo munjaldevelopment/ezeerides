@@ -1413,7 +1413,7 @@ class apiEmployeeController extends Controller
                     $today = date('Y-m-d');
                     $current_time = date('H:i:s');
 
-                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '<=', $current_time);
+                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '>', $current_time);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
@@ -1453,10 +1453,10 @@ class apiEmployeeController extends Controller
                             $booking_no = $vlist->booking_no;
                             $customer_name = $vlist->customer_name;
                             $vehicle_number = $vlist->vehicle;
-                            $pick_up = date("d M F",strtotime($vlist->pick_up));
+                            $pick_up = date("d M Y",strtotime($vlist->pick_up));
                             $pick_up_time = $vlist->pick_up_time;
 
-                            $expected_drop = date("d M F",strtotime($vlist->expected_drop));
+                            $expected_drop = date("d M Y",strtotime($vlist->expected_drop));
                             $expected_drop_time = $vlist->expected_drop_time;
                             
                             $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'vehicle_number' => $vehicle_number, 'vehicle_status' => $vstatus, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'expected_drop_date' => $expected_drop, 'expected_drop_time' => $expected_drop_time]; 
