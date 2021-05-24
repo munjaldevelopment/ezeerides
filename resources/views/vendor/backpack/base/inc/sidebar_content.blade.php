@@ -45,7 +45,9 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-tools"></i>Service Management</a>
 	<ul class="nav-dropdown-items">
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicetype') }}'><i class='nav-icon la la-tools'></i> Service Type</a></li>
-	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice/create') }}'><i class='nav-icon la la-tools'></i> Services Request </a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('servicefleetrequest') }}'><i class='nav-icon la la-tools'></i> Employee Service Enquiry</a></li>
+	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice/create') }}'><i class='nav-icon la la-tools'></i> Add Services </a></li>
+	  
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('vehicleservice') }}'><i class='nav-icon la la-tools'></i> ALL Services </a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('pendingservices') }}'><i class='nav-icon la la-tools'></i> Pending Services </a></li>
 	  <li class='nav-item'><a class='nav-link' href='{{ backpack_url('completedservices') }}'><i class='nav-icon la la-tools'></i> Completed Services </a></li>
@@ -98,6 +100,7 @@
 @php
 	endif;
 @endphp
+
 
 
 
