@@ -1071,7 +1071,7 @@ class apiController extends Controller
                             {
                                 if($vlist->receive_amount < $vlist->additional_amount){
                                     $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
-                                    $customer_penalty = $penalty_amount;
+                                    $customer_penalty += $penalty_amount;
                                 }
                             }
                         }        
@@ -1413,6 +1413,23 @@ class apiController extends Controller
                             $payment_status = 'success';
                             $payment_type = 'paytm';
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
+
+                             /* paid due penalties */
+                            $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                            $customer_penalty = 0;
+                            if(count($booked_vehicleList) >0){
+                                foreach($booked_vehicleList as $vlist)
+                                {
+                                    if($vlist->receive_amount < $vlist->additional_amount){
+                                        /* update penalties */
+                                        $penaltybooking_id = $vlist->id;
+                                        $penaltyamt = $vlist->additional_amount;
+                                        $due_penalty = 'no';   
+                                        DB::table('vehicle_registers')->where('id', '=', $penaltybooking_id)->update(['receive_amount' => "".$penaltyamt, 'due_penalty' => $due_penalty, 'updated_at' => $date]);
+                                    }
+                                }
+                            }        
+                            /* End */
 
                             $status_code = $success = '1';
                             $message = 'Your Booking Transaction Successfully Done.';

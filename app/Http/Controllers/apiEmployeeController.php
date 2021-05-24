@@ -1141,7 +1141,7 @@ class apiEmployeeController extends Controller
                             {
                                 if($vlist->receive_amount < $vlist->additional_amount){
                                     $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
-                                    $customer_penalty = $penalty_amount;
+                                    $customer_penalty += $penalty_amount;
                                 }
                             }
                         }        
@@ -1411,9 +1411,9 @@ class apiEmployeeController extends Controller
                     $center = $stationinfo->id;
                     $station_name = $stationinfo->station_name;
                     $today = date('Y-m-d');
-                    $current_time = date('h:i:s');
+                    $current_time = date('20:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('is_amount_receive','0')->where('pick_up', $today)->where('pick_up_time', '<=', $current_time);
+                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('is_amount_receive','0')->where('pick_up', $today)->where('pick_up_time', '<=', $current_time);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
@@ -2073,7 +2073,7 @@ class apiEmployeeController extends Controller
                             {
                                 if($vlist->receive_amount < $vlist->additional_amount){
                                     $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
-                                    $customer_penalty = $penalty_amount;
+                                    $customer_penalty += $penalty_amount;
                                 }
                             }
                         }        
