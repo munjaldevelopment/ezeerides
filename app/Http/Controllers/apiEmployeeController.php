@@ -1857,7 +1857,7 @@ class apiEmployeeController extends Controller
                     $center = $stationinfo->id;
                     $station_name = $stationinfo->station_name;
                    
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','additional_amount','receive_amount','receive_date','return_time','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','additional_amount','receive_amount','receive_date','return_time','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->where('due_penalty','yes');
                     $booked_vehicleList = $booked_vehicleList->orderBy('pick_up', 'asc')->get(); 
                     if(count($booked_vehicleList) >0){
                         $v_list = array();
@@ -1902,6 +1902,165 @@ class apiEmployeeController extends Controller
                         $message = 'Due Penalties Result';
                         
                         $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'center_name' => $station_name, 'vehicle_list' => $v_list);
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'Penalty Vehicle not available right now';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);    
+                    }
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //Due Penalties
+    public function penalty_detail(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+             $baseUrl = URL::to("/");
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $error = "";
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){ 
+
+
+                    $stationinfo = DB::table('stations')->where('employee_id', $employee_id)->where('status', '=', 'Live')->first();
+                    
+                    $city_id = $stationinfo->city_id;
+                    $center = $stationinfo->id;
+                    $station_name = $stationinfo->station_name;
+                   
+                    $booked_vehicleList = DB::table('vehicle_registers')->where('id',$booking_id)->where('user_id',$employee_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->where('due_penalty','yes');
+                    $booked_vehicleList = $booked_vehicleList->orderBy('pick_up', 'asc')->get(); 
+                    if(count($booked_vehicleList) > 0){
+                        $v_list = array();
+                        foreach($booked_vehicleList as $vlist)
+                        {
+                            if($vlist->receive_amount < $vlist->additional_amount){
+                                $model_id = $vlist->vehicle_model_id;
+                                $customer_id = $vlist->customer_id;
+                                $vehicle_status = $vlist->status;
+                                $vehicleModel = DB::table('vehicle_models')->where('id', $model_id)->pluck('model')[0];
+                                /* Customer info from prepare to delivery */
+                                $bookingid = $vlist->id;
+                                $customerinfo = DB::table('customers')->where('id', $customer_id)->first();
+
+                                $customerDeliveyinfo = DB::table('vehicle_prepare_to_delivery')->where('booking_id', $bookingid)->first();
+
+                                $customerReturninfo = DB::table('vehicle_return_to_station')->where('booking_id', $bookingid)->first();
+
+                                $vehicle_model = $vehicleModel;
+                                $booking_no = $vlist->booking_no;
+                                $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                $customer_name = $vlist->customer_name;
+                                $customer_phone = $vlist->phone;
+                                $customer_address = $customerinfo->address;
+                                $customer_email = $customerinfo->email;
+                                $customerDocArr = array();
+                                $customerDocList = DB::table('customer_documents')->select('id','title','front_image' ,'back_image', 'other_image')->where('customer_id', '=', $customer_id)->where('status', '=', 'Live')->orderBy('id', 'DESC')->get();
+                               
+                                foreach ($customerDocList as $doclist) {
+                                    $front_image  = '';
+                                    $back_image  = '';
+                                    $other_image  = '';
+                                    if($doclist->front_image){
+                                        $front_image  =  $baseUrl."/public/".$doclist->front_image;
+                                    }
+                                    if($doclist->back_image){
+                                        $back_image  =  $baseUrl."/public/".$doclist->back_image;
+                                    }
+                                    if($doclist->other_image){
+                                        $other_image  =  $baseUrl."/public/".$doclist->other_image;
+                                    }
+                                    $customerDocArr[] = ['id' => (int)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
+                                }
+                                if($customerDeliveyinfo){
+                                    $secondary_number = $customerDeliveyinfo->secondary_number;
+                                    $parents_number = $customerDeliveyinfo->parents_number;
+                                    $deliverytime_meeterreading = $customerDeliveyinfo->meter_reading;
+                                }else{
+                                    $secondary_number = '';
+                                    $parents_number = '';
+                                    $deliverytime_meeterreading = '';
+                                }
+
+                                if($customerReturninfo){
+                                    $extra_charges = $customerReturninfo->extra_charges;
+                                    $damage_charges = $customerReturninfo->damage_charges;
+                                    $returntime_meeterreading = $customerReturninfo->meter_reading;
+                                }else{
+                                    $extra_charges = '';
+                                    $damage_charges = '';
+                                    $returntime_meeterreading = '';
+                                }
+                                $vehicle_number = $vlist->vehicle;
+                                
+                                $booking_hours = $vlist->booking_hours;
+                                $additional_hours = $vlist->additional_hours;
+                                $allowed_km = $vlist->allowed_km;
+                                $additional_amount = $vlist->additional_amount;
+                                $receive_amount = $vlist->receive_amount;
+                                $total_amount = $vlist->total_amount;
+                                $pick_up = date("d M Y",strtotime($vlist->pick_up));
+                                $pick_up_time = $vlist->pick_up_time;
+
+                                $receive_date = date("d M Y",strtotime($vlist->receive_date));
+                                $return_time = date("H:i:s",strtotime($vlist->return_time));
+
+                                $before_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
+                                $booked_vehicle_before_list = array();
+                                foreach($before_ride_img as $beforeimg)
+                                {
+                                    if($beforeimg->image){
+                                        $beforeimgurl = $baseUrl."/public/".$beforeimg->image; 
+                                        
+                                        $booked_vehicle_before_list[] = array('title' => $beforeimg->title, 'image' => $beforeimgurl); 
+                                    }
+                                } 
+
+                                $after_ride_img = DB::table('booked_vehicle_images')->where('booking_id', $booking_id)->where('image_type', 'After Ride')->orderBy('id', 'DESC')->get();
+                                $booked_vehicle_after_list = array();
+                                foreach($after_ride_img as $afterimg)
+                                {
+                                    if($afterimg->image){
+                                        $afterimgurl = $baseUrl."/public/".$afterimg->image; 
+                                        
+                                        $booked_vehicle_after_list[] = array('title' => $afterimg->title, 'image' => $afterimgurl); 
+                                    }
+                                }  
+                                
+                                $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'secondary_number' =>$secondary_number, 'parents_number' =>$parents_number, 'customer_email' =>$customer_email, 'customer_address' =>$customer_address, 'customer_doc' =>$customerDocArr, 'vehicle_number' => $vehicle_number, 'booking_hours' => $booking_hours, 'additional_hours' => $additional_hours, 'allowed_km' => $allowed_km, 'additional_amount' => $additional_amount, 'extra_charges' => $extra_charges, 'damage_charges' => $damage_charges,  'receive_amount' => $receive_amount, 'penalty_amount' => $penalty_amount, 'total_amount' => $total_amount, 'deliverytime_bike_meeter_reading' => "".$deliverytime_meeterreading, 'returntime_bike_meeter_reading' => "".$returntime_meeterreading, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'receive_date' => $receive_date, 'return_time' => $return_time,'booked_vehicle_before_images' => $booked_vehicle_before_list, 'booked_vehicle_after_images' => $booked_vehicle_after_list]; 
+                             }
+                        } 
+
+                        
+                        if($city_id > 0){
+                            $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
+                        }
+                        $status_code = $success = '1';
+                        $message = 'Penalties Detail';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'center_name' => $station_name, 'penality_detail' => $v_list);
                     }else{
                         $status_code = $success = '0';
                         $message = 'Penalty Vehicle not available right now';
@@ -2708,23 +2867,23 @@ class apiEmployeeController extends Controller
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
 
-                     }else{
-                        $prepare_delivery = DB::table('vehicle_return_to_station')->insert([
-                            'booking_id' => $booking_id,
-                            'recieve_helmets' => $recieve_helmets,
-                            'check_side_mirrors' => $check_side_mirrors,
-                            'check_key' => $check_key,
-                            'fuel_reading' => $fuel_reading,
-                            'meter_reading' => $meter_reading,
-                            'damage_charges' => $damage_charges,
-                            'extra_charges' => $extra_charges,
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s'),
-                        ]);
+                         }else{
+                            $prepare_delivery = DB::table('vehicle_return_to_station')->insert([
+                                'booking_id' => $booking_id,
+                                'recieve_helmets' => $recieve_helmets,
+                                'check_side_mirrors' => $check_side_mirrors,
+                                'check_key' => $check_key,
+                                'fuel_reading' => $fuel_reading,
+                                'meter_reading' => $meter_reading,
+                                'damage_charges' => $damage_charges,
+                                'extra_charges' => $extra_charges,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            ]);
 
-                    }    
+                        }    
 
-                        /* Assigne vehicle number */
+                        
                         $return_time = date('Y-m-d H:i:s');
                         $additional_hours = 0;
                         $additional_amount = 0;
@@ -2733,8 +2892,61 @@ class apiEmployeeController extends Controller
                         }
                         
                         $is_amount_receive = 1;
+                        $due_penalty = 'no';
+                        if($receive_amount < $additional_amount){
+                            $due_penalty = 'yes';
+                        }
                         $receive_date = date('Y-m-d H:i:s');
-                        $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'receive_amount' => $receive_amount, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'IN', 'updated_at' => $date]);
+                        $vehicleBooking =  DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['return_time' => $return_time, 'additional_hours' => $additional_hours, 'additional_amount' => $additional_amount, 'receive_amount' => $receive_amount, 'due_penalty' => $due_penalty, 'is_amount_receive' => $is_amount_receive, 'receive_date' => $receive_date, 'status' => 'In', 'updated_at' => $date]);
+
+                        /* Check vehicle number for service */
+                         $bookinginfo = DB::table('vehicle_registers')->select('id','vehicle')->where('id', $booking_id)->first();
+                         if($bookinginfo){
+                            $vehicle_number = $bookinginfo->vehicle;
+                             $checkserviceReminder = DB::table('vehicle_service_reminder')->select('id','service_complete_date')->where('vehicle_number', $vehicle_number)->where('service_status', 'done')->first();
+
+                             $no_ofride = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
+                             if($checkserviceReminder){
+                                $service_complete_date = $checkserviceReminder->service_complete_date;    
+                                $no_ofride .= $no_ofride->wheredate('pick_up', '>' ,$service_complete_date);    
+                            }
+                            $no_ofride .= $no_ofride->count();
+                              
+                            $totalKm = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
+                            if($checkserviceReminder){
+                                $service_complete_date = $checkserviceReminder->service_complete_date;    
+                                $totalKm .= $totalKm->wheredate('pick_up', '>' ,$service_complete_date);    
+                            }    
+                            $totalKm .= $totalKm->sum('allowed_km');
+                              if($no_ofride >= 60){
+                                    $serviceReminder = DB::table('vehicle_service_reminder')->select('id')->where('vehicle_number', $vehicle_number)->where('service_status', 'pending')->count();
+                                    if($serviceReminder == 0){
+                                         $vehicle_service_reminder = DB::table('vehicle_service_reminder')->insert([
+                                            'vehicle_number' => $vehicle_number,
+                                            'service_type' => 'ride',
+                                            'service_status' => 'pending',
+                                            'service_complete_date' => '',
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            'updated_at' => date('Y-m-d H:i:s'),
+                                        ]);   
+                                    }
+                              }
+
+                                if($totalKm >= 5000 ){
+                                    $serviceReminder = DB::table('vehicle_service_reminder')->select('id')->where('vehicle_number', $vehicle_number)->where('service_status', 'pending')->count();
+                                    if($serviceReminder == 0){
+                                         $vehicle_service_reminder = DB::table('vehicle_service_reminder')->insert([
+                                            'vehicle_number' => $vehicle_number,
+                                            'service_type' => 'km',
+                                            'service_status' => 'pending',
+                                            'service_complete_date' => '',
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            'updated_at' => date('Y-m-d H:i:s'),
+                                        ]);   
+                                    }
+                                }
+                         }     
+                        /* End */
                     }
                     
                     $status_code = $success = '1';
@@ -3050,7 +3262,7 @@ class apiEmployeeController extends Controller
                                 $vehicle_image  =  $baseUrl."/public/".$rsfleet->vehicle_image;
                             
                             }
-                            $status = '';
+                            $status = 'Green';
                             if($no_ofride >= 6){
                                 $status = 'Yellow';
                             }
