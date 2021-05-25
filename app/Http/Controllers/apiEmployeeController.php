@@ -1997,7 +1997,7 @@ class apiEmployeeController extends Controller
                                     if($doclist->other_image){
                                         $other_image  =  $baseUrl."/public/".$doclist->other_image;
                                     }
-                                    $customerDocArr[] = ['id' => (int)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
+                                    $customerDocArr[] = ['id' => (string)$doclist->id, 'title' => $doclist->title, 'front_image' => $front_image, 'back_image' => $back_image , 'other_image' => $other_image]; //'planning_isprogress' => 
                                 }
                                 if($customerDeliveyinfo){
                                     $secondary_number = $customerDeliveyinfo->secondary_number;
@@ -2010,8 +2010,8 @@ class apiEmployeeController extends Controller
                                 }
 
                                 if($customerReturninfo){
-                                    $extra_charges = $customerReturninfo->extra_charges;
-                                    $damage_charges = $customerReturninfo->damage_charges;
+                                    $extra_charges = "".$customerReturninfo->extra_charges;
+                                    $damage_charges = "".$customerReturninfo->damage_charges;
                                     $returntime_meeterreading = $customerReturninfo->meter_reading;
                                 }else{
                                     $extra_charges = '';
@@ -2020,11 +2020,11 @@ class apiEmployeeController extends Controller
                                 }
                                 $vehicle_number = $vlist->vehicle;
                                 
-                                $booking_hours = $vlist->booking_hours;
-                                $additional_hours = $vlist->additional_hours;
-                                $allowed_km = $vlist->allowed_km;
-                                $additional_amount = $vlist->additional_amount;
-                                $receive_amount = $vlist->receive_amount;
+                                $booking_hours = "".$vlist->booking_hours;
+                                $additional_hours = "".$vlist->additional_hours;
+                                $allowed_km = "".$vlist->allowed_km;
+                                $additional_amount = "".$vlist->additional_amount;
+                                $receive_amount = "".$vlist->receive_amount;
                                 $total_amount = $vlist->total_amount;
                                 $pick_up = date("d M Y",strtotime($vlist->pick_up));
                                 $pick_up_time = $vlist->pick_up_time;
