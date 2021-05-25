@@ -1976,6 +1976,11 @@ class apiEmployeeController extends Controller
                                 $customer_phone = $vlist->phone;
                                 $customer_address = $customerinfo->address;
                                 $customer_email = $customerinfo->email;
+                                if($customerinfo->image){
+                                    $customer_image  =  $baseUrl."/public/".$customerinfo->image;
+                                }else{
+                                   $customer_image  =  "";
+                                }
                                 $customerDocArr = array();
                                 $customerDocList = DB::table('customer_documents')->select('id','title','front_image' ,'back_image', 'other_image')->where('customer_id', '=', $customer_id)->where('status', '=', 'Live')->orderBy('id', 'DESC')->get();
                                
@@ -2049,7 +2054,7 @@ class apiEmployeeController extends Controller
                                     }
                                 }  
                                 
-                                $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'secondary_number' =>$secondary_number, 'parents_number' =>$parents_number, 'customer_email' =>$customer_email, 'customer_address' =>$customer_address, 'customer_doc' =>$customerDocArr, 'vehicle_number' => $vehicle_number, 'booking_hours' => $booking_hours, 'additional_hours' => $additional_hours, 'allowed_km' => $allowed_km, 'additional_amount' => $additional_amount, 'extra_charges' => $extra_charges, 'damage_charges' => $damage_charges,  'receive_amount' => $receive_amount, 'penalty_amount' => $penalty_amount, 'total_amount' => $total_amount, 'deliverytime_bike_meeter_reading' => "".$deliverytime_meeterreading, 'returntime_bike_meeter_reading' => "".$returntime_meeterreading, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'receive_date' => $receive_date, 'return_time' => $return_time,'booked_vehicle_before_images' => $booked_vehicle_before_list, 'booked_vehicle_after_images' => $booked_vehicle_after_list]; 
+                                $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'booking_no' =>$booking_no, 'customer_name' =>$customer_name, 'customer_phone' =>$customer_phone, 'secondary_number' =>$secondary_number, 'parents_number' =>$parents_number, 'customer_email' =>$customer_email, 'customer_address' =>$customer_address, 'customer_image' => $customer_image, 'customer_doc' =>$customerDocArr, 'vehicle_number' => $vehicle_number, 'booking_hours' => $booking_hours, 'additional_hours' => $additional_hours, 'allowed_km' => $allowed_km, 'additional_amount' => $additional_amount, 'extra_charges' => $extra_charges, 'damage_charges' => $damage_charges,  'receive_amount' => $receive_amount, 'penalty_amount' => $penalty_amount, 'total_amount' => $total_amount, 'deliverytime_bike_meeter_reading' => "".$deliverytime_meeterreading, 'returntime_bike_meeter_reading' => "".$returntime_meeterreading, 'pick_up_date' => $pick_up, 'pick_up_time' => $pick_up_time, 'receive_date' => $receive_date, 'return_time' => $return_time,'booked_vehicle_before_images' => $booked_vehicle_before_list, 'booked_vehicle_after_images' => $booked_vehicle_after_list]; 
                              }
                         } 
 
