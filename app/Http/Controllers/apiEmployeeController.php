@@ -2178,7 +2178,7 @@ class apiEmployeeController extends Controller
                                 if($expected_droptimestamp >= $currentTimestamp){
                                     $vstatus = 'Prepare To Delivery';
                                 }else{
-                                    $vstatus = '';
+                                    $vstatus = 'Book New Order';
                                 }
                             }
 
