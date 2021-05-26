@@ -1133,19 +1133,7 @@ class apiEmployeeController extends Controller
                         $end_trip_date = date('d-m-Y',strtotime($to_date));
                         $end_trip_time = date('H:i',strtotime($to_date));
 
-                        /* due penalties */
-                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
-                        $customer_penalty = 0;
-                        if(count($booked_vehicleList) >0){
-                            foreach($booked_vehicleList as $vlist)
-                            {
-                                if($vlist->receive_amount < $vlist->additional_amount){
-                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
-                                    $customer_penalty += $penalty_amount;
-                                }
-                            }
-                        }        
-                        /* End */
+                        
                         
                         $fleetFare = 0;
                         $total_price = 0;
