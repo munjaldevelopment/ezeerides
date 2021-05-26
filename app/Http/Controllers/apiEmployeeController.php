@@ -1223,6 +1223,7 @@ class apiEmployeeController extends Controller
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer->id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'address' => $address ); 
                     
                 } else{
+
                     $status_code = $success = '0';
                     $message = 'Customer not valid';
                     
@@ -1266,6 +1267,10 @@ class apiEmployeeController extends Controller
             
             if($bike_model_id == ""){
                 $error = "Please choose bike model for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($customer_id == ""){
+                $error = "Please enter valid customer";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
             if($error == ""){
