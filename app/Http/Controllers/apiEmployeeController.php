@@ -1404,7 +1404,7 @@ class apiEmployeeController extends Controller
                     $center = $stationinfo->id;
                     $station_name = $stationinfo->station_name;
                     $today = date('Y-m-d');
-                    $current_time = date('18:i:s');
+                    $current_time = date('h:i:s');
 
                      $booked_vehicleList1 = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '<=', $current_time);
 
@@ -2170,7 +2170,16 @@ class apiEmployeeController extends Controller
                          $vehicle_status = $booking->status;
                          $vstatus ='';
                          if($vehicle_status == 'In'){
-                                $vstatus = 'Prepare To Delivery';
+                                $expected_drop = $booking->expected_drop;
+                                $expected_drop_time = $booking->expected_drop_time;
+                                $expected_droptimestamp = strtotime($expected_drop.' '.$expected_drop_time);
+                                $today  = date('Y-m-d H:i:s');
+                                $currentTimestamp  = strtotime($today);
+                                if($expected_droptimestamp >= $currentTimestamp){
+                                    $vstatus = 'Prepare To Delivery';
+                                }else{
+                                    $vstatus = '';
+                                }
                             }
 
                             if($vehicle_status == 'Out'){
