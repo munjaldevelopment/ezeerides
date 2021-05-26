@@ -1077,7 +1077,7 @@ class apiController extends Controller
                         }        
                         /* End */ 
                        
-                        $bike_feature[] =  ['title' => 'Pre Penalty Amount', 'subtitle' => $customer_penalty];
+                        $bike_feature[] =  ['title' => 'Pre Penalty Amount', 'subtitle' => "".$customer_penalty];
 
                        
 
