@@ -1406,12 +1406,13 @@ class apiEmployeeController extends Controller
                     $today = date('Y-m-d');
                     $current_time = date('18:i:s');
 
-                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '<', $current_time);
+                     $booked_vehicleList1 = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '<=', $current_time);
 
                     if($center){
-                        $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
+                        $booked_vehicleList1 = $booked_vehicleList1->where('station',$station_name);    
                     }
 
+                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('vehicle', '!=', '')->where('expected_drop', '>', $today);
                    /* if($ride_typ528e){
                         $vehicleList = $vehicleList->where('v.ride_type',$ride_type);    
                     }*/
@@ -1421,7 +1422,7 @@ class apiEmployeeController extends Controller
                         $vehicleList = $vehicleList->where('available_date', '<=', $from_date.' 00:00:00'); 
 
                     }*/
-                    $booked_vehicleList = $booked_vehicleList->orderBy('pick_up', 'asc')->get(); 
+                    $booked_vehicleList = $booked_vehicleList->union($booked_vehicleList1)->orderBy('pick_up', 'asc')->get(); 
                     if(count($booked_vehicleList) >0){
                         $v_list = array();
                         foreach($booked_vehicleList as $vlist)
@@ -1633,7 +1634,7 @@ class apiEmployeeController extends Controller
                     }
                     $current_time = date('H:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','is_amount_receive','receive_date','status')->where('user_id',$employee_id)->where('booking_status','1')->where('status','In')->where('due_penalty','no')->wheredate('expected_drop', '<=', $filterdate)->where('expected_drop_time', '<', $current_time);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','is_amount_receive','receive_date','status')->where('user_id',$employee_id)->where('booking_status','1')->where('status','In')->where('vehicle','=', '')->where('due_penalty','no')->wheredate('expected_drop', '<=', $filterdate)->where('expected_drop_time', '<', $current_time);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
