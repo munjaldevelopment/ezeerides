@@ -3116,12 +3116,12 @@ class apiEmployeeController extends Controller
                 }else{
                      $status_code = '0';
                     $message = 'No notification found.';
-                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $customer_id);
+                    $json = array('status_code' => $status_code,  'message' => $message, 'customer_id' => $employee_id);
                 }
             }else{
                 $status_code = $success = '0';
                 $message = 'Employee not valid';
-                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $employee_id);
 
             }
         }
