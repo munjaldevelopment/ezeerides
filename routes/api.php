@@ -155,7 +155,7 @@ Route::post('due-penalties', 'apiEmployeeController@due_penalties');
 
 Route::post('penalty-detail', 'apiEmployeeController@penalty_detail');
 
-Route::post('noticeboard', 'apiEmployeeController@notification_list');
+Route::post('noticeboard', 'apiEmployeeController@noticeboard_list');
 
 Route::post('statics', 'apiEmployeeController@statics_info');
 

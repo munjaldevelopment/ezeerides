@@ -2918,16 +2918,16 @@ class apiEmployeeController extends Controller
                              $no_ofride = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
                              if($checkserviceReminder){
                                 $service_complete_date = $checkserviceReminder->service_complete_date;    
-                                $no_ofride .= $no_ofride->wheredate('pick_up', '>' ,$service_complete_date);    
+                                $no_ofride = $no_ofride->wheredate('pick_up', '>' ,$service_complete_date);    
                             }
-                            $no_ofride .= $no_ofride->count();
+                            $no_ofride = $no_ofride->count();
                               
                             $totalKm = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
                             if($checkserviceReminder){
                                 $service_complete_date = $checkserviceReminder->service_complete_date;    
-                                $totalKm .= $totalKm->wheredate('pick_up', '>' ,$service_complete_date);    
+                                $totalKm = $totalKm->wheredate('pick_up', '>' ,$service_complete_date);    
                             }    
-                            $totalKm .= $totalKm->sum('allowed_km');
+                            $totalKm = $totalKm->sum('allowed_km');
                               if($no_ofride >= 60){
                                     $serviceReminder = DB::table('vehicle_service_reminder')->select('id')->where('vehicle_number', $vehicle_number)->where('service_status', 'pending')->count();
                                     if($serviceReminder == 0){
@@ -3084,7 +3084,7 @@ class apiEmployeeController extends Controller
     }
 
     
-    public function notification_list(Request $request)
+    public function noticeboard_list(Request $request)
     {
         try 
         {
@@ -3094,17 +3094,17 @@ class apiEmployeeController extends Controller
              $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
 
             if($employee){
-                $notificationExists = DB::table('notifications')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->count();
+                $notificationExists = DB::table('noticeboards')->where('status', 'Live')->orderBy('id', 'DESC')->count();
                 $notify_List = array();
                 if($notificationExists > 0){
-                    $notifyList = DB::table('notifications')->select('id','notification_title','notification_content','notification_type','created_at')->where('customer_id', $employee_id)->where('user_type', 'employee')->orderBy('id', 'DESC')->get();
+                    $notifyList = DB::table('noticeboards')->select('id','title','description','created_at')->where('status', 'Live')->orderBy('id', 'DESC')->get();
 
                     
                     foreach($notifyList as $notifylist)
                     {
-                        $notification_type = $notifylist->notification_type;
+                        $notification_type = 'Employee';
                         
-                        $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->notification_title,'notification_content' => "".$notifylist->notification_content, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
+                        $notify_List[] = array('id' => "".$notifylist->id, 'notification_title' => $notifylist->title,'notification_content' => "".$notifylist->description, 'notification_type' => $notification_type, 'date' => date('d-m-Y H:i:s', strtotime($notifylist->created_at))); 
                        
                     } 
 
@@ -3262,20 +3262,32 @@ class apiEmployeeController extends Controller
                         {
                            $vehicle_number = $rsfleet->vehicle_number;
                            $vehicleModel = $rsfleet->model;
-                          $no_ofride = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1')->count();
+                           $checkserviceReminder = DB::table('vehicle_service_reminder')->select('id','service_complete_date')->where('vehicle_number', $vehicle_number)->where('service_status', 'done')->first();
 
-                          $totalKm = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1')->sum('allowed_km');
-
+                             $no_ofride = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
+                             if($checkserviceReminder){
+                                $service_complete_date = $checkserviceReminder->service_complete_date;    
+                                $no_ofride = $no_ofride->wheredate('pick_up', '>' ,$service_complete_date);    
+                            }
+                            $no_ofride = $no_ofride->count();
+                              
+                            $totalKm = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->where('status', 'In')->where('payment_status', 'success')->where('is_amount_receive', '1');
+                            if($checkserviceReminder){
+                                $service_complete_date = $checkserviceReminder->service_complete_date;    
+                                $totalKm = $totalKm->wheredate('pick_up', '>' ,$service_complete_date);    
+                            }    
+                            $totalKm = $totalKm->sum('allowed_km');
+                          if($no_ofride >= 6){
                             $baseUrl = URL::to("/");
                             $vehicle_image  = "";
                             if($rsfleet->vehicle_image){
                                 $vehicle_image  =  $baseUrl."/public/".$rsfleet->vehicle_image;
                             
                             }
-                            $status = 'Green';
-                            if($no_ofride >= 6){
-                                $status = 'Yellow';
-                            }
+                            
+                            
+                            $status = 'Yellow';
+                            
 
                             if($no_ofride >= 60 || $totalKm >= 5000 ){
                                 $status = 'Red';
@@ -3284,6 +3296,7 @@ class apiEmployeeController extends Controller
                             $vehicle_status = DB::table('vehicle_registers')->where('vehicle', $vehicle_number)->pluck('status')[0];
                            
                             $fleet_List[] = array('id' => "".$rsfleet->id, 'vehicle_model' => $vehicleModel, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'no_ofride' => "".$no_ofride, 'total_km' => "".$totalKm, 'status_color' => $status); 
+                           } 
                            
                         } 
 
@@ -3327,6 +3340,8 @@ class apiEmployeeController extends Controller
             $filter_check = $request->filter_check;
             $tyre_check = $request->tyre_check;
             $description = $request->description;
+            //$approx_amount = $request->approx_amount;
+            $approx_amount = '500';
             $status = 'Pending';
             $error = "";
             if($vehicle_id == ""){
@@ -3349,8 +3364,74 @@ class apiEmployeeController extends Controller
                             'filter_check' => $filter_check,
                             'tyre_check' => $tyre_check,
                             'description' => $description,
+                            'approx_amount' => $approx_amount,
                             'updated_at' => date('Y-m-d H:i:s')
                         ]);
+                        $serviceRequest_status = $employeeServiceFleet->status;
+                        if($serviceRequest_status == 'Approve'){
+                            $currentDay = date('Y-m-d');
+                            $fleetService = DB::table('vehicle_service')->where('vehicle_id', $vehicle_id)->wheredate('next_date', '>', $currentDay)->count();
+                            if($fleetService == 0){
+
+                                /* Update vehicle service reminder */
+                                    $vehicle_number = DB::table('vehicles')->where('id', $vehicle_id)->pluck('vehicle_number')[0];
+
+                                    $fleetServiceReminder = DB::table('vehicle_service_reminder')->where('vehicle_number', $vehicle_number)->where('service_status', 'pending')->first();
+                                    if($fleetServiceReminder){
+                                        $serviceReminderid = $fleetServiceReminder->id;
+                                        $updateServiceReminder = DB::table('vehicle_service_reminder')->where('id', '=', $serviceReminderid)->update([
+                                            'service_status' => 'done',
+                                            'service_complete_date' => date('Y-m-d'),
+                                            'updated_at' => date('Y-m-d H:i:s')
+                                        ]);
+                                    }    
+                                /* End */
+                                $service_by = '1';
+                                $bike_km = '0';
+                                $fleetstatus = 'done';
+                                $insertservice_id = DB::table('vehicle_service')->insertGetId([
+                                    'vehicle_id' => $vehicle_id,
+                                    'description' => $description,
+                                    'service_by' => $service_by,
+                                    'service_amount' => $approx_amount,
+                                    'bike_km' => $bike_km,
+                                    'service_date' => date('Y-m-d H:i:s'),
+                                    'next_date' => date('Y-m-d H:i:s',strtotime("+3 month")),
+                                    'status' => $fleetstatus,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+
+                                if($oil_check=='Yes'){
+                                    $insertserviceType = DB::table('services_has_vehicles')->insertGetId([
+                                        'vehicle_service_id' => $insertservice_id,
+                                        'service_type_id' => '1'
+                                    
+                                    ]);
+                                }
+                                if($engine_check=='Yes'){
+                                    $insertserviceType = DB::table('services_has_vehicles')->insertGetId([
+                                        'vehicle_service_id' => $insertservice_id,
+                                        'service_type_id' => '4'
+                                    
+                                    ]);
+                                }
+                                if($filter_check=='Yes'){
+                                    $insertserviceType = DB::table('services_has_vehicles')->insertGetId([
+                                        'vehicle_service_id' => $insertservice_id,
+                                        'service_type_id' => '3'
+                                    
+                                    ]);
+                                }
+                                if($tyre_check=='Yes'){
+                                    $insertserviceType = DB::table('services_has_vehicles')->insertGetId([
+                                        'vehicle_service_id' => $insertservice_id,
+                                        'service_type_id' => '2'
+                                    
+                                    ]);
+                                }
+                            }
+                        }
 
                     }else{
                         $insertserviceRequest_id = DB::table('employee_service_fleet_request')->insert([
@@ -3410,11 +3491,11 @@ class apiEmployeeController extends Controller
                         
                         $status_code = '1';
                         $message = 'Service Fleet Request';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'vehicle_id' => $employeeServiceFleet->vehicle_id, 'oil_check' => $employeeServiceFleet->oil_check, 'engine_check' => $employeeServiceFleet->engine_check, 'filter_check' => $employeeServiceFleet->filter_check, 'tyre_check' => $employeeServiceFleet->tyre_check, 'description' => $employeeServiceFleet->description, 'status' => $employeeServiceFleet->status);
+                        $json = array('status_code' => $status_code,  'message' => $message, 'vehicle_id' => $employeeServiceFleet->vehicle_id, 'oil_check' => $employeeServiceFleet->oil_check, 'engine_check' => $employeeServiceFleet->engine_check, 'filter_check' => $employeeServiceFleet->filter_check, 'tyre_check' => $employeeServiceFleet->tyre_check, 'description' => $employeeServiceFleet->description, 'approx_amount' => "".$employeeServiceFleet->approx_amount, 'status' => $employeeServiceFleet->status);
                     }else{
                         $status_code = '1';
                         $message = 'Service Fleet Request';
-                        $json = array('status_code' => $status_code,  'message' => $message,  'vehicle_id' => $vehicle_id, 'oil_check' => 'No', 'engine_check' => 'No', 'filter_check' => 'No', 'tyre_check' => 'No', 'description' => '');
+                        $json = array('status_code' => $status_code,  'message' => $message,  'vehicle_id' => $vehicle_id, 'oil_check' => 'No', 'engine_check' => 'No', 'filter_check' => 'No', 'tyre_check' => 'No', 'description' => '', 'approx_amount' => '');
                     }
             }else{
                 $status_code = $success = '0';
