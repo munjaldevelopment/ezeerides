@@ -3277,7 +3277,7 @@ class apiEmployeeController extends Controller
                                 $totalKm = $totalKm->wheredate('pick_up', '>' ,$service_complete_date);    
                             }    
                             $totalKm = $totalKm->sum('allowed_km');
-                          if($no_ofride >= 6){
+                          if($no_ofride >= 6 || $totalKm >= 5000){
                             $baseUrl = URL::to("/");
                             $vehicle_image  = "";
                             if($rsfleet->vehicle_image){
