@@ -3340,8 +3340,8 @@ class apiEmployeeController extends Controller
             $filter_check = $request->filter_check;
             $tyre_check = $request->tyre_check;
             $description = $request->description;
-            //$approx_amount = $request->approx_amount;
-            $approx_amount = '500';
+            $approx_amount = $request->approx_amount;
+            //$approx_amount = '500';
             $status = 'Pending';
             $error = "";
             if($vehicle_id == ""){
