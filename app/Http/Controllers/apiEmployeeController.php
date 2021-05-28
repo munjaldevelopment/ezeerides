@@ -1277,6 +1277,7 @@ class apiEmployeeController extends Controller
             $device_id = $request->device_id;
             $customer_id = $request->customer_id;
             $customer_otp = $request->customer_otp;
+            $front_image = $request->customer_doc;
             $customer_name = $request->customer_name;
             $customer_phone = $request->customer_mobile;
             $customer_email = $request->customer_email;
@@ -1319,6 +1320,20 @@ class apiEmployeeController extends Controller
                              $roleid = DB::table('model_has_roles')->insert(['role_id' => $role_id, 'model_type' => $model_type, 'model_id' => $userid]);
 
                             DB::table('customers')->where('id', '=', $customer_id)->update(['user_id' => $userid, 'name' => $customer_name, 'email' => $customer_email, 'updated_at' => $date]);
+                            if($front_image != ''){
+                                $image_parts = explode(";base64,", $front_image);
+                                $image_type_aux = explode("image/", $image_parts[0]);
+                                $image_type = $image_type_aux[1];
+
+                                $frontimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                                $destinationPath = public_path('/uploads/customer_documents/').$frontimage;
+
+                                $data = base64_decode($image_parts[1]);
+                               // $data = $image_parts[1];
+                                file_put_contents($destinationPath, $data);
+                                $title = 'Customer Doc';
+                                DB::table('customer_documents')->insert(['customer_id' => $customer_id, 'title' => $title, 'front_image' => 'uploads/customer_documents/'.$frontimage, 'back_image' => 'uploads/customer_documents/'.$frontimage, 'other_image' => 'uploads/customer_documents/'.$frontimage, 'status' => 'Live', 'created_at' => $date, 'updated_at' => $date]);
+                            }
                     }  
                 }else{
                     $error = "Please enter valid OTP to verify.";
