@@ -1220,14 +1220,38 @@ class apiEmployeeController extends Controller
                     }
                     $status_code = '1';
                     $message = 'Customer Info';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer->id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'address' => $address ); 
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer->id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'address' => $address, 'customer_type' => 'already_exist' ); 
                     
                 } else{
+                    $otp = rand(11111, 99999);
+                    $customer = DB::table('customers')->where('mobile', $mobile)->where('status', '!=', 'Live')->first();
+                    if($customer){
+                        $customerid = $customer->id;
+                        $smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
+
+                        $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
+                    
+                        DB::table('customers')->where('id', '=', $customerid)->update(['otp' => $otp, 'updated_at' => $date]);
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Otp Send, Please Process Next Step';
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => "", 'mobile' => $mobile, "customer_type" => "new", 'otp' => "".$otp);
+                    }else{
+                     
+                        
+                     //$smsmessage = str_replace(" ", '%20', "Here is the new OTP ".$otp." for your login id. Please do not share with anyone.");
+                     $smsmessage = str_replace(" ", '%20', "Thank you for registering on AUTO AWAY RENTALS app. ".$otp." is the OTP for your Login id. Please do not share with anyone.");
+
+                     $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
+                     $device_id = '';
+                     $fcmToken = '';
+                     $customerid = DB::table('customers')->insertGetId(['mobile' => $mobile, 'otp' => "".$otp, 'device_id' => $device_id, 'fcmToken' => $fcmToken, 'created_at' => $date, 'status' => 'Not live',  'updated_at' => $date]); 
 
                     $status_code = $success = '0';
-                    $message = 'Customer not valid';
+                    $message = 'Customer not Exist';
                     
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '' );
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'otp' => "".$otp 'customer_type' => 'new' );
+                    }
                 }
             }
         }
@@ -1252,6 +1276,7 @@ class apiEmployeeController extends Controller
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
             $customer_id = $request->customer_id;
+            $customer_otp = $request->customer_otp;
             $customer_name = $request->customer_name;
             $customer_phone = $request->customer_mobile;
             $customer_email = $request->customer_email;
@@ -1273,7 +1298,35 @@ class apiEmployeeController extends Controller
                 $error = "Please enter valid customer";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
+            if($customer_phone == ""){
+                $error = "Please enter valid customer Phone";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($customer_id == '' && $customer_otp != ''){
+                $customer = DB::table('customers')->where('mobile', $customer_phone)->where('otp', $customer_otp)->first();
+                if($customer) 
+                {
+                    $customer_id = $customer->id;
+                    DB::table('customers')->where('id', '=', $customer_id)->update(['status' => 'Live', 'updated_at' => $date]); 
+                     $usersChk = DB::table('users')->where('phone', $customer_phone)->first();
+                    if($usersChk) 
+                    {    
+
+                    }else{     
+                            $userid = DB::table('users')->insertGetId(['name' => $customer_name, 'email' => $customer_email, 'phone' => $customer_phone, 'password' => Hash::make($customer_phone), 'created_at' => $date, 'updated_at' => $date]);
+                            $role_id = 3;
+                            $model_type = 'App\User';
+                             $roleid = DB::table('model_has_roles')->insert(['role_id' => $role_id, 'model_type' => $model_type, 'model_id' => $userid]);
+
+                            DB::table('customers')->where('id', '=', $customer_id)->update(['user_id' => $userid, 'name' => $customer_name, 'email' => $customer_email, 'updated_at' => $date]);
+                    }  
+                }else{
+                    $error = "Please enter valid OTP to verify.";
+                    $json = array('status_code' => '0', 'message' => $error, 'customer_id' => '');
+                    }    
+            }
             if($error == ""){
+
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
                 if($employee){
                     $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
