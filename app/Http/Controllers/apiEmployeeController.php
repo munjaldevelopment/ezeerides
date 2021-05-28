@@ -1265,6 +1265,94 @@ class apiEmployeeController extends Controller
         return response()->json($json, 200);
     }
 
+    public function upload_customer_documents(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $title = $request->document_type;
+            $front_image = $request->front_image;
+            $back_image = $request->back_image;
+            $other_image = $request->other_image;
+            $status = 'Live';
+            
+            
+            $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+            if($customer){ 
+                $customerDoc = DB::table('customer_documents')->where('title', $title)->where('customer_id', $customer_id)->first();
+                if(!$customerDoc){ 
+                    $frontimage = '';
+                    $backimage = '';
+                    $otherimage = '';
+                    if($front_image != ''){
+                        $image_parts = explode(";base64,", $front_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $frontimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $destinationPath = public_path('/uploads/customer_documents/').$frontimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($destinationPath, $data);
+                    }
+
+                    if($back_image != ''){
+                        $image_parts = explode(";base64,", $back_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $backimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $backimgdestinationPath = public_path('/uploads/customer_documents/').$backimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($backimgdestinationPath, $data);
+                    }
+
+                    if($other_image != ''){
+                        $image_parts = explode(";base64,", $other_image);
+                        $image_type_aux = explode("image/", $image_parts[0]);
+                        $image_type = $image_type_aux[1];
+
+                        $otherimage = rand(10000, 99999).'-'.time().'.'.$image_type;
+                        $otherdestinationPath = public_path('/uploads/customer_documents/').$otherimage;
+
+                        $data = base64_decode($image_parts[1]);
+                       // $data = $image_parts[1];
+                        file_put_contents($otherdestinationPath, $data);
+                    }
+                    DB::table('customer_documents')->insert(['customer_id' => $customer_id, 'title' => $title, 'front_image' => 'uploads/customer_documents/'.$frontimage, 'back_image' => 'uploads/customer_documents/'.$backimage, 'other_image' => 'uploads/customer_documents/'.$otherimage, 'status' => $status, 'created_at' => $date, 'updated_at' => $date]);
+                    
+                    $status_code = $success = '1';
+                    $message = 'Customer Documents uploaded successfully';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Documents already uploaded for '.$title;
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }                    
+
+            } else{
+                $status_code = $success = '0';
+                $message = 'Customer not exists or not verified';
+                
+                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
     //Reserve Bike
     public function reserve_bike(Request $request)
     {
@@ -1277,7 +1365,6 @@ class apiEmployeeController extends Controller
             $device_id = $request->device_id;
             $customer_id = $request->customer_id;
             $customer_otp = $request->customer_otp;
-            $front_image = $request->customer_doc;
             $customer_name = $request->customer_name;
             $customer_phone = $request->customer_mobile;
             $customer_email = $request->customer_email;
@@ -1320,20 +1407,7 @@ class apiEmployeeController extends Controller
                              $roleid = DB::table('model_has_roles')->insert(['role_id' => $role_id, 'model_type' => $model_type, 'model_id' => $userid]);
 
                             DB::table('customers')->where('id', '=', $customer_id)->update(['user_id' => $userid, 'name' => $customer_name, 'email' => $customer_email, 'updated_at' => $date]);
-                            if($front_image != ''){
-                                $image_parts = explode(";base64,", $front_image);
-                                $image_type_aux = explode("image/", $image_parts[0]);
-                                $image_type = $image_type_aux[1];
-
-                                $frontimage = rand(10000, 99999).'-'.time().'.'.$image_type;
-                                $destinationPath = public_path('/uploads/customer_documents/').$frontimage;
-
-                                $data = base64_decode($image_parts[1]);
-                               // $data = $image_parts[1];
-                                file_put_contents($destinationPath, $data);
-                                $title = 'Customer Doc';
-                                DB::table('customer_documents')->insert(['customer_id' => $customer_id, 'title' => $title, 'front_image' => 'uploads/customer_documents/'.$frontimage, 'back_image' => 'uploads/customer_documents/'.$frontimage, 'other_image' => 'uploads/customer_documents/'.$frontimage, 'status' => 'Live', 'created_at' => $date, 'updated_at' => $date]);
-                            }
+                            
                     }  
                 }else{
                     $error = "Please enter valid OTP to verify.";

@@ -145,6 +145,8 @@ Route::post('add-vehicle-booking-image', 'apiEmployeeController@add_vehicle_book
 
 Route::post('get-customer-detail', 'apiEmployeeController@getCustomerDetail');
 
+Route::post('upload-customer-doc', 'apiEmployeeController@upload_customer_documents');
+
 Route::post('reserve-bike', 'apiEmployeeController@reserve_bike');
 
 Route::post('employee-attendance', 'apiEmployeeController@employee_attendance');
