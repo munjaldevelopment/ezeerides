@@ -1404,7 +1404,7 @@ class apiEmployeeController extends Controller
                     $center = $stationinfo->id;
                     $station_name = $stationinfo->station_name;
                     $today = date('Y-m-d');
-                    $current_time = date('18:i:s');
+                    $current_time = date('H:i:s');
 
                      $booked_vehicleList1 = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '<=', $current_time);
 
@@ -1412,7 +1412,7 @@ class apiEmployeeController extends Controller
                         $booked_vehicleList1 = $booked_vehicleList1->where('station',$station_name);    
                     }
 
-                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('vehicle', '!=', '')->where('expected_drop', '>', $today);
+                     $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('vehicle', '!=', '')->where('expected_drop', '>=', $today);
                    /* if($ride_typ528e){
                         $vehicleList = $vehicleList->where('v.ride_type',$ride_type);    
                     }*/
