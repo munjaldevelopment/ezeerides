@@ -62,7 +62,7 @@ class apiEmployeeController extends Controller
                     }else{
                         $status_code = $success = '0';
                         $message = 'Employee Not Active, Please contact to support';
-                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => "".$empid, 'email' => $email, 'otp' => "".$otp);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => "".$empid, 'email' => $email, 'otp' => "".$otp ,"smsurl"=>"http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$mobile."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                     }
                         
                    
@@ -1250,7 +1250,7 @@ class apiEmployeeController extends Controller
                     $status_code = $success = '0';
                     $message = 'Customer not Exist';
                     
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'otp' => "".$otp 'customer_type' => 'new' );
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'otp' => "".$otp, 'customer_type' => 'new' );
                     }
                 }
             }
