@@ -1223,7 +1223,7 @@ class apiEmployeeController extends Controller
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer->id , 'name' => $name, 'email' => $email, 'mobile' => $mobile, 'address' => $address, 'customer_type' => 'already_exist' ); 
                     
                 } else{
-                    $otp = rand(11111, 99999);
+                    /*$otp = rand(11111, 99999);
                     $customer = DB::table('customers')->where('mobile', $mobile)->where('status', '!=', 'Live')->first();
                     if($customer){
                         $customerid = $customer->id;
@@ -1251,6 +1251,10 @@ class apiEmployeeController extends Controller
                     $message = 'Customer not Exist';
                     
                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'otp' => "".$otp, 'customer_type' => 'new' );
+                    }*/
+                    $status_code = $success = '0';
+                    $message = 'Customer not Exist';
+                     $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'customer_type' => 'new' );
                     }
                 }
             }
@@ -1364,7 +1368,6 @@ class apiEmployeeController extends Controller
             $employee_id = $request->employee_id;
             $device_id = $request->device_id;
             $customer_id = $request->customer_id;
-            $customer_otp = $request->customer_otp;
             $customer_name = $request->customer_name;
             $customer_phone = $request->customer_mobile;
             $customer_email = $request->customer_email;
@@ -1390,30 +1393,7 @@ class apiEmployeeController extends Controller
                 $error = "Please enter valid customer Phone";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
-            if($customer_id == '' && $customer_otp != ''){
-                $customer = DB::table('customers')->where('mobile', $customer_phone)->where('otp', $customer_otp)->first();
-                if($customer) 
-                {
-                    $customer_id = $customer->id;
-                    DB::table('customers')->where('id', '=', $customer_id)->update(['status' => 'Live', 'updated_at' => $date]); 
-                     $usersChk = DB::table('users')->where('phone', $customer_phone)->first();
-                    if($usersChk) 
-                    {    
-
-                    }else{     
-                            $userid = DB::table('users')->insertGetId(['name' => $customer_name, 'email' => $customer_email, 'phone' => $customer_phone, 'password' => Hash::make($customer_phone), 'created_at' => $date, 'updated_at' => $date]);
-                            $role_id = 3;
-                            $model_type = 'App\User';
-                             $roleid = DB::table('model_has_roles')->insert(['role_id' => $role_id, 'model_type' => $model_type, 'model_id' => $userid]);
-
-                            DB::table('customers')->where('id', '=', $customer_id)->update(['user_id' => $userid, 'name' => $customer_name, 'email' => $customer_email, 'updated_at' => $date]);
-                            
-                    }  
-                }else{
-                    $error = "Please enter valid OTP to verify.";
-                    $json = array('status_code' => '0', 'message' => $error, 'customer_id' => '');
-                    }    
-            }
+            
             if($error == ""){
 
                 $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
@@ -1462,13 +1442,14 @@ class apiEmployeeController extends Controller
                         $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
 
                         $allowed_km = ($allowed_km_per_hour*$hours);
-
+                        $otp = rand(111111, 999999);
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
                             'station' => $station_name,
                             'customer_id' => $customer_id,
                             'vehicle_model_id' => $bike_model_id,
                             'customer_name' => $customer_name,
+                            'register_otp' => $otp,
                             'phone' => $phone,
                             'pick_up' => $pick_up,
                             'pick_up_time' => $pick_up_time,
@@ -1488,7 +1469,12 @@ class apiEmployeeController extends Controller
                         $booking_no = "EZR".date('YmdHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
             
                         VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+                        // Send booking no for customer mobile
+                         $vehicle_model = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('model')[0];
+                        
+                        $smsmessage = str_replace(" ", '%20', "Your booking is confirmed fo ".$vehicle_model.", booking price for your ride is: ".$total_amount." rs. And your booking code is ".$otp.". Enjoy your ride!.");
 
+                        $this->httpGet("http://sms.messageindia.in/sendSMS?username=ezeego&message=".$smsmessage."&sendername=EZEEGO&smstype=TRANS&numbers=".$phone."&apikey=888b42ca-0d2a-48c2-bb13-f64fba81486a");
                         
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Reserved Successfully';
@@ -1548,13 +1534,12 @@ class apiEmployeeController extends Controller
                     $today = date('Y-m-d');
                     $current_time = date('H:i:s');
 
-                     $booked_vehicleList1 = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('pick_up', $today)->where('expected_drop_time', '>=', $current_time);
-
-                    if($center){
-                        $booked_vehicleList1 = $booked_vehicleList1->where('station',$station_name);    
-                    }
+                     //$booked_vehicleList1 = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('expected_drop_time', '>=', $current_time);
 
                      $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->where('is_amount_receive','0')->where('vehicle', '!=', '')->where('expected_drop', '>=', $today);
+                     if($center){
+                        $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
+                    }
                    /* if($ride_typ528e){
                         $vehicleList = $vehicleList->where('v.ride_type',$ride_type);    
                     }*/
@@ -1564,7 +1549,7 @@ class apiEmployeeController extends Controller
                         $vehicleList = $vehicleList->where('available_date', '<=', $from_date.' 00:00:00'); 
 
                     }*/
-                    $booked_vehicleList = $booked_vehicleList->union($booked_vehicleList1)->orderBy('pick_up', 'asc')->get(); 
+                    //$booked_vehicleList = $booked_vehicleList->union($booked_vehicleList1)->orderBy('pick_up', 'asc')->get(); 
                     if(count($booked_vehicleList) >0){
                         $v_list = array();
                         foreach($booked_vehicleList as $vlist)
@@ -1665,7 +1650,7 @@ class apiEmployeeController extends Controller
                     $today = date('Y-m-d');
                     $current_time = date('H:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->wheredate('pick_up', '>', $today);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','status','receive_date','is_amount_receive')->where('user_id',$employee_id)->where('booking_status','1')->wheredate('expected_drop', '>=', $today);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    

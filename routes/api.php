@@ -65,6 +65,12 @@ Route::post('booking-list', 'apiController@customer_booking');
 
 Route::post('booking-detail', 'apiController@booking_detail');
 
+Route::post('expand-drop', 'apiController@expand_drop');
+
+Route::post('make-expand-payment', 'apiController@make_expand_date_payment');
+
+Route::post('confirm-expand-payment', 'apiController@confirm_expanddate_payment');
+
 Route::post('cancel-booking', 'apiController@canceledBooking');
 
 Route::post('contact-us', 'apiController@contact_us');
