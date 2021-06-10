@@ -1599,7 +1599,7 @@ class apiController extends Controller
 
                         /* get latest return bike booking id */ 
                         $latestreturnbookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $booking->vehicle_model_id)->where('status', 'Out')->where('station', $booking->station)->orderBy('expected_drop', 'DESC')->orderBy('expected_drop_time', 'DESC')->first();
-                         echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                         //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
                         if(count($vehicle_list) > 0 || $booking_id != $latestreturnbookedvehicle->id){
 
                             $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
@@ -1622,6 +1622,7 @@ class apiController extends Controller
 
                                 $hours = abs($timestamp2 - $timestamp1)/(60*60);
 
+                                $allowed_km = ($bikeDetail->allowed_km_per_hour*$hours);
 
                                  $fleetFare = 0;
                                  $total_price = 0;
@@ -1642,13 +1643,13 @@ class apiController extends Controller
                                 
                                 }
                                 
-                                $expand_date = date('Y-m-d',strtotime($expand_date));
-                                $expand_time = date('H:i',strtotime($expand_date));
+                                $expanddate = date('Y-m-d',strtotime($expand_date));
+                                $expand_time = date('H:i:s',strtotime($expand_date));
 
                                 $status_code = $success = '1';
                                 $message = 'Expand Date Details';
                                 
-                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'expand_date' => $expand_date, 'expand_time' => $expand_time, 'center_name' => $booking->station,  'without_insurance_price' => "".$fleetFare, 'expand_amount' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'expand_date' => $expanddate, 'expand_time' => $expand_time, 'center_name' => $booking->station,  'without_insurance_price' => "".$fleetFare, 'expand_amount' => '₹ '.$total_price, 'allowed_km' => $allowed_km, 'booking_hours' => $hours." Hr" );
                             }else{
                                $status_code = $success = '0';
                                 
@@ -1702,7 +1703,7 @@ class apiController extends Controller
             $expand_time = $request->expand_time;
             $expand_amount = $request->expand_amount;
             $booking_hours = $request->booking_hours;
-            
+            $allowed_km = $request->allowed_km;
             $error = "";
             if($booking_id == ""){
                 $error = "Please enter valid booking id";
@@ -1725,11 +1726,7 @@ class apiController extends Controller
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                     }else{
 
-                        $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
-
-                        $allowed_km = ($allowed_km_per_hour*$hours);
-
-                        
+                        $expand_date = date('Y-m-d',strtotime($expand_date));
                         $expandbooking_id = DB::table('booking_expended')->insertGetId([
                             'booking_id' => $booking_id,
                             'expand_date' => $expand_date,
