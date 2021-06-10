@@ -1508,9 +1508,11 @@ class apiController extends Controller
                                 $bike_image = $baseUrl."/public/".$vehicle_image; 
                              }
                             $expand_button = 'f'; 
+                            $expected_dropdatetime = strtotime($booking->expected_drop." ".$booking->expected_drop_time);
+                            $current_time strtotime(date('Y-m-d H:i:s'));
                             if($booking->booking_status == 1){
                                $booking_status = 'Open';
-                               if($booking->status == 'Out'){
+                               if($booking->status == 'Out' && $expected_dropdatetime > $current_time){
                                    $expand_button = 't';
                                }
                             }else if($booking->booking_status == 0){
