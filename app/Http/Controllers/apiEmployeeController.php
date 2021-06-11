@@ -1255,7 +1255,7 @@ class apiEmployeeController extends Controller
                     $status_code = $success = '0';
                     $message = 'Customer not Exist';
                      $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '','name' => '', 'email' => '', 'mobile' => $mobile, 'address' => '', 'customer_type' => 'new' );
-                    }
+                    
                 }
             }
         }
