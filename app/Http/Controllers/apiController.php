@@ -2121,8 +2121,8 @@ class apiController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            //$message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-            $message = $e->getTraceAsString(); 
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            //$message = $e->getTraceAsString(); 
     
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
