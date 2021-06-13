@@ -2453,7 +2453,7 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $booking_id = $request->booking_id;
             $upgrade_bike_booking_id = $request->upgrade_bike_booking_id;
-            $orderid = $orderid;
+            $orderid = $request->orderid;
             $error = "";
            if($upgrade_bike_booking_id == ""){
                 $error = "Please send valid upgrade bike booking id.";
