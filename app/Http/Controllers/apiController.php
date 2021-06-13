@@ -2368,7 +2368,7 @@ class apiController extends Controller
                            
 
                             $paytmParams = array();
-                            $orderid = $upgradeBikebooking_id;
+                            $orderid = $upgradeBikebooking_id."-".time();
                             $paytmParams["body"] = array(
                                 'requestType' => 'Payment',
                                 'mid' => $merchent_id,
@@ -2416,12 +2416,12 @@ class apiController extends Controller
                             $status_code = $success = '1';
                             $message = 'Bike Model Upgrade Successfully';
                                 
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." " );
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ", 'orderid' => "".$orderid );
                         }else{
                            $status_code = $success = '1';
                            $message = 'Bike Model Upgrade Successfully';
                                 
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'callbackUrl' => "" ); 
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'callbackUrl' => "", 'orderid' => "" ); 
                         }    
                     
                     }
@@ -2453,6 +2453,7 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $booking_id = $request->booking_id;
             $upgrade_bike_booking_id = $request->upgrade_bike_booking_id;
+            $orderid = $orderid;
             $error = "";
            if($upgrade_bike_booking_id == ""){
                 $error = "Please send valid upgrade bike booking id.";
@@ -2466,7 +2467,7 @@ class apiController extends Controller
                     if($booking){
 
                         $status = PaytmWallet::with('status');
-                        $status->prepare(['order' => $upgrade_bike_booking_id]);
+                        $status->prepare(['order' => $orderid]);
                         $status->check();
                         
                         $response = $status->response(); // To get raw response as array
