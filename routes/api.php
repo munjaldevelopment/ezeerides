@@ -71,6 +71,14 @@ Route::post('make-expand-payment', 'apiController@make_expand_date_payment');
 
 Route::post('confirm-expand-payment', 'apiController@confirm_expanddate_payment');
 
+Route::post('upgrade-vehicle-filter', 'apiController@upgrade_vehicle_filter');
+
+Route::post('upgrade-bike', 'apiController@upgrade_bike');
+
+Route::post('make-payment-upgrade-bike', 'apiController@make_payment_upgrade_bike');
+
+Route::post('confirm-upgrade-bike-payment', 'apiController@confirm_upgrade_bike_payment');
+
 Route::post('cancel-booking', 'apiController@canceledBooking');
 
 Route::post('contact-us', 'apiController@contact_us');
