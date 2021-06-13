@@ -182,3 +182,9 @@ Route::post('service-fleet-on-pickup-center', 'apiEmployeeController@service_fle
 Route::post('save-service-fleet-request', 'apiEmployeeController@save_service_fleet_request');
 
 Route::post('service-fleet-request', 'apiEmployeeController@service_fleet_request');
+
+Route::post('emp-upgrade-vehicle-filter', 'apiEmployeeController@upgrade_vehicle_filter');
+
+Route::post('emp-upgrade-bike', 'apiEmployeeController@upgrade_bike');
+
+Route::post('emp-make-payment-upgrade-bike', 'apiEmployeeController@make_payment_upgrade_bike');
