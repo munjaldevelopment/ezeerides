@@ -2515,6 +2515,11 @@ class apiController extends Controller
                             $message = 'Your Booking Transaction is Pending / Processing.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);
+                        }else{
+                            $status_code = '0';
+                            $message = 'Paytm order id not valid';
+                        
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                         }
                         
 
