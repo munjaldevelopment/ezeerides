@@ -1549,7 +1549,8 @@ class apiEmployeeController extends Controller
                         $vehicleList = $vehicleList->where('available_date', '<=', $from_date.' 00:00:00'); 
 
                     }*/
-                    //$booked_vehicleList = $booked_vehicleList->union($booked_vehicleList1)->orderBy('pick_up', 'asc')->get(); 
+                    //$booked_vehicleList = $booked_vehicleList->union($booked_vehicleList1)->orderBy('pick_up', 'asc')->get();
+                    $booked_vehicleList = $booked_vehicleList->orderBy('pick_up', 'asc')->get(); 
                     if(count($booked_vehicleList) >0){
                         $v_list = array();
                         foreach($booked_vehicleList as $vlist)
@@ -1609,7 +1610,7 @@ class apiEmployeeController extends Controller
         catch(\Exception $e) {
             $status_code = '0';
             $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-            $message = $e->getTraceAsString(); 
+            //$message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
         }
