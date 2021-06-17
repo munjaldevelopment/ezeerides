@@ -4079,4 +4079,163 @@ class apiEmployeeController extends Controller
         
         return response()->json($json, 200);
     } 
+
+
+    public function current_vehicle_location(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter Booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','vehicle_model_id','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->where('status', 'Out')->orderBy('id', 'DESC')->first();
+                        
+                        $time = date('H:i:s');
+                        if($booking){
+                            $vehicle_number = $booking->vehicle;
+
+                            $curl = curl_init();
+
+                            curl_setopt_array($curl, array(
+                              CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no=RJ14QH1189&format=json',
+                              CURLOPT_RETURNTRANSFER => true,
+                              CURLOPT_ENCODING => '',
+                              CURLOPT_MAXREDIRS => 10,
+                              CURLOPT_TIMEOUT => 0,
+                              CURLOPT_FOLLOWLOCATION => true,
+                              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                              CURLOPT_CUSTOMREQUEST => 'GET',
+                              CURLOPT_HTTPHEADER => array(
+                                'Cookie: JSESSIONID=5139FFE98C395187DB84A00C18508065'
+                              ),
+                            ));
+
+                            $response = curl_exec($curl);
+                            $trackdetail = json_decode($response);
+                            curl_close($curl);
+                            //print_r($trackdetail);
+                            $vehicle_No = $trackdetail->root->VehicleData[0]->Vehicle_No;
+                            $vehicle_Name = $trackdetail->root->VehicleData[0]->Vehicle_Name;
+                            $vehicletype = $trackdetail->root->VehicleData[0]->Vehicletype;
+                            $imeino = $trackdetail->root->VehicleData[0]->Imeino;
+                            $deviceModel = $trackdetail->root->VehicleData[0]->DeviceModel;
+                            $location = $trackdetail->root->VehicleData[0]->Location;
+                            $datetime = $trackdetail->root->VehicleData[0]->Datetime;
+                            $latitude = $trackdetail->root->VehicleData[0]->Latitude;
+                            $longitude = $trackdetail->root->VehicleData[0]->Longitude;
+                            $status = $trackdetail->root->VehicleData[0]->Status;
+                            $speed = $trackdetail->root->VehicleData[0]->Speed;
+                            $gps = $trackdetail->root->VehicleData[0]->GPS;
+                            $ignission = $trackdetail->root->VehicleData[0]->IGN;
+                            $power = $trackdetail->root->VehicleData[0]->Power;
+                            $fuel = $trackdetail->root->VehicleData[0]->Fuel;
+                            $odometer = $trackdetail->root->VehicleData[0]->Odometer;
+
+
+                            $message = 'Vehicle Tracking Detail';
+                            $status_code = '1';
+                            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id,"vehicle_No" => $vehicle_No, "vehicle_Name" => $vehicle_Name, "vehicletype" => $vehicletype, "imeino" => $imeino, "deviceModel" => $deviceModel,"location" => $location,"datetime" => $datetime,"latitude" => $latitude,"longitude" => $longitude,"status" => $status,"speed" => $speed,"gps" => $gps,"ignission" => $ignission ,"power" => $power,"fuel" => $fuel,"odometer" => $odometer);
+                        }else{
+
+                            $status_code = $success = '0';
+                            $message = 'Booking vehicle Data not valid';
+                    
+                            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+
+                        }
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            $message = $e->getTraceAsString();
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function vehicle_track_log(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $employee_id = $request->employee_id;
+            $device_id = $request->device_id;
+            $booking_id = $request->booking_id;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter Booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'employee_id' => $employee_id);
+            }
+            if($error == ""){
+                $employee = DB::table('users')->where('id', $employee_id)->where('device_id', $device_id)->where('status', '=', 'Live')->first();
+                if($employee){
+                        $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_id','customer_name','phone','vehicle_model_id','vehicle', 'created_at')->where('user_id', $employee_id)->where('id', $booking_id)->orderBy('id', 'DESC')->first();
+                        $attendance_date = date('Y-m-d');
+                        $time = date('H:i:s');
+                        if($booking){
+                            echo $vehicle_number = $booking->vehicle;
+                             $trackbooking = DB::table('booking_vehicle_gpstrack_log')->where('booking_id', $booking_id)->orderBy('id', 'asc')->get();
+                            // print_r($trackbooking);
+                             $trackArr = array();
+                            if($trackbooking){
+                                foreach ($trackbooking as $trackdetail) {
+                                    $vehicle_No = $trackdetail->vehicle_No;
+                                    $trackArr[] = ['id' => (int)$booking_id, 'vehicle_No' => $vehicle_number, 'location' => $trackdetail->location, 'latitude' => $trackdetail->location , 'longitude' => $trackdetail->location, 'status' => $trackdetail->status , 'speed' => $trackdetail->speed, 'ignission' => $trackdetail->ignission, 'power' => $trackdetail->power, 'Odometer' => $trackdetail->odometer, 'datetime' => $trackdetail->created_at];
+
+                                    
+                                } 
+                            }   
+
+
+                            $message = 'Vehicle Tracking Log';
+                            $status_code = '1';
+                            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id,"vehicle_No" => $vehicle_number, "booking_id" => $booking_id, "vehiclelog" => $trackArr);
+                        }else{
+
+                            $status_code = $success = '0';
+                            $message = 'Booking vehicle Data not valid';
+                    
+                            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+
+                        }
+                    
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Employee not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
 }

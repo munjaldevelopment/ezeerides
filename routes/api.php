@@ -188,3 +188,7 @@ Route::post('emp-upgrade-vehicle-filter', 'apiEmployeeController@upgrade_vehicle
 Route::post('emp-upgrade-bike', 'apiEmployeeController@upgrade_bike');
 
 Route::post('emp-make-payment-upgrade-bike', 'apiEmployeeController@make_payment_upgrade_bike');
+
+Route::post('current-vehicle-location', 'apiEmployeeController@current_vehicle_location');
+
+Route::post('vehicle-track-log', 'apiEmployeeController@vehicle_track_log');
