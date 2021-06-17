@@ -4124,7 +4124,7 @@ class apiEmployeeController extends Controller
                             $response = curl_exec($curl);
                             $trackdetail = json_decode($response);
                             curl_close($curl);
-                            print_r($trackdetail);
+                            //print_r($trackdetail);
                             $vehicle_No = $trackdetail->root->VehicleData[0]->Vehicle_No;
                             $vehicle_Name = $trackdetail->root->VehicleData[0]->Vehicle_Name;
                             $vehicletype = $trackdetail->root->VehicleData[0]->Vehicletype;
