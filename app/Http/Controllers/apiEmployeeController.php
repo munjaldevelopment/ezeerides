@@ -4125,22 +4125,41 @@ class apiEmployeeController extends Controller
                             $trackdetail = json_decode($response);
                             curl_close($curl);
                             //print_r($trackdetail);
-                            $vehicle_No = $trackdetail->root->VehicleData[0]->Vehicle_No;
-                            $vehicle_Name = $trackdetail->root->VehicleData[0]->Vehicle_Name;
-                            $vehicletype = $trackdetail->root->VehicleData[0]->Vehicletype;
-                            $imeino = $trackdetail->root->VehicleData[0]->Imeino;
-                            $deviceModel = $trackdetail->root->VehicleData[0]->DeviceModel;
-                            $location = $trackdetail->root->VehicleData[0]->Location;
-                            $datetime = $trackdetail->root->VehicleData[0]->Datetime;
-                            $latitude = $trackdetail->root->VehicleData[0]->Latitude;
-                            $longitude = $trackdetail->root->VehicleData[0]->Longitude;
-                            $status = $trackdetail->root->VehicleData[0]->Status;
-                            $speed = $trackdetail->root->VehicleData[0]->Speed;
-                            $gps = $trackdetail->root->VehicleData[0]->GPS;
-                            $ignission = $trackdetail->root->VehicleData[0]->IGN;
-                            $power = $trackdetail->root->VehicleData[0]->Power;
-                            $fuel = $trackdetail->root->VehicleData[0]->Fuel;
-                            $odometer = $trackdetail->root->VehicleData[0]->Odometer;
+                            if(isset($trackdetail->root->error)){
+                                $vehicle_No = '';
+                                $vehicle_Name = '';
+                                $vehicletype = '';
+                                $imeino = '';
+                                $deviceModel = '';
+                                $location = '';
+                                $datetime = '';
+                                $latitude = '';
+                                $longitude = '';
+                                $status = '';
+                                $speed = '';
+                                $gps = '';
+                                $ignission = '';
+                                $power = '';
+                                $fuel = '';
+                                $odometer = '';
+                            }else{    
+                                $vehicle_No = $trackdetail->root->VehicleData[0]->Vehicle_No;
+                                $vehicle_Name = $trackdetail->root->VehicleData[0]->Vehicle_Name;
+                                $vehicletype = $trackdetail->root->VehicleData[0]->Vehicletype;
+                                $imeino = $trackdetail->root->VehicleData[0]->Imeino;
+                                $deviceModel = $trackdetail->root->VehicleData[0]->DeviceModel;
+                                $location = $trackdetail->root->VehicleData[0]->Location;
+                                $datetime = $trackdetail->root->VehicleData[0]->Datetime;
+                                $latitude = $trackdetail->root->VehicleData[0]->Latitude;
+                                $longitude = $trackdetail->root->VehicleData[0]->Longitude;
+                                $status = $trackdetail->root->VehicleData[0]->Status;
+                                $speed = $trackdetail->root->VehicleData[0]->Speed;
+                                $gps = $trackdetail->root->VehicleData[0]->GPS;
+                                $ignission = $trackdetail->root->VehicleData[0]->IGN;
+                                $power = $trackdetail->root->VehicleData[0]->Power;
+                                $fuel = $trackdetail->root->VehicleData[0]->Fuel;
+                                $odometer = $trackdetail->root->VehicleData[0]->Odometer;
+                            }    
 
 
                             $message = 'Vehicle Tracking Detail';
@@ -4195,7 +4214,7 @@ class apiEmployeeController extends Controller
                         $attendance_date = date('Y-m-d');
                         $time = date('H:i:s');
                         if($booking){
-                            echo $vehicle_number = $booking->vehicle;
+                             $vehicle_number = $booking->vehicle;
                              $trackbooking = DB::table('booking_vehicle_gpstrack_log')->where('booking_id', $booking_id)->orderBy('id', 'asc')->get();
                             // print_r($trackbooking);
                              $trackArr = array();
