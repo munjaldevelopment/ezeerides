@@ -4221,7 +4221,7 @@ class apiEmployeeController extends Controller
                             if($trackbooking){
                                 foreach ($trackbooking as $trackdetail) {
                                     $vehicle_No = $trackdetail->vehicle_No;
-                                    $trackArr[] = ['id' => (int)$booking_id, 'vehicle_No' => $vehicle_number, 'location' => $trackdetail->location, 'latitude' => $trackdetail->location , 'longitude' => $trackdetail->location, 'status' => $trackdetail->status , 'speed' => $trackdetail->speed, 'ignission' => $trackdetail->ignission, 'power' => $trackdetail->power, 'Odometer' => $trackdetail->odometer, 'datetime' => $trackdetail->created_at];
+                                    $trackArr[] = ['id' => (int)$booking_id, 'vehicle_No' => $vehicle_number, 'location' => $trackdetail->location, 'latitude' => $trackdetail->latitude , 'longitude' => $trackdetail->longitude, 'status' => $trackdetail->status , 'speed' => $trackdetail->speed, 'ignission' => $trackdetail->ignission, 'power' => $trackdetail->power, 'Odometer' => $trackdetail->odometer, 'datetime' => $trackdetail->created_at];
 
                                     
                                 } 
