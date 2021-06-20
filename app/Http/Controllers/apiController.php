@@ -1532,7 +1532,7 @@ class apiController extends Controller
                 if($customer){ 
                     //$bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
 
-                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status','status', 'vehicle', 'is_upgrade', 'created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
+                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status','status', 'vehicle','is_expended', 'is_upgrade', 'created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
                     $booking_list = array();
                     if($bookingList){
                         foreach($bookingList as $booking)
