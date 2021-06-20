@@ -1539,7 +1539,7 @@ class apiController extends Controller
                         {
                             if($booking->is_expended == 'yes'){
                                 $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->first();
-                                $booking->expected_drop = $expand_booking->expected_drop;
+                                $booking->expected_drop = $expand_booking->expand_date;
                                 $booking->expected_drop_time = $expand_booking->expand_time;
                                 $booking->total_amount += $expand_booking->expand_amount;
                             }
