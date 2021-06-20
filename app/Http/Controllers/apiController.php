@@ -1651,7 +1651,7 @@ class apiController extends Controller
 
                         /* get latest return bike booking id */ 
                         $latestreturnbookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $booking->vehicle_model_id)->where('status', 'Out')->where('station', $booking->station)->orderBy('expected_drop', 'DESC')->orderBy('expected_drop_time', 'DESC')->first();
-                         //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                         echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
                         if(count($vehicle_list) > 0 || $booking_id != $latestreturnbookedvehicle->id){
 
                             $bikeDetail = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->where('status', '=', 'Live')->first();
