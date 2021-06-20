@@ -1537,6 +1537,12 @@ class apiController extends Controller
                     if($bookingList){
                         foreach($bookingList as $booking)
                         {
+                            if($booking->is_expended == 'yes'){
+                                $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->first();
+                                $booking->expected_drop = $expand_booking->expected_drop;
+                                $booking->expected_drop_time = $expand_booking->expand_time;
+                                $booking->total_amount += $expand_booking->expand_amount;
+                            }
                             if($booking->is_upgrade == 'yes'){
                                 $upgrade_vehicle_model_id = DB::table('booking_upgrade_bike')->where('booking_id', $booking->id)->where('payment_status', 'success')->pluck('vehicle_model_id')[0];
                                 $vehicle_model_id = $upgrade_vehicle_model_id;
