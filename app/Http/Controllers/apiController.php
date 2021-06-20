@@ -2359,18 +2359,17 @@ class apiController extends Controller
                         ]);
 
                         if($differance_amount > 0){
-                        
+
+                            $order_id = $upgradeBikebooking_id.'_'.time();
+
                             $enviroment='local';
                             $merchent_id ='FnAoux43246182437237';
                             $merchantKey='2fCkkMtPcbf###hr';
                             $merchantwebsite='WEBSTAGING';
                             $channel='WEB';
                             $industryType='Retail';
-
-                           
-
                             $paytmParams = array();
-                            $orderid = $upgradeBikebooking_id."_".time();
+                            $orderid = $order_id;
                             $paytmParams["body"] = array(
                                 'requestType' => 'Payment',
                                 'mid' => $merchent_id,
@@ -2413,8 +2412,7 @@ class apiController extends Controller
                             $gettxnarr = json_decode($response);
                             $txnToken = $gettxnarr->body->txnToken;
 
-                           
-
+                        ################################################
                             $status_code = $success = '1';
                             $message = 'Bike Model Upgrade Successfully';
                                 
