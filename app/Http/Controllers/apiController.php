@@ -1639,7 +1639,7 @@ class apiController extends Controller
                                 }
                             }
                         }
-
+                        print_r($usedVehList);
                         $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $booking->vehicle_model_id)->where('s.employee_id', $booking->user_id)->orderBy('v.id', 'DESC')->get();
                         $vehicle_list = array();
                         foreach($vehiclelist as $bikelist)
@@ -1648,7 +1648,7 @@ class apiController extends Controller
                                 $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
                             }
                         }
-
+                        print_r($vehicle_list);
                         /* get latest return bike booking id */ 
                         $latestreturnbookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $booking->vehicle_model_id)->where('status', 'Out')->where('station', $booking->station)->orderBy('expected_drop', 'DESC')->orderBy('expected_drop_time', 'DESC')->first();
                          echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
