@@ -2370,7 +2370,7 @@ class apiController extends Controller
                            
 
                             $paytmParams = array();
-                            $orderid = $upgradeBikebooking_id."ezeeride".time();
+                            $orderid = $upgradeBikebooking_id."_".time();
                             $paytmParams["body"] = array(
                                 'requestType' => 'Payment',
                                 'mid' => $merchent_id,
