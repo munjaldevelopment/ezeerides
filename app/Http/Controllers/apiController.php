@@ -2598,7 +2598,7 @@ class apiController extends Controller
                             if($expand_booking){
                                 foreach($expand_booking as $extendbookdata)
                                 {
-                                    $extendhistory[] = array('expand_date' => $extendbookdata->expand_date, 'expand_time' => $extendbookdata->expand_time, 'expand_amount' => $extendbookdata->expand_amount, 'expand_km' => $extendbookdata->expand_km, 'booking_hours' => $extendbookdata->booking_hours);
+                                    $extendhistory[] = array('expand_date' => $extendbookdata->expand_date, 'expand_time' => $extendbookdata->expand_time, 'expand_amount' => "".$extendbookdata->expand_amount, 'expand_km' => "".$extendbookdata->expand_km, 'booking_hours' => "".$extendbookdata->booking_hours);
                                 }   
                             }
                             
