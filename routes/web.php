@@ -43,3 +43,8 @@ Route::post('save_booking_verify', 'RegisterController@saveBookingVerify');
 Route::get('initiate','OrderController@initiate')->name('initiate.payment');
 Route::post('payment','OrderController@pay')->name('make.payment');
 Route::post('payment/status', 'OrderController@paymentCallback')->name('status');
+
+Route::get('/terms', 'StaticPageController@termsPage');
+Route::get('/privacy', 'StaticPageController@privacyPage');
+Route::get('/faq', 'StaticPageController@faqPage');
+
