@@ -23,7 +23,7 @@ class StaticPageController extends Controller
     public function termsPage()
     {
         //
-       $pageInfo = Page::getPageInfo(1);
+       $pageInfo = Page::getPageInfo(4);
        
        //$pageData = json_decode($pageInfo->name);
         //dd($pageData);
@@ -33,7 +33,17 @@ class StaticPageController extends Controller
     public function privacyPage()
     {
         //
-       $pageInfo = Page::getPageInfo(2);
+       $pageInfo = Page::getPageInfo(5);
+       
+       //$pageData = json_decode($pageInfo->name);
+        //dd($pageData);
+        return view('page', ['title' => $pageInfo->title, 'meta_description' => $pageInfo->title, 'meta_keywords' => $pageInfo->title, 'pageheading' => $pageInfo->title, 'content' => $pageInfo->content]);
+    }
+
+    public function faqPage()
+    {
+        //
+       $pageInfo = Page::getPageInfo(6);
        
        //$pageData = json_decode($pageInfo->name);
         //dd($pageData);
