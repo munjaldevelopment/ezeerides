@@ -1302,7 +1302,7 @@ class apiController extends Controller
                         $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
 
                         $allowed_km = ($allowed_km_per_hour*$hours);
-
+                        $booking_from = 'customer';
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
                             'station' => $station_name,
@@ -1321,6 +1321,7 @@ class apiController extends Controller
                             'allowed_km' => $allowed_km,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
+                            'booking_from' => $booking_from,
                             'status' => $status,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),

@@ -1429,6 +1429,9 @@ class apiEmployeeController extends Controller
 
                         $status = 'In';
                         $booking_status = '1';
+                        $payment_status = 'success';
+                        $payment_type = 'cashToEmp';
+                        $booking_from = 'employee';
                         $customer_name = $customer_name;
                         $phone = $customer_phone;
                         $pick_up = date('Y-m-d',strtotime($from_date));
@@ -1461,6 +1464,9 @@ class apiEmployeeController extends Controller
                             'allowed_km' => $allowed_km,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
+                            'payment_status' => $payment_status,
+                            'payment_type' => $payment_type,
+                            'booking_from' => $booking_from,
                             'status' => $status,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
