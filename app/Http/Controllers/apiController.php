@@ -2368,7 +2368,7 @@ class apiController extends Controller
                         if($differance_amount > 0){
 
                             //$order_id = $upgradeBikebooking_id.'_'.time();
-                            $order_id = $upgradeBikebooking_id;
+                            $order_id = $upgradeBikebooking_id+100;
 
                         $enviroment='local';
                         $merchent_id ='FnAoux43246182437237';
