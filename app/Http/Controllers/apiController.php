@@ -2367,16 +2367,16 @@ class apiController extends Controller
 
                         if($differance_amount > 0){
 
-                            //$order_id = $upgradeBikebooking_id.'_'.time();
-                            $order_id = $upgradeBikebooking_id+100;
+                            $order_id = $upgradeBikebooking_id.'_'.time();
+                            //$order_id = $upgradeBikebooking_id;
 
-                        $enviroment='local';
-                        $merchent_id ='FnAoux43246182437237';
-                        $merchantKey='2fCkkMtPcbf###hr';
-                        $merchantwebsite='WEBSTAGING';
-                        $channel='WEB';
-                        $industryType='Retail';
-                        $paytmParams = array();
+                            $enviroment='local';
+                            $merchent_id ='FnAoux43246182437237';
+                            $merchantKey='2fCkkMtPcbf###hr';
+                            $merchantwebsite='WEBSTAGING';
+                            $channel='WEB';
+                            $industryType='Retail';
+                            $paytmParams = array();
                             $orderid = $order_id;
                             $paytmParams["body"] = array(
                                 'requestType' => 'Payment',
