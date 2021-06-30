@@ -2368,14 +2368,15 @@ class apiController extends Controller
                         if($differance_amount > 0){
 
                             //$order_id = $upgradeBikebooking_id.'_'.time();
-                            $order_id = $upgradeBikebooking_id;
-                            $enviroment='local';
-                            $merchent_id ='FnAoux43246182437237';
-                            $merchantKey='2fCkkMtPcbf###hr';
-                            $merchantwebsite='WEBSTAGING';
-                            $channel='WEB';
-                            $industryType='Retail';
-                            $paytmParams = array();
+                            $order_id = $upgradeBikebooking_id.'_'.time();
+
+                        $enviroment='local';
+                        $merchent_id ='FnAoux43246182437237';
+                        $merchantKey='2fCkkMtPcbf###hr';
+                        $merchantwebsite='WEBSTAGING';
+                        $channel='WEB';
+                        $industryType='Retail';
+                        $paytmParams = array();
                             $orderid = $order_id;
                             $paytmParams["body"] = array(
                                 'requestType' => 'Payment',
@@ -2384,7 +2385,7 @@ class apiController extends Controller
                                 'orderId' => $orderid,
                                 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
                                 'txnAmount'     => array(
-                                    'value'     => $differance_amount,
+                                    'value'     => $amount,
                                     'currency'  => 'INR',
                                 ),
                                 'userInfo'      => array(
