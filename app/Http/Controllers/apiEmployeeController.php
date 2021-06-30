@@ -2458,11 +2458,12 @@ class apiEmployeeController extends Controller
                         $time = date('H:i:s');
                         if($booking){
                             
+                            $vehicle_regno = $vehicle_number;
 
                             $curl = curl_init();
 
                             curl_setopt_array($curl, array(
-                              CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no=RJ14QH1189&format=json',
+                              CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no='.$vehicle_regno.'&format=json',
                               CURLOPT_RETURNTRANSFER => true,
                               CURLOPT_ENCODING => '',
                               CURLOPT_MAXREDIRS => 10,
@@ -4129,7 +4130,7 @@ class apiEmployeeController extends Controller
                             $curl = curl_init();
 
                             curl_setopt_array($curl, array(
-                              CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no=RJ14QH1189&format=json',
+                              CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no='.$vehicle_number.'&format=json',
                               CURLOPT_RETURNTRANSFER => true,
                               CURLOPT_ENCODING => '',
                               CURLOPT_MAXREDIRS => 10,

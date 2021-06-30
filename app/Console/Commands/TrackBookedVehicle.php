@@ -46,12 +46,13 @@ class TrackBookedVehicle extends Command
         if($booked_vehicleList){
             $error = '';
             foreach ($booked_vehicleList as $vlist) {
-                //$vehicle_number = $vlist->vehicle;
+                $vehicle_number = $vlist->vehicle;
                 $booking_id = $vlist->id;
+
                 $curl = curl_init();
 
                 curl_setopt_array($curl, array(
-                  CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no=RJ14QH1189&format=json',
+                  CURLOPT_URL => 'http://13.127.228.11/webservice?token=getLiveData&vehicle_no='.$vehicle_number.'&format=json',
                   CURLOPT_RETURNTRANSFER => true,
                   CURLOPT_ENCODING => '',
                   CURLOPT_MAXREDIRS => 10,
