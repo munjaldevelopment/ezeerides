@@ -2385,7 +2385,7 @@ class apiController extends Controller
                                 'orderId' => $orderid,
                                 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
                                 'txnAmount'     => array(
-                                    'value'     => $amount,
+                                    'value'     => round($differance_amount),
                                     'currency'  => 'INR',
                                 ),
                                 'userInfo'      => array(
