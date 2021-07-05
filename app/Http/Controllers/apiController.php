@@ -1177,7 +1177,7 @@ class apiController extends Controller
                             }
                         }
                         //print_r($usedCouponList);
-                        $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
+                        $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->wheredate('start_date',' > ',$current_date)->wheredate('end_date',' <= ',$current_date)->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                         $coupon_list = array();
                         if($referCouponList){
                             foreach($referCouponList as $couponlist)
@@ -1188,7 +1188,7 @@ class apiController extends Controller
                             }
                         } 
 
-                        $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
+                        $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->wheredate('start_date',' > ',$current_date)->wheredate('end_date',' <= ',$current_date)->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
                         if($generalCouponList){
                             foreach($generalCouponList as $gencouponlist)
                             {
