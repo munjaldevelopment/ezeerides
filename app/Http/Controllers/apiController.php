@@ -927,46 +927,49 @@ class apiController extends Controller
                                 $charges = '₹ '.$total_price.' / Hr';
                             }
                             
-                            $user_id = DB::table('stations')->where('id', $center)->pluck('employee_id')[0];
-                            if($center != 0){
-                    
+                            $user_id = '';
+                            $next_booking_time = '';
+                            if($center > 0){
+                                $user_id = DB::table('stations')->where('id', $center)->pluck('employee_id')[0];
                                 $station_name = DB::table('stations')->where('id', $center)->pluck('station_name')[0];
                             }else{
                                 
                                 $station_name = "";
                             } 
-
-                            /*Check Bike availability */
-                            $usedVehList = array('01');
-                            $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('user_id', $user_id)->where('status', 'Out')->where('station', $station_name)->distinct()->select('vehicle')->get();
-                            if($bookedvehicle){
-                                foreach ($bookedvehicle as $usedvehicle) {
-                                    if($usedvehicle->vehicle){
-                                        $usedVehList[] = $usedvehicle->vehicle;
+                            if($user_id != ''){
+                                /*Check Bike availability */
+                                $usedVehList = array('01');
+                                $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('user_id', $user_id)->where('status', 'Out')->where('station', $station_name)->distinct()->select('vehicle')->get();
+                                if($bookedvehicle){
+                                    foreach ($bookedvehicle as $usedvehicle) {
+                                        if($usedvehicle->vehicle){
+                                            $usedVehList[] = $usedvehicle->vehicle;
+                                        }
                                     }
                                 }
-                            }
 
-                        $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $vlist->id)->where('s.employee_id', $user_id)->orderBy('v.id', 'DESC')->get();
-                        $vehicle_list = array();
-                        foreach($vehiclelist as $bikelist)
-                        {
-                            if($bikelist->vehicle_number){
-                                $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
-                            }
-                        }
+                                $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $vlist->id)->where('s.employee_id', $user_id)->orderBy('v.id', 'DESC')->get();
+                                $vehicle_list = array();
+                                foreach($vehiclelist as $bikelist)
+                                {
+                                    if($bikelist->vehicle_number){
+                                        $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
+                                    }
+                                }
 
-                        /* get latest return bike booking id */ 
-                        $from_returndate  = date('Y-m-d', strtotime($from_date));
-                        $from_returnTime  = date('H:i:s', strtotime($from_date));
-                        $latestreturnbookedvehicle = DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('status', 'Out')->where('station', $station_name)->where('expected_drop', '>=', $from_returndate)->orderBy('expected_drop', 'ASC')->orderBy('expected_drop_time', 'ASC')->first();
-                         //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                            /* get latest return bike booking id */ 
+                            $from_returndate  = date('Y-m-d', strtotime($from_date));
+                            $from_returnTime  = date('H:i:s', strtotime($from_date));
+                            $latestreturnbookedvehicle = DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('status', 'Out')->where('station', $station_name)->where('expected_drop', '>=', $from_returndate)->orderBy('expected_drop', 'ASC')->orderBy('expected_drop_time', 'ASC')->first();
+
+                            //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
                             $next_booking_time = '';
                             if(count($vehicle_list) == 0){
                                if($latestreturnbookedvehicle){
                                     $next_booking_time = date("d-m-Y",strtotime($latestreturnbookedvehicle->expected_drop))." ".$latestreturnbookedvehicle->expected_drop_time;
                                 }    
                             }
+                        }
 
                             $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
                          }
