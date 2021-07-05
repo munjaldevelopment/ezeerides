@@ -1025,6 +1025,7 @@ class apiController extends Controller
             $to_date = $request->to_date;
             $coupon_code = $request->coupon_code;
             $error = "";
+            $current_date = date('Y-m-d H:i:s');
             if($ride_type == ""){
                 $error = "Please choose ride type for bike booking";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
