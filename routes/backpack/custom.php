@@ -56,4 +56,6 @@ Route::group([
     Route::crud('needhelp', 'NeedHelpCrudController');
     Route::crud('policies', 'PoliciesCrudController');
     Route::crud('ridetype', 'RideTypeCrudController');
+    Route::crud('servicefleetrequest', 'ServiceFleetRequestCrudController');
+    Route::crud('noticeboard', 'NoticeboardCrudController');
 }); // this should be the absolute last line of this file

@@ -842,7 +842,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
     //END
-    //Rent IN Result
+    //vehicle filter Result
     public function vehicle_filter(Request $request)
     {
         try 
@@ -881,6 +881,8 @@ class apiController extends Controller
                         //$vehicleList = $vehicleList->where('available_date', '<=', $from_date.' 00:00:00'); 
                     }
                     $vehicleList = $vehicleList->orderBy('v.id', 'asc')->get(); 
+
+                    
                     if(count($vehicleList) >0){
                         $v_list = array();
                         foreach($vehicleList as $vlist)
@@ -905,35 +907,74 @@ class apiController extends Controller
                             $timestamp2 = strtotime($expected_dropDateTime);
 
                             $hours = abs($timestamp2 - $timestamp1)/(60*60);
+                            $bikecharges = $charges_per_hour;
+                            $fleetFare = 0;
+                            $total_price = 0;
+                            if($hours > 0){
+                               
+                                $VehicleRegister = new VehicleRegister();
+                                $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                $total_price = $fleetFare+$insurance_charges_per_hour;
+                            }
                             $day = floor($hours/24);
                             if($ride_type == 'long'){
                                 
-                                $bikecharges = $charges_per_hour;
-                                $fleetFare = 0;
-                                $total_price = 0;
-                                if($hours > 0){
-                                   
-                                    $VehicleRegister = new VehicleRegister();
-                                    $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
-                                    $total_price = $fleetFare+$insurance_charges_per_hour;
-                                }
+                               
                                 $charges = '₹ '.$total_price.' / '.$day.'d';
 
                             }else{
                                 
-                                $charges = '₹ '.$charges_per_hour.' / Hr';
+                                $charges = '₹ '.$total_price.' / Hr';
                             }
                             
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image]; 
+                            $user_id = '';
+                            $next_booking_time = '';
+                            if($center > 0){
+                                $user_id = DB::table('stations')->where('id', $center)->pluck('employee_id')[0];
+                                $station_name = DB::table('stations')->where('id', $center)->pluck('station_name')[0];
+                            }else{
+                                
+                                $station_name = "";
+                            } 
+                            if($user_id != ''){
+                                /*Check Bike availability */
+                                $usedVehList = array('01');
+                                $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('user_id', $user_id)->where('status', 'Out')->where('station', $station_name)->distinct()->select('vehicle')->get();
+                                if($bookedvehicle){
+                                    foreach ($bookedvehicle as $usedvehicle) {
+                                        if($usedvehicle->vehicle){
+                                            $usedVehList[] = $usedvehicle->vehicle;
+                                        }
+                                    }
+                                }
+
+                                $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $vlist->id)->where('s.employee_id', $user_id)->orderBy('v.id', 'DESC')->get();
+                                $vehicle_list = array();
+                                foreach($vehiclelist as $bikelist)
+                                {
+                                    if($bikelist->vehicle_number){
+                                        $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
+                                    }
+                                }
+
+                            /* get latest return bike booking id */ 
+                            $from_returndate  = date('Y-m-d', strtotime($from_date));
+                            $from_returnTime  = date('H:i:s', strtotime($from_date));
+                            $latestreturnbookedvehicle = DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('status', 'Out')->where('station', $station_name)->where('expected_drop', '>=', $from_returndate)->orderBy('expected_drop', 'ASC')->orderBy('expected_drop_time', 'ASC')->first();
+
+                            //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                            $next_booking_time = '';
+                            if(count($vehicle_list) == 0){
+                               if($latestreturnbookedvehicle){
+                                    $next_booking_time = date("d-m-Y",strtotime($latestreturnbookedvehicle->expected_drop))." ".$latestreturnbookedvehicle->expected_drop_time;
+                                }    
+                            }
+                        }
+
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
                          }
 
-                         if($center != 0){
-                    
-                            $station_name = DB::table('stations')->where('id', $center)->pluck('station_name')[0];
-                        }else{
-                            
-                            $station_name = "";
-                        } 
+                        
                         if($city_id > 0){
                             $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
                         }
@@ -984,6 +1025,7 @@ class apiController extends Controller
             $to_date = $request->to_date;
             $coupon_code = $request->coupon_code;
             $error = "";
+            $current_date = date('Y-m-d H:i:s');
             if($ride_type == ""){
                 $error = "Please choose ride type for bike booking";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
@@ -1062,7 +1104,24 @@ class apiController extends Controller
 
                         }
 
+                       /* due penalties */
+                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                        $customer_penalty = 0;
+                        if(count($booked_vehicleList) >0){
+                            foreach($booked_vehicleList as $vlist)
+                            {
+                                if($vlist->receive_amount < $vlist->additional_amount){
+                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                    $customer_penalty += $penalty_amount;
+                                }
+                            }
+                        }        
+                        /* End */ 
                        
+                        $bike_feature[] =  ['title' => 'Pre Penalty Amount', 'subtitle' => "".$customer_penalty];
+
+                       
+
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
 
@@ -1084,7 +1143,7 @@ class apiController extends Controller
                             $total_price = $fleetFare+$insurance_charges;
                         }
 
-                        
+                        $total_price += $customer_penalty;
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -1119,7 +1178,7 @@ class apiController extends Controller
                             }
                         }
                         //print_r($usedCouponList);
-                        $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
+                        $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->wheredate('end_date',' >= ',$current_date)->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                         $coupon_list = array();
                         if($referCouponList){
                             foreach($referCouponList as $couponlist)
@@ -1130,7 +1189,7 @@ class apiController extends Controller
                             }
                         } 
 
-                        $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
+                        $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->wheredate('end_date',' >= ',$current_date)->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
                         if($generalCouponList){
                             foreach($generalCouponList as $gencouponlist)
                             {
@@ -1161,7 +1220,7 @@ class apiController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            $message = $e->getTraceAsString();//$e->getTraceAsString(); getMessage //
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
     
             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
         }
@@ -1231,7 +1290,7 @@ class apiController extends Controller
                         }
 
                         $status = 'In';
-                        $booking_status = '0';
+                        $booking_status = '1';
                         $customer_name = $customer->name;
                         $phone = $customer->mobile;
                         $pick_up = date('Y-m-d',strtotime($from_date));
@@ -1247,7 +1306,7 @@ class apiController extends Controller
                         $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
 
                         $allowed_km = ($allowed_km_per_hour*$hours);
-
+                        $booking_from = 'customer';
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,
                             'station' => $station_name,
@@ -1266,6 +1325,7 @@ class apiController extends Controller
                             'allowed_km' => $allowed_km,
                             'total_amount' => $total_amount,
                             'booking_status' => $booking_status,
+                            'booking_from' => $booking_from,
                             'status' => $status,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
@@ -1396,6 +1456,23 @@ class apiController extends Controller
                             $payment_type = 'paytm';
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
 
+                             /* paid due penalties */
+                            $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                            $customer_penalty = 0;
+                            if(count($booked_vehicleList) >0){
+                                foreach($booked_vehicleList as $vlist)
+                                {
+                                    if($vlist->receive_amount < $vlist->additional_amount){
+                                        /* update penalties */
+                                        $penaltybooking_id = $vlist->id;
+                                        $penaltyamt = $vlist->additional_amount;
+                                        $due_penalty = 'no';   
+                                        DB::table('vehicle_registers')->where('id', '=', $penaltybooking_id)->update(['receive_amount' => "".$penaltyamt, 'due_penalty' => $due_penalty, 'updated_at' => $date]);
+                                    }
+                                }
+                            }        
+                            /* End */
+
                             $status_code = $success = '1';
                             $message = 'Your Booking Transaction Successfully Done.';
                         
@@ -1453,33 +1530,57 @@ class apiController extends Controller
         try 
         {   
             
-            $json       =   array();
+            $json      =   array();
             $baseUrl = URL::to("/");
             $customer_id = $request->customer_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
+                    //$bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
+
+                    $bookingList = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount', 'booking_status','status', 'vehicle','is_expended', 'is_upgrade', 'created_at')->where('customer_id', $customer_id)->orderBy('id', 'DESC')->get();
                     $booking_list = array();
                     if($bookingList){
                         foreach($bookingList as $booking)
                         {
-                            
-                            $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
-                            $vehicle_image = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('vehicle_image')[0];
+                            if($booking->is_expended == 'yes'){
+                                $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                                $booking->expected_drop = $expand_booking->expand_date;
+                                $booking->expected_drop_time = $expand_booking->expand_time;
+                                $booking->total_amount += $expand_booking->expand_amount;
+                            }
+                            if($booking->is_upgrade == 'yes'){
+                                $upgrade_vehicle_model_id = DB::table('booking_upgrade_bike')->where('booking_id', $booking->id)->where('payment_status', 'success')->pluck('vehicle_model_id')[0];
+                                $vehicle_model_id = $upgrade_vehicle_model_id;
+                                $vehicle_model = DB::table('vehicle_models')->where('id', $vehicle_model_id)->pluck('model')[0];
+                            }else{
+                                $vehicle_model_id = $booking->vehicle_model_id;
+                                $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+                            }
+                            $vehicle_image = DB::table('vehicle_models')->where('id', $vehicle_model_id)->pluck('vehicle_image')[0];
                              $bike_image = '';
                              if($vehicle_image){
                                 $bike_image = $baseUrl."/public/".$vehicle_image; 
                              }
-
+                            $expand_button = 'f';
+                            $upgrade_button = 'f'; 
+                            $expected_dropdatetime = strtotime($booking->expected_drop." ".$booking->expected_drop_time);
+                            $current_time = strtotime(date('Y-m-d H:i:s'));
                             if($booking->booking_status == 1){
                                $booking_status = 'Open';
+                               if($booking->status == 'Out' && $expected_dropdatetime > $current_time){
+                                   $expand_button = 't';
+                               }
+                               if($booking->status == 'In' && $booking->vehicle == '' && $expected_dropdatetime > $current_time){
+                                   $upgrade_button = 't';
+                               }
+
                             }else if($booking->booking_status == 0){
                                $booking_status = 'Canceled'; 
                             }else if($booking->booking_status == 2){
                                $booking_status = 'Completed';      
                             }
                             
-                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_image' => $bike_image, 'vehicle_model' => $vehicle_model, 'total_amount' => $booking->total_amount, 'booking_status' => $booking_status, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
+                            $booking_list[] = array('id' => "".$booking->id, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_image' => $bike_image, 'vehicle_model' => $vehicle_model, 'total_amount' => "".$booking->total_amount, 'booking_status' => $booking_status, 'is_expand_button' => $expand_button, 'is_upgrade_button' => $upgrade_button, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at))); 
                            
                         } 
 
@@ -1508,6 +1609,957 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
+    //Expand Date Bike Detail
+    public function expand_drop(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $expand_date = $request->expand_date;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+
+            
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+
+                    $booking = DB::table('vehicle_registers')->select('id','user_id','booking_no','customer_name','phone','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','vehicle', 'booking_status','is_upgrade')->where('customer_id', $customer_id)->where('vehicle', '!=', '')->where('status','Out')->where('id', $booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+                        $bike_model_id = $booking->vehicle_model_id;
+                        $vehicle_number = $booking->vehicle;
+                        if($booking->is_upgrade == 'yes'){
+                            $upgrade_vehicle_model_id = DB::table('booking_upgrade_bike')->where('booking_id', $booking->id)->where('payment_status', 'success')->pluck('vehicle_model_id')[0];
+                            $booking->vehicle_model_id = $upgrade_vehicle_model_id;
+                            
+                        }
+                        /*Check Bike availability */
+                        $usedVehList = array('01');
+                        $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $booking->vehicle_model_id)->where('user_id', $booking->user_id)->where('status', 'Out')->where('station', $booking->station)->distinct()->select('vehicle')->get();
+                        if($bookedvehicle){
+                            foreach ($bookedvehicle as $usedvehicle) {
+                                if($usedvehicle->vehicle){
+                                    $usedVehList[] = $usedvehicle->vehicle;
+                                }
+                            }
+                        }
+                        //print_r($usedVehList);
+                        $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $booking->vehicle_model_id)->where('s.employee_id', $booking->user_id)->orderBy('v.id', 'DESC')->get();
+                        $vehicle_list = array();
+                        foreach($vehiclelist as $bikelist)
+                        {
+                            if($bikelist->vehicle_number){
+                                $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
+                            }
+                        }
+                       // print_r($vehicle_list);
+                        /* get latest return bike booking id */ 
+                        $latestreturnbookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $booking->vehicle_model_id)->where('status', 'Out')->where('station', $booking->station)->orderBy('expected_drop', 'DESC')->orderBy('expected_drop_time', 'DESC')->first();
+                         //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                        if(count($vehicle_list) > 0 || $booking_id != $latestreturnbookedvehicle->id){
+
+                            $bikeDetail = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->where('status', '=', 'Live')->first();
+                            $bike_feature = array();
+                            if($bikeDetail){ 
+                                $vehicle_model = $bikeDetail->model;
+                                
+                                $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
+                                $excess_km_charges = '0';
+                                $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
+                                $bikecharges = $bikeDetail->charges_per_hour;
+                                $insurance_charges_per_hour =$bikeDetail->insurance_charges_per_hour;
+                                $insurance_charges = $bikeDetail->insurance_charges_per_hour;
+                                $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
+                                
+                                $pick_upDateTime = $booking->expected_drop." ".$booking->expected_drop_time;
+                                $expand_DateTime = $expand_date;
+                                $timestamp1 = strtotime($pick_upDateTime);
+                                $timestamp2 = strtotime($expand_DateTime);
+
+                                $hours = abs($timestamp2 - $timestamp1)/(60*60);
+
+                                $allowed_km = ($bikeDetail->allowed_km_per_hour*$hours);
+
+                                 $fleetFare = 0;
+                                 $total_price = 0;
+                                if($hours > 0){
+                                    //echo $bikecharges;
+                                    /*$VehicleRegister = new VehicleRegister();
+                                    $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                    $total_price = $fleetFare+$insurance_charges;*/
+                                    $fleetFare = $hours*$bikecharges;
+                                    $total_price = $fleetFare+$insurance_charges;
+
+                                }
+                                
+                                $baseUrl = URL::to("/");
+                                $vehicle_image  = "";
+                                if($bikeDetail->vehicle_image){
+                                    $vehicle_image  =  $baseUrl."/public/".$bikeDetail->vehicle_image;
+                                
+                                }
+                                
+                                $expanddate = date('Y-m-d',strtotime($expand_date));
+                                $expand_time = date('H:i:s',strtotime($expand_date));
+
+                                $status_code = $success = '1';
+                                $message = 'Expand Date Details';
+                                
+                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'expand_date' => $expanddate, 'expand_time' => $expand_time, 'center_name' => $booking->station,  'without_insurance_price' => "".$fleetFare, 'expand_amount' => '₹ '.$total_price, 'allowed_km' => $allowed_km, 'booking_hours' => $hours." Hr" );
+                            }else{
+                               $status_code = $success = '0';
+                                
+                                $message = 'Bike not valid';
+                                $json = array('status_code' => $status_code, 'message' => $message); 
+                            }
+                        }else{
+                            $status_code = $success = '0';
+                            
+                            $message = 'You can not extend Date Or Time for this vehicle. As this is assigned already to other inquiry.';
+                            
+                            $json = array('status_code' => $status_code, 'message' => $message);
+                        }
+
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'booking detail not valid';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message);
+                    }
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+     //Make Payment
+    public function make_expand_date_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $expand_date  = $request->expand_date;
+            $expand_time = $request->expand_time;
+            $expand_amount = $request->expand_amount;
+            $booking_hours = $request->booking_hours;
+            $allowed_km = $request->allowed_km;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($expand_date == ""){
+                $error = "Please enter expand date";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
+                    if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+
+                        $expand_date = date('Y-m-d',strtotime($expand_date));
+                        $expandbooking_id = DB::table('booking_expended')->insertGetId([
+                            'booking_id' => $booking_id,
+                            'expand_date' => $expand_date,
+                            'expand_time' => $expand_time,
+                            'expand_amount' => $expand_amount,
+                            'expand_km' => $allowed_km,
+                            'booking_hours' => $booking_hours,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        
+                        $enviroment='local';
+                        $merchent_id ='FnAoux43246182437237';
+                        $merchantKey='2fCkkMtPcbf###hr';
+                        $merchantwebsite='WEBSTAGING';
+                        $channel='WEB';
+                        $industryType='Retail';
+
+                       
+
+                        $paytmParams = array();
+                        $orderid = $expandbooking_id;
+                        $paytmParams["body"] = array(
+                            'requestType' => 'Payment',
+                            'mid' => $merchent_id,
+                            'websiteName' => 'WEBSTAGING',
+                            'orderId' => $orderid,
+                            'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
+                            'txnAmount'     => array(
+                                'value'     => $expand_amount,
+                                'currency'  => 'INR',
+                            ),
+                            'userInfo'      => array(
+                                'custId'    => $customer_id,
+                            )
+                        );
+
+                        /*
+                        * Generate checksum by parameters we have in body
+                        * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+                        */
+                        $payment = PaytmWallet::with('receive');
+                        $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
+
+                        $paytmParams["head"] = array('signature'=>$checksum);
+
+                        $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
+
+                        /* for Staging */
+                        $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
+
+                        /* for Production */
+                        // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
+
+                        $ch = curl_init($url);
+                        curl_setopt($ch, CURLOPT_POST, 1);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
+                        $response = curl_exec($ch);
+                        $gettxnarr = json_decode($response);
+                        $txnToken = $gettxnarr->body->txnToken;
+
+                       
+
+                        $status_code = $success = '1';
+                        $message = 'Bike Enquiry Booked Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $expandbooking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." " );
+                    
+                    }
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function confirm_expanddate_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $expand_booking_id = $request->expand_booking_id;
+            $error = "";
+           if($expand_booking_id == ""){
+                $error = "Please send valid expand booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    
+                    $booking = DB::table('booking_expended')->select('id','expand_amount', 'created_at')->where('booking_id', $booking_id)->where('id', $expand_booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+
+                        $status = PaytmWallet::with('status');
+                        $status->prepare(['order' => $expand_booking_id]);
+                        $status->check();
+                        
+                        $response = $status->response(); // To get raw response as array
+                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
+                        /*print_r($response);
+                        exit;*/
+
+                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
+                        //get important parameters via public methods
+                        $orderId = $status->getOrderId(); // Get order id
+                        
+                        $transactionId = $status->getTransactionId(); // Get transaction id
+                        
+                        if($status->isSuccessful()){
+                          //Transaction Successful
+                            $payment_status = 'success';
+                            $payment_type = 'paytm';
+                            DB::table('booking_expended')->where('id', '=', $expand_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
+
+                            $is_expended = 'yes';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['is_expended' => "".$is_expended,  'updated_at' => $date]);
+
+                             
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Successfully Done.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else if($status->isFailed()){
+                          //Transaction Failed
+                            
+                            $payment_status = 'failed';
+                            DB::table('booking_expended')->where('id', '=', $expand_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }else if($status->isOpen()){
+                          //Transaction Open/Processing
+                            $payment_status = 'pending';
+                            DB::table('booking_expended')->where('id', '=', $expand_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction is Pending / Processing.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);
+                        }
+                        
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Expand date booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //upgrade vehicle filter Result
+    public function upgrade_vehicle_filter(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter booking id ";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+                    $booking = DB::table('vehicle_registers')->select('id','user_id','booking_no','customer_name','vehicle_model_id','station', 'booking_status','pick_up','pick_up_time','expected_drop','expected_drop_time')->where('customer_id', $customer_id)->where('vehicle', '=', '')->where('status','In')->where('id', $booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+                        $station_name = $booking->station;
+                        $vehicle_model_id = $booking->vehicle_model_id;
+                        $station_id = DB::table('stations')->where('station_name', $station_name)->pluck('id')[0];
+                        $vehicleList = DB::table('vehicles as v')->join('vehicle_models as vm', 'v.vehicle_model', '=', 'vm.id')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->select('vm.id','vm.model','vm.allowed_km_per_hour','vm.charges_per_hour','vm.insurance_charges_per_hour', 'vm.penalty_amount_per_hour','vm.vehicle_image')->where('v.status','Live')->groupBy('vm.id');
+
+                            if($station_id > 0){
+                                $vehicleList = $vehicleList->where('sv.station_id',$station_id);    
+                            }
+
+                            if($vehicle_model_id != ''){
+                                $vehicleList = $vehicleList->where('vm.id','!=',$vehicle_model_id);    
+                            }
+
+                            $vehicleList = $vehicleList->orderBy('v.id', 'asc')->get(); 
+
+                    
+                            if(count($vehicleList) >0){
+                                $v_list = array();
+                                foreach($vehicleList as $vlist)
+                                {
+                                    
+                                    $vehicle_model = $vlist->model;
+                                    $allowed_km_per_hour = $vlist->allowed_km_per_hour;
+                                    $charges_per_hour = $vlist->charges_per_hour;
+                                    $insurance_charges_per_hour = $vlist->insurance_charges_per_hour;
+                                    $penalty_amount_per_hour = $vlist->penalty_amount_per_hour;
+                                    $baseUrl = URL::to("/");
+                                    $vehicle_image  = "";
+                                    if($vlist->vehicle_image){
+                                        $vehicle_image  =  $baseUrl."/public/".$vlist->vehicle_image;
+                                    
+                                    }
+                                    $premium_charges_per_hour = '0.00';
+                                    $from_date = $booking->pick_up." ".$booking->pick_up_time;
+                                    $to_date = $booking->expected_drop." ".$booking->expected_drop_time;
+                                    $pick_upDateTime = $from_date;
+                                    $expected_dropDateTime = $to_date;
+                                    $timestamp1 = strtotime($pick_upDateTime);
+                                    $timestamp2 = strtotime($expected_dropDateTime);
+
+                                    $hours = abs($timestamp2 - $timestamp1)/(60*60);
+                                    $bikecharges = $charges_per_hour;
+                                    $fleetFare = 0;
+                                    $total_price = 0;
+                                    if($hours > 0){
+                                       
+                                        $VehicleRegister = new VehicleRegister();
+                                        $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                        $total_price = $fleetFare+$insurance_charges_per_hour;
+                                    }
+                                    $day = floor($hours/24);
+                                    $ride_type = 'regular';
+                                    if($ride_type == 'long'){
+                                        
+                                       
+                                        $charges = '₹ '.$total_price.' / '.$day.'d';
+
+                                    }else{
+                                        
+                                        $charges = '₹ '.$total_price.' / Hr';
+                                    }
+                                    
+                                    $user_id = DB::table('stations')->where('id', $station_id)->pluck('employee_id')[0];
+                                    if($station_id != 0){
+                            
+                                        $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                                    }else{
+                                        
+                                        $station_name = "";
+                                    } 
+
+                                    /*Check Bike availability */
+                                    $usedVehList = array('01');
+                                    $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('user_id', $user_id)->where('status', 'Out')->where('station', $station_name)->distinct()->select('vehicle')->get();
+                                    if($bookedvehicle){
+                                        foreach ($bookedvehicle as $usedvehicle) {
+                                            if($usedvehicle->vehicle){
+                                                $usedVehList[] = $usedvehicle->vehicle;
+                                            }
+                                        }
+                                    }
+
+                                $vehiclelist = DB::table('vehicles as v')->join('station_has_vehicles as sv', 'v.id', '=', 'sv.vehicle_id')->join('stations as s', 's.id', '=', 'sv.station_id')->select('v.id','v.vehicle_number')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $vlist->id)->where('s.employee_id', $user_id)->orderBy('v.id', 'DESC')->get();
+                                $vehicle_list = array();
+                                foreach($vehiclelist as $bikelist)
+                                {
+                                    if($bikelist->vehicle_number){
+                                        $vehicle_list[] = array('vehicle_number' => $bikelist->vehicle_number); 
+                                    }
+                                }
+
+                                /* get latest return bike booking id */ 
+                                $from_returndate  = date('Y-m-d', strtotime($from_date));
+                                $from_returnTime  = date('H:i:s', strtotime($from_date));
+                                $latestreturnbookedvehicle = DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('status', 'Out')->where('station', $station_name)->where('expected_drop', '>=', $from_returndate)->orderBy('expected_drop', 'ASC')->orderBy('expected_drop_time', 'ASC')->first();
+                                 //echo count($vehicle_list)."-".$latestreturnbookedvehicle->id;
+                                    $next_booking_time = '';
+                                    if(count($vehicle_list) == 0){
+                                        if($latestreturnbookedvehicle){
+                                            $next_booking_time = date("d-m-Y",strtotime($latestreturnbookedvehicle->expected_drop))." ".$latestreturnbookedvehicle->expected_drop_time;
+                                        }
+                                    }
+
+                                    $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
+                                 }
+
+                                
+                                
+                                $status_code = $success = '1';
+                                $message = 'Upgrade Vehicle Filter Result';
+                                
+                                $json = array('status_code' => $status_code, 'message' => $message, 'booking_id' => $booking_id, 'center_name' => $station_name, 'vehicle_list' => $v_list);
+                            }else{
+                                $status_code = $success = '0';
+                                $message = 'Vehicle not available right now';
+                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);    
+                            }
+                        }else{
+                            $status_code = $success = '0';
+                            $message = 'Booking detail not found for this booking id';
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);    
+                        }
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            //$message = $e->getTraceAsString(); 
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    //Upgrade Bike Detail
+    public function upgrade_bike(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $bike_model_id = $request->bike_model_id;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){ 
+
+                     $booking = DB::table('vehicle_registers')->select('id','user_id','booking_no','customer_name','vehicle_model_id','station', 'booking_status','pick_up','pick_up_time','expected_drop','expected_drop_time','booking_hours','allowed_km','total_amount')->where('customer_id', $customer_id)->where('vehicle', '=', '')->where('status','In')->where('id', $booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+                        $station_name = $booking->station;
+                        $station_id = DB::table('stations')->where('station_name', $station_name)->pluck('id')[0];
+                        $bikeDetail = DB::table('vehicle_models')->where('id', $bike_model_id)->where('status', '=', 'Live')->first();
+                        $bike_feature = array();
+                        if($bikeDetail){ 
+                            $vehicle_model = $bikeDetail->model;
+                            $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
+                            $excess_km_charges = '0';
+                            $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
+                            $bikecharges = $bikeDetail->charges_per_hour;
+                            $insurance_charges_per_hour =$bikeDetail->insurance_charges_per_hour;
+                            $insurance_charges = $bikeDetail->insurance_charges_per_hour;
+                            $penalty_amount_per_hour = '₹ '.$bikeDetail->penalty_amount_per_hour.' / Hr';
+                            $helmet_charges = '₹ 0';
+                            $helmet_status = '1';
+                            $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->first();
+                            if($customer_doc){
+                                $document_status = 'Attached';
+                            }else{
+                                $document_status = 'Not Attached';
+                            }
+
+                            $from_date = $booking->pick_up." ".$booking->pick_up_time;
+                            $to_date = $booking->expected_drop." ".$booking->expected_drop_time;
+
+                            $hours = $booking->booking_hours;
+
+                            if($allowed_km_per_hour > 0){
+                                $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
+                                
+                            }
+                            if($excess_km_charges){
+                                 $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
+                            }
+
+                            if($charges_per_hour){
+                              
+                                $bike_feature[] =  ['title' => 'Charges', 'subtitle' => $charges_per_hour];
+                                
+                            }
+
+                            if($penalty_amount_per_hour){
+                                 
+                                 $bike_feature[] =  ['title' => 'Penalty', 'subtitle' => $penalty_amount_per_hour];
+
+                            }
+
+                            if($insurance_charges_per_hour > 0){
+                                
+                                $bike_feature[] =  ['title' => 'Insurance for your Ride', 'subtitle' => '₹ '.$insurance_charges_per_hour];
+
+                                
+                            }
+
+                             if($helmet_charges){
+                                $bike_feature[] =  ['title' => 'Number of Helmet (2)', 'subtitle' => $helmet_charges];
+
+                            }
+
+                            if($document_status){
+                                $bike_feature[] =  ['title' => 'Documents Status', 'subtitle' => $document_status];
+
+                            }
+
+                       
+                            $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+
+                            $booking_time = $from_date."-".$to_date;
+
+                            $start_trip_date = date('d-m-Y',strtotime($from_date));
+                            $start_trip_time = date('H:i',strtotime($from_date));
+                            $end_trip_date = date('d-m-Y',strtotime($to_date));
+                            $end_trip_time = date('H:i',strtotime($to_date));
+
+                        
+
+                             $fleetFare = 0;
+                             $total_price = 0;
+                            if($hours > 0){
+                                //echo $bikecharges;
+                                $VehicleRegister = new VehicleRegister();
+                                $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                $total_price = $fleetFare+$insurance_charges;
+                            }
+
+                            
+
+                            $baseUrl = URL::to("/");
+                            $vehicle_image  = "";
+                            if($bikeDetail->vehicle_image){
+                                $vehicle_image  =  $baseUrl."/public/".$bikeDetail->vehicle_image;
+                            
+                            }
+                        
+                            $bikegallery = DB::table('vehicle_galleries')->where('vehicle_model_id', $bike_model_id)->where('status', '=', 'Live')->get();
+                            $bgallery = array();
+                            if(count($bikegallery) >0){
+                                
+                                foreach($bikegallery as $bike_gallery)
+                                {   
+                                    if($bike_gallery->image){
+                                        $title = $bike_gallery->title;
+                                        $vehicle_gal_image  =  $baseUrl."/public/".$bike_gallery->image;
+
+                                        $bgallery[] = ['title' => $title, 'gallery_img' => $vehicle_gal_image];
+                                    }      
+                                }
+                            }       
+                            $booking_amount = $booking->total_amount;
+                            $differance_amount = '0';
+                            if($total_price > $booking->total_amount){
+                                $differance_amount = $total_price-$booking->total_amount;
+                            }
+
+                            $status_code = $success = '1';
+                            $message = 'Bike Details';
+                            
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'booking_hours' => $hours." Hr" );
+                        }else{
+                            $status_code = $success = '0';
+                            $message = 'Bike not valid';
+                            
+                            $json = array('status_code' => $status_code, 'message' => $message);
+                        }
+
+                
+                    }else{
+                        $status_code = $success = '0';
+                        $message = 'booking detail not valid';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message);
+                    }
+
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+
+    //Make Payment for upgrade bike
+    public function make_payment_upgrade_bike(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $upgrade_model_id = $request->upgrade_model_id;
+            $differance_amount = $request->differance_amount;
+            $allowed_km = $request->allowed_km;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($upgrade_model_id == ""){
+                $error = "Please enter upgrade bike model ";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
+                    if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                        
+                        if($differance_amount > 0){
+                            $payment_status = 'pending';
+                            $payment_type = 'paytm';
+                        }else{
+                            $payment_status = 'success';
+                            $payment_type = 'wallet';
+                        }
+                        $upgradeBikebooking_id = DB::table('booking_upgrade_bike')->insertGetId([
+                            'booking_id' => $booking_id,
+                            'vehicle_model_id' => $upgrade_model_id,
+                            'upgrade_amount' => $differance_amount,
+                            'allowed_km' => $allowed_km,
+                            'payment_status' => $payment_status,
+                            'payment_type' => $payment_type,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        if($differance_amount > 0){
+
+                            $order_id = $upgradeBikebooking_id.'_'.time();
+                            //$order_id = $upgradeBikebooking_id;
+
+                            $enviroment='local';
+                            $merchent_id ='FnAoux43246182437237';
+                            $merchantKey='2fCkkMtPcbf###hr';
+                            $merchantwebsite='WEBSTAGING';
+                            $channel='WEB';
+                            $industryType='Retail';
+                            $paytmParams = array();
+                            $orderid = $order_id;
+                            $paytmParams["body"] = array(
+                                'requestType' => 'Payment',
+                                'mid' => $merchent_id,
+                                'websiteName' => 'WEBSTAGING',
+                                'orderId' => $orderid,
+                                'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
+                                'txnAmount'     => array(
+                                    'value'     => round($differance_amount),
+                                    'currency'  => 'INR',
+                                ),
+                                'userInfo'      => array(
+                                    'custId'    => $customer_id,
+                                )
+                            );
+
+                            /*
+                            * Generate checksum by parameters we have in body
+                            * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+                            */
+                            $payment = PaytmWallet::with('receive');
+                            $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
+
+                            $paytmParams["head"] = array('signature'=>$checksum);
+
+                            $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
+
+                            /* for Staging */
+                            $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
+
+                            /* for Production */
+                            // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
+
+                            $ch = curl_init($url);
+                            curl_setopt($ch, CURLOPT_POST, 1);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                            //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
+                            $response = curl_exec($ch);
+                            $gettxnarr = json_decode($response);
+                            $txnToken = $gettxnarr->body->txnToken;
+
+                        ################################################
+                            $status_code = $success = '1';
+                            $message = 'Bike Model Upgrade Successfully';
+                                
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ", 'orderid' => "".$orderid );
+                        }else{
+                           $status_code = $success = '1';
+                           $message = 'Bike Model Upgrade Successfully';
+                                
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'callbackUrl' => "", 'orderid' => "" ); 
+                        }    
+                    
+                    }
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function confirm_upgrade_bike_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $upgrade_bike_booking_id = $request->upgrade_bike_booking_id;
+            $orderid = $request->orderid;
+            $error = "";
+           if($upgrade_bike_booking_id == ""){
+                $error = "Please send valid upgrade bike booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    
+                    $booking = DB::table('booking_upgrade_bike')->select('id','upgrade_amount', 'created_at')->where('booking_id', $booking_id)->where('id', $upgrade_bike_booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+
+                        $status = PaytmWallet::with('status');
+                        $status->prepare(['order' => $orderid]);
+                        $status->check();
+                        
+                        $response = $status->response(); // To get raw response as array
+                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
+                        /*print_r($response);
+                        exit;*/
+
+                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
+                        //get important parameters via public methods
+                        $orderId = $status->getOrderId(); // Get order id
+                        
+                        $transactionId = $status->getTransactionId(); // Get transaction id
+                        
+                        if($status->isSuccessful()){
+                          //Transaction Successful
+                            $payment_status = 'success';
+                            $payment_type = 'paytm';
+                            DB::table('booking_upgrade_bike')->where('id', '=', $upgrade_bike_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
+
+                            $is_upgrade = 'yes';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['is_upgrade' => "".$is_upgrade,  'updated_at' => $date]);
+
+                             
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Successfully Done.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else if($status->isFailed()){
+                          //Transaction Failed
+                            
+                            $payment_status = 'failed';
+                            DB::table('booking_upgrade_bike')->where('id', '=', $upgrade_bike_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }else if($status->isOpen()){
+                          //Transaction Open/Processing
+                            $payment_status = 'pending';
+                            DB::table('booking_upgrade_bike')->where('id', '=', $upgrade_bike_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction is Pending / Processing.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);
+                        }else{
+                            $status_code = '0';
+                            $message = 'Paytm order id not valid';
+                        
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                        }
+                        
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Upgrade bike model booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
     public function booking_detail(Request $request)
     {
         try 
@@ -1519,7 +2571,9 @@ class apiController extends Controller
             $booking_id = $request->booking_id;
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','coupon_code','coupon_discount','vehicle', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    //$booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','coupon_code','coupon_discount','vehicle', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
+                    
+                    $booking = DB::table('vehicle_registers')->select('id','booking_no','customer_name','phone','register_otp','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle_model_id','total_amount','coupon_code','coupon_discount','vehicle', 'is_expended', 'is_upgrade', 'booking_status', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->orderBy('id', 'DESC')->first();
                     
                     $before_ride_img = DB::table('booked_vehicle_images')->where('customer_id', $customer_id)->where('booking_id', $booking_id)->where('image_type', 'Before Ride')->orderBy('id', 'DESC')->get();
                     $booked_vehicle_before_list = array();
@@ -1543,8 +2597,45 @@ class apiController extends Controller
                         }
                     } 
                     if($booking){
-                        
-                         $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+                        $extendhistory = array();
+                        $extendamount = 0;
+                        if($booking->is_expended == 'yes'){
+                            
+                            $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
+                            if($expand_booking){
+                                foreach($expand_booking as $extendbookdata)
+                                {
+                                    $extendhistory[] = array('expand_date' => $extendbookdata->expand_date, 'expand_time' => $extendbookdata->expand_time, 'expand_amount' => "".$extendbookdata->expand_amount, 'expand_km' => "".$extendbookdata->expand_km, 'booking_hours' => "".$extendbookdata->booking_hours);
+                                    $extendamount += $extendbookdata->expand_amount;
+                                }   
+                            }
+                            
+                           
+                        }
+
+                        $upgradeBikehistory = array();
+                        $upgradeamount = 0;
+                        if($booking->is_upgrade == 'yes'){
+                            
+                            $upgrade_booking = DB::table('booking_upgrade_bike')->where('booking_id', $booking->id)->where('payment_status', 'success')->orderBy('id', 'DESC')->get();
+                            
+                            if($upgrade_booking){
+                                foreach($upgrade_booking as $upgradebookdata)
+                                {
+                                    $upgrade_vehicle_model = DB::table('vehicle_models')->where('id', $upgradebookdata->vehicle_model_id)->pluck('model')[0];
+                                    $upgradeBikehistory[] = array('upgrade_vehicle_model' => $upgrade_vehicle_model, 'upgrade_amount' => "".$upgradebookdata->upgrade_amount, 'allowed_km' => "".$upgradebookdata->allowed_km);
+                                    $upgradeamount += $upgradebookdata->upgrade_amount;  
+                                }   
+                            }
+                            
+                           
+                        }
+                        if($booking->is_upgrade == 'yes'){
+                             $upgrade_vehicle_model_id = DB::table('booking_upgrade_bike')->where('booking_id', $booking->id)->where('payment_status', 'success')->pluck('vehicle_model_id')[0];
+                             $vehicle_model = DB::table('vehicle_models')->where('id', $upgrade_vehicle_model_id)->pluck('model')[0];
+                        }else{
+                            $vehicle_model = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('model')[0];
+                        }
                          $vehicle_image = DB::table('vehicle_models')->where('id', $booking->vehicle_model_id)->pluck('vehicle_image')[0];
                          $bike_image = '';
                          if($vehicle_image){
@@ -1559,9 +2650,25 @@ class apiController extends Controller
                                $booking_status = 'Completed';     
                          }
 
+                         /* due penalties */
+                        $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
+                        $customer_penalty = 0;
+                        if(count($booked_vehicleList) >0){
+                            foreach($booked_vehicleList as $vlist)
+                            {
+                                if($vlist->receive_amount < $vlist->additional_amount){
+                                    $penalty_amount = "".($vlist->additional_amount-$vlist->receive_amount);
+                                    $customer_penalty += $penalty_amount;
+                                }
+                            }
+                        }        
+                        /* End */
+
+                         $total_amount = $booking->total_amount+$customer_penalty+$extendamount+$upgradeamount;
+
                         $status_code = '1';
                         $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'total_amount' => $booking->total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list);
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'booking_amount' => $booking->total_amount, 'customer_penalty' => $customer_penalty, 'total_amount' => "".$total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list, 'is_expended' => $booking->is_expended, 'extendhistory' => $extendhistory, 'is_upgrade' => $booking->is_upgrade,'upgradeBikehistory' => $upgradeBikehistory  );
                     }else{
                          $status_code = '0';
                         $message = 'No booking found.';
@@ -1604,12 +2711,22 @@ class apiController extends Controller
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){ 
-                    $booking_status = 0;
-                    DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['booking_status' => $booking_status, 'cancel_date' => $date, 'cancel_reason' => $reason, 'updated_at' => $date]);
-                    $status_code = $success = '1';
-                    $message = 'Your booking canceled successfully';
-                    
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    $today = date('Y-m-d');
+                    $current_time = date('H:i:s');
+                    $chkbooking = DB::table('vehicle_registers')->where('id', $booking_id)->wheredate('pick_up', '>=', $today)->where('pick_up_time', '<=', $current_time)->first();
+                    if($chkbooking){
+                        $booking_status = 0;
+                        DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['booking_status' => $booking_status, 'cancel_date' => $date, 'cancel_reason' => $reason, 'updated_at' => $date]);
+                        $status_code = $success = '1';
+                        $message = 'Your booking canceled successfully';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                         $status_code = $success = '0';
+                        $message = 'You can not cancel this booking as pickup time is over.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }    
 
 
                 } else{
@@ -2019,6 +3136,7 @@ class apiController extends Controller
             
             $json       =   array();
             $customer_id = $request->customer_id;
+            $current_date = date('Y-m-d H:i:s');
             $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){
                     /* Used Coupon List */
@@ -2032,7 +3150,7 @@ class apiController extends Controller
                         }
                     }
                     //print_r($usedCouponList);
-                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
+                    $referCouponList = DB::table('customer_referal_coupons')->select('id','customer_id','coupon_code', 'discount','description')->where('customer_id', $customer_id)->where('status', 'Live')->wheredate('start_date',' > ',$current_date)->wheredate('end_date',' <= ',$current_date)->whereNotIn('coupon_code', $usedCouponList)->orderBy('id', 'ASC')->get();
                     $coupon_list = array();
                     if($referCouponList){
                         foreach($referCouponList as $couponlist)
@@ -2043,7 +3161,7 @@ class apiController extends Controller
                         }
                     } 
 
-                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
+                    $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->wheredate('start_date',' > ',$current_date)->wheredate('end_date',' <= ',$current_date)->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
                     if($generalCouponList){
                         foreach($generalCouponList as $gencouponlist)
                         {

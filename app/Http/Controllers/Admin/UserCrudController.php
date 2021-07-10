@@ -88,7 +88,7 @@ class UserCrudController extends CrudController
         );
 
         // Extra Permission Filter
-        $this->crud->addFilter(
+       /* $this->crud->addFilter(
             [
                 'name'  => 'permissions',
                 'type'  => 'select2',
@@ -102,7 +102,7 @@ class UserCrudController extends CrudController
             }
         );
 
-        $this->crud->addButtonFromView('line', 'receive_amount', 'receive_amount', 'end');
+        $this->crud->addButtonFromView('line', 'receive_amount', 'receive_amount', 'end');*/
     }
 
     public function setupCreateOperation()

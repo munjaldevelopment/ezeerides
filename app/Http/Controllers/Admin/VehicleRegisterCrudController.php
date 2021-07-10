@@ -123,12 +123,12 @@ class VehicleRegisterCrudController extends CrudController
         }
 
         $this->crud->addField([
-            'name' => 'user_id',
+            'name' => 'employee_id',
             'label' => 'Employee',
             'type'      => 'select2_from_array',
             'options'   => $employee_list,
             'attributes'   => [
-                'id' => 'user_id'
+                'id' => 'employee_id'
                 
             ],
             'hint' => '',
@@ -154,14 +154,15 @@ class VehicleRegisterCrudController extends CrudController
         $customer_list = array();
             
         $customer_list[0] = 'Select';
+        
         $custlist= User::whereHas('roles', function($q){
                     $q->where('name', 'Customer');
-                  })->get();
+                  })->join('customers as c', 'c.user_id', '=', 'users.id')->select('c.id','c.name')->where('c.status','Live')->get();
         if($custlist)
         {
             foreach($custlist as $row)
             {
-                $customer_list[$row->name] = $row->name;
+                $customer_list[$row->id] = $row->name;
             }
         }
         $this->crud->addField([
@@ -244,13 +245,18 @@ class VehicleRegisterCrudController extends CrudController
         $this->crud->unsetValidation(); // validation has already been run
         
         $result = $this->traitVehicleRegisterStore();
-        
+       
         // Save Data in user table
         $id = $this->crud->entry->id;
-        $user_id = $this->crud->getRequest()->user_id;
+        $employee_id = $this->crud->getRequest()->employee_id;
         $station = $this->crud->getRequest()->station;
         $vehicle = $this->crud->getRequest()->vehicle;
-        $customer_name = $this->crud->getRequest()->customer_name;
+
+         $vehicle_model = \DB::table('vehicles')->where('vehicle_number', $vehicle)->pluck('vehicle_model')[0];
+
+        $vehicle_model_id = $vehicle_model;
+        $customer_id = $this->crud->getRequest()->customer_name;
+        $customer_name = \DB::table('customers')->where('id', $customer_id)->pluck('name')[0];
         $phone = $this->crud->getRequest()->phone;
         $pick_up = $this->crud->getRequest()->pick_up;
         $pick_up_time = $this->crud->getRequest()->pick_up_time;
@@ -273,17 +279,21 @@ class VehicleRegisterCrudController extends CrudController
         $VehicleRegister = new VehicleRegister();
         $fleetFare = $VehicleRegister->getFleetFare($hours,$vehicle_amount);
         $fleetFare += $insurance_charges_per_hour;
-        
-        $booking_id = VehicleRegister::insertGetId([
-            'user_id' => $user_id,
+        $register_otp = rand(11111, 99999);
+        $booking_id = VehicleRegister::where('id', $id)->update([
+            'user_id' => $employee_id,
             'station' => $station,
+            'vehicle_model_id' => $vehicle_model_id,
             'vehicle' => $vehicle,
+            'register_otp' => $register_otp,
+            'customer_id' => $customer_id,
             'customer_name' => $customer_name,
             'phone' => $phone,
             'pick_up' => $pick_up,
             'pick_up_time' => $pick_up_time,
             'expected_drop' => $expected_drop,
             'expected_drop_time' => $expected_drop_time,
+            'booking_hours' => $hours,
             'total_amount' => $fleetFare,
             'booking_status' => $booking_status,
             'status' => $status,
@@ -291,9 +301,10 @@ class VehicleRegisterCrudController extends CrudController
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $booking_no = "EZR".date('YMDHis').str_pad($booking_id, 5, "0", STR_PAD_LEFT);
+        $booking_no = "EZR".date('YmdHis').str_pad($id, 5, "0", STR_PAD_LEFT);
         
-        VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
+        VehicleRegister::where('id', $id)->update(['booking_no' => $booking_no]);
+         
         
         return $result;
         
@@ -308,9 +319,12 @@ class VehicleRegisterCrudController extends CrudController
         $this->crud->unsetValidation(); // validation has already been run
 
         $id = $this->crud->getRequest()->id;
-        $user_id = $this->crud->getRequest()->user_id;
+        $employee_id = $this->crud->getRequest()->employee_id;
         $station = $this->crud->getRequest()->station;
         $vehicle = $this->crud->getRequest()->vehicle;
+        $vehicle_model = \DB::table('vehicles')->where('vehicle_number', $vehicle)->pluck('vehicle_model')[0];
+
+        $vehicle_model_id = $vehicle_model;
         $customer_name = $this->crud->getRequest()->customer_name;
         $phone = $this->crud->getRequest()->phone;
         $pick_up = $this->crud->getRequest()->pick_up;
@@ -332,17 +346,20 @@ class VehicleRegisterCrudController extends CrudController
         $VehicleRegister = new VehicleRegister();
         $fleetFare = $VehicleRegister->getFleetFare($hours,$vehicle_amount);
         $fleetFare += $insurance_charges_per_hour;
-
+        $register_otp = rand(11111, 99999);
         $booking_id = VehicleRegister::where('id', $id)->update([
-            'user_id' => $user_id,
+            'user_id' => $employee_id,
             'station' => $station,
+            'vehicle_model_id' => $vehicle_model_id,
             'vehicle' => $vehicle,
+            'register_otp' => $register_otp,
             'customer_name' => $customer_name,
             'phone' => $phone,
             'pick_up' => $pick_up,
             'pick_up_time' => $pick_up_time,
             'expected_drop' => $expected_drop,
             'expected_drop_time' => $expected_drop_time,
+            'booking_hours' => $hours,
             'total_amount' => $fleetFare,
             'booking_status' => $booking_status,
             'status' => $status,
@@ -366,7 +383,7 @@ class VehicleRegisterCrudController extends CrudController
         $empData = array();
         foreach($emplist as $row)
         {
-            $empData[$row->id] = $row->name;
+            $empData[$row->employee_id] = $row->name;
             
         }
         return response()->json($empData);
