@@ -926,7 +926,7 @@ class apiController extends Controller
                                 
                                 $charges = '₹ '.$total_price.' / Hr';
                             }
-                            
+                            $available_bike = '0';
                             $user_id = '';
                             $next_booking_time = '';
                             if($center > 0){
@@ -971,7 +971,7 @@ class apiController extends Controller
                             }
                         }
 
-                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
+                            $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'available_bike' =>$available_bike, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
                          }
 
                         
@@ -1246,6 +1246,8 @@ class apiController extends Controller
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
+            $lattitude = $request->lattitude;
+            $longitude = $request->longitude;
             $document_status = 0;
             $error = "";
             if($ride_type == ""){
@@ -1708,11 +1710,11 @@ class apiController extends Controller
                                 
                                 $expanddate = date('Y-m-d',strtotime($expand_date));
                                 $expand_time = date('H:i:s',strtotime($expand_date));
-
+                                $wallet_amount = '250';
                                 $status_code = $success = '1';
                                 $message = 'Expand Date Details';
                                 
-                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'expand_date' => $expanddate, 'expand_time' => $expand_time, 'center_name' => $booking->station,  'without_insurance_price' => "".$fleetFare, 'expand_amount' => '₹ '.$total_price, 'allowed_km' => $allowed_km, 'booking_hours' => $hours." Hr" );
+                                $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $vehicle_number, 'vehicle_image' => $vehicle_image, 'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'expand_date' => $expanddate, 'expand_time' => $expand_time, 'center_name' => $booking->station,  'without_insurance_price' => "".$fleetFare, 'expand_amount' => '₹ '.$total_price, 'wallet_amount' => $wallet_amount, 'allowed_km' => $allowed_km, 'booking_hours' => $hours." Hr" );
                             }else{
                                $status_code = $success = '0';
                                 
@@ -2277,11 +2279,11 @@ class apiController extends Controller
                             if($total_price > $booking->total_amount){
                                 $differance_amount = $total_price-$booking->total_amount;
                             }
-
+                            $wallet_amount = '250';
                             $status_code = $success = '1';
                             $message = 'Bike Details';
                             
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'booking_hours' => $hours." Hr" );
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'wallet_amount' => $wallet_amount, 'booking_hours' => $hours." Hr" );
                         }else{
                             $status_code = $success = '0';
                             $message = 'Bike not valid';
@@ -2666,9 +2668,11 @@ class apiController extends Controller
 
                          $total_amount = $booking->total_amount+$customer_penalty+$extendamount+$upgradeamount;
 
+                         $wallet_amount = '250';
+
                         $status_code = '1';
                         $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'booking_amount' => $booking->total_amount, 'customer_penalty' => $customer_penalty, 'total_amount' => "".$total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list, 'is_expended' => $booking->is_expended, 'extendhistory' => $extendhistory, 'is_upgrade' => $booking->is_upgrade,'upgradeBikehistory' => $upgradeBikehistory  );
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'booking_amount' => $booking->total_amount, 'wallet_amount' => $wallet_amount, 'customer_penalty' => $customer_penalty, 'total_amount' => "".$total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list, 'is_expended' => $booking->is_expended, 'extendhistory' => $extendhistory, 'is_upgrade' => $booking->is_upgrade,'upgradeBikehistory' => $upgradeBikehistory  );
                     }else{
                          $status_code = '0';
                         $message = 'No booking found.';
