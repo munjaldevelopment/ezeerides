@@ -1198,11 +1198,11 @@ class apiController extends Controller
                                
                             }
                         } 
-
+                        $wallet_amount = '250';
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'wallet_amount' => $wallet_amount, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
