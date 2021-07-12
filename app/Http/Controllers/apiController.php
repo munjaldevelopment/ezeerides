@@ -924,11 +924,11 @@ class apiController extends Controller
                             if($ride_type == 'long'){
                                 
                                
-                                $charges = '₹ '.$total_price.' / '.$day.'d';
+                                $charges = '₹ '.$fleetFare.' / '.$day.'d';
 
                             }else{
                                 
-                                $charges = '₹ '.$total_price.' / Hr';
+                                $charges = '₹ '.$fleetFare.' / Hr';
                             }
                            
 
