@@ -64,6 +64,8 @@ class StationCrudController extends CrudController
          ]);
         CRUD::column('station_name');
 
+        CRUD::column('station_address');
+
         $this->crud->addColumn([
             'label'     => 'Employee Name',
             'type'      => 'select',
@@ -98,6 +100,8 @@ class StationCrudController extends CrudController
         ]);
 
         CRUD::field('station_name');
+
+        CRUD::field('station_address');
 
         $employee_list = array();
             

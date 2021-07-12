@@ -905,8 +905,12 @@ class apiController extends Controller
                             $expected_dropDateTime = $to_date;
                             $timestamp1 = strtotime($pick_upDateTime);
                             $timestamp2 = strtotime($expected_dropDateTime);
+                            if($ride_type == 'long'){
+                                $hours = abs($timestamp2 - $timestamp1)/(60*60);
+                            }else{
+                                $hours = 4;
+                            }
 
-                            $hours = abs($timestamp2 - $timestamp1)/(60*60);
                             $bikecharges = $charges_per_hour;
                             $fleetFare = 0;
                             $total_price = 0;
@@ -926,16 +930,17 @@ class apiController extends Controller
                                 
                                 $charges = '₹ '.$total_price.' / Hr';
                             }
+                           
+
                             $available_bike = '0';
                             $user_id = '';
                             $next_booking_time = '';
+                            $station_name = '';
                             if($center > 0){
+
                                 $user_id = DB::table('stations')->where('id', $center)->pluck('employee_id')[0];
                                 $station_name = DB::table('stations')->where('id', $center)->pluck('station_name')[0];
-                            }else{
-                                
-                                $station_name = "";
-                            } 
+                            
                             if($user_id != ''){
                                 /*Check Bike availability */
                                 $usedVehList = array('01');
@@ -968,8 +973,28 @@ class apiController extends Controller
                                if($latestreturnbookedvehicle){
                                     $next_booking_time = date("d-m-Y",strtotime($latestreturnbookedvehicle->expected_drop))." ".$latestreturnbookedvehicle->expected_drop_time;
                                 }    
+                            }else{
+                                $available_bike = "".count($vehicle_list);
                             }
                         }
+
+                        }else{
+                            $usedVehList = array('01');
+                            $bookedvehicle = \DB::table('vehicle_registers')->where('vehicle', '!=', '')->where('vehicle_model_id', $vlist->id)->where('status', 'Out')->distinct()->select('vehicle')->get();
+                            if($bookedvehicle){
+                                foreach ($bookedvehicle as $usedvehicle) {
+                                    if($usedvehicle->vehicle){
+                                        $usedVehList[] = $usedvehicle->vehicle;
+                                    }
+                                }
+                            }
+                            $onrideBike = implode(',', $usedVehList);    
+                            $totavailablevehicle = DB::table('vehicles as v')->select('v.id')->whereNotIn('v.vehicle_number', $usedVehList)->where('v.vehicle_model', $vlist->id)->orderBy('v.id', 'DESC')->count();
+                            $available_bike = "".$totavailablevehicle;
+                        }
+                        if($available_bike > 5){
+                            $available_bike = '5+';
+                        }    
 
                             $v_list[] = ['id' => (string)$vlist->id, 'vehicle_model' =>$vehicle_model, 'allowed_km_per_hour' =>$allowed_km_per_hour, 'charges_per_hour' =>$charges_per_hour, 'booking_hours' =>$hours, 'charges' =>$charges, 'available_bike' =>$available_bike, 'insurance_charges_per_hour' => $insurance_charges_per_hour, 'premium_charges_per_hour' => $premium_charges_per_hour, 'penalty_amount_per_hour' => $penalty_amount_per_hour, 'vehicle_image' => $vehicle_image,'next_booking_time'=>$next_booking_time]; 
                          }
@@ -1044,8 +1069,8 @@ class apiController extends Controller
                     $bike_feature = array();
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->model;
-                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
-                        $excess_km_charges = '0';
+                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' / Hr';
+                        $excess_km_charges = '₹ '.$bikeDetail->excess_km_penalty_charges." / KM";
                         $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
                         $bikecharges = $bikeDetail->charges_per_hour;
                         $insurance_charges_per_hour =$bikeDetail->insurance_charges_per_hour;
@@ -1067,6 +1092,15 @@ class apiController extends Controller
 
                         $hours = abs($timestamp2 - $timestamp1)/(60*60);
 
+                        $fleetFare = 0;
+                         $total_price = 0;
+                        if($hours > 0){
+                            //echo $bikecharges;
+                            $VehicleRegister = new VehicleRegister();
+                            $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                            $total_price = $fleetFare+$insurance_charges;
+                        }
+
                         if($allowed_km_per_hour > 0){
                             $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
                             
@@ -1075,15 +1109,27 @@ class apiController extends Controller
                              $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
                         }
 
-                        if($charges_per_hour){
-                          
-                            $bike_feature[] =  ['title' => 'Charges', 'subtitle' => $charges_per_hour];
-                            
+                        if($document_status){
+                            $bike_feature[] =  ['title' => 'Documents Status', 'subtitle' => $document_status];
+
                         }
 
                         if($penalty_amount_per_hour){
                              
                              $bike_feature[] =  ['title' => 'Penalty', 'subtitle' => $penalty_amount_per_hour];
+
+                        }
+
+                        
+
+                        if($charges_per_hour){
+                          
+                            $bike_feature[] =  ['title' => 'Charges', 'subtitle' => '₹ '.$fleetFare];
+                            
+                        }
+
+                        if($helmet_charges){
+                            $bike_feature[] =  ['title' => 'Helmet', 'subtitle' => '1 Compulsory / Subject to Availability'];
 
                         }
 
@@ -1094,16 +1140,9 @@ class apiController extends Controller
                             
                         }
 
-                         if($helmet_charges){
-                            $bike_feature[] =  ['title' => 'Number of Helmet (2)', 'subtitle' => $helmet_charges];
+                        
 
-                        }
-
-                        if($document_status){
-                            $bike_feature[] =  ['title' => 'Documents Status', 'subtitle' => $document_status];
-
-                        }
-
+                        
                        /* due penalties */
                         $booked_vehicleList = DB::table('vehicle_registers')->select('id','customer_id','additional_amount','receive_amount')->where('customer_id',$customer_id)->where('booking_status','1')->where('additional_amount', '>', 0)->where('is_amount_receive', '=', 1)->get();
                         $customer_penalty = 0;
@@ -1121,9 +1160,13 @@ class apiController extends Controller
                         $bike_feature[] =  ['title' => 'Pre Penalty Amount', 'subtitle' => "".$customer_penalty];
 
                        
-
+                        $total_price += $customer_penalty;
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
+                        $station_address = DB::table('stations')->where('id', $station_id)->pluck('station_address')[0];
+                        if($station_address){
+                            $station_name .= " (".$station_address.")";
+                        }
 
                         $booking_time = $from_date."-".$to_date;
 
@@ -1133,17 +1176,7 @@ class apiController extends Controller
                         $end_trip_time = date('H:i',strtotime($to_date));
 
                         
-
-                         $fleetFare = 0;
-                         $total_price = 0;
-                        if($hours > 0){
-                            //echo $bikecharges;
-                            $VehicleRegister = new VehicleRegister();
-                            $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
-                            $total_price = $fleetFare+$insurance_charges;
-                        }
-
-                        $total_price += $customer_penalty;
+                        
 
                         $baseUrl = URL::to("/");
                         $vehicle_image  = "";
@@ -1191,14 +1224,35 @@ class apiController extends Controller
 
                         $generalCouponList = DB::table('coupons')->select('id','title','discount_type','discount','description')->where('status', 'Live')->wheredate('end_date',' >= ',$current_date)->whereNotIn('title', $usedCouponList)->orderBy('id', 'ASC')->get();
                         if($generalCouponList){
+                            $custnumodr = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_status', '=', 'success')->count();
                             foreach($generalCouponList as $gencouponlist)
                             {
                                 
-                                $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount_type' => $gencouponlist->discount_type, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
+                                if($gencouponlist->title == 'FIRSTRIDE' && $custnumodr > 0){
+                                    
+                                }else{
+                                    $coupon_list[] = array('coupon_code' => "".$gencouponlist->title, 'discount_type' => $gencouponlist->discount_type, 'discount' => $gencouponlist->discount, 'description' => $gencouponlist->description); 
+                                }
                                
                             }
-                        } 
-                        $wallet_amount = '250';
+                        }
+                        /* Get wallet amount */
+                        $orderWalletAmt = 0;
+                        $expandWalletAmt = 0;
+                        $upgradeWalletAmt = 0;
+
+                        $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
+
+                        $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
+
+                        $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
+
+                        $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
+                    
+                        $totalwaletamount = "".($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
+                        
+                        $wallet_amount = $totalwaletamount;
+
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
@@ -1246,10 +1300,15 @@ class apiController extends Controller
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
+            $payment_type = $request->payment_type;
             $lattitude = $request->lattitude;
             $longitude = $request->longitude;
             $document_status = 0;
             $error = "";
+            if($payment_type == ""){
+                $error = "Please choose payment type for bike booking";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
             if($ride_type == ""){
                 $error = "Please choose ride type for bike booking";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
@@ -1291,10 +1350,18 @@ class apiController extends Controller
                             }
                         }
 
+                        if($payment_type == 'wallet'){
+                            $payment_type = 'wallet';
+                            $payment_status = 'success';
+                        }else{
+                            $payment_type = 'paytm';
+                            $payment_status = 'pending';
+                        }
                         $status = 'In';
                         $booking_status = '1';
                         $customer_name = $customer->name;
                         $phone = $customer->mobile;
+
                         $pick_up = date('Y-m-d',strtotime($from_date));
                         $pick_up_time = date('H:i',strtotime($from_date));
                         $expected_drop = date('Y-m-d',strtotime($to_date));
@@ -1329,6 +1396,8 @@ class apiController extends Controller
                             'booking_status' => $booking_status,
                             'booking_from' => $booking_from,
                             'status' => $status,
+                            'payment_status' => $payment_status,
+                            'payment_type' => $payment_type,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
@@ -1337,6 +1406,7 @@ class apiController extends Controller
             
                         VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
 
+                    if($payment_type != 'wallet'){
                         $enviroment='local';
                         $merchent_id ='FnAoux43246182437237';
                         $merchantKey='2fCkkMtPcbf###hr';
@@ -1389,13 +1459,24 @@ class apiController extends Controller
                         $response = curl_exec($ch);
                         $gettxnarr = json_decode($response);
                         $txnToken = $gettxnarr->body->txnToken;
+                        $callbackUrl = "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid;
+                    }else{
+                        $enviroment = '';
+                        $merchent_id = '';
+                        $merchantKey = '';
+                        $merchantwebsite = '';
+                        $channel = '';
+                        $industryType = '';
+                        $txnToken = '';
+                        $callbackUrl = '';
 
+                    }
                        
 
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." " );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'payment_type' => $payment_type, 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => $callbackUrl );
                     
                     }
                 } else{
@@ -1710,7 +1791,23 @@ class apiController extends Controller
                                 
                                 $expanddate = date('Y-m-d',strtotime($expand_date));
                                 $expand_time = date('H:i:s',strtotime($expand_date));
-                                $wallet_amount = '250';
+                                
+                                /* Get wallet amount */
+                                $orderWalletAmt = 0;
+                                $expandWalletAmt = 0;
+                                $upgradeWalletAmt = 0;
+
+                                $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
+
+                                $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
+
+                                $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
+
+                                $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
+                            
+                                $totalwaletamount = "".($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
+
+                                $wallet_amount = $totalwaletamount;
                                 $status_code = $success = '1';
                                 $message = 'Expand Date Details';
                                 
@@ -1769,6 +1866,7 @@ class apiController extends Controller
             $expand_amount = $request->expand_amount;
             $booking_hours = $request->booking_hours;
             $allowed_km = $request->allowed_km;
+            $payment_type = $request->payment_type;
             $error = "";
             if($booking_id == ""){
                 $error = "Please enter valid booking id";
@@ -1790,7 +1888,13 @@ class apiController extends Controller
                         
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                     }else{
-
+                        if($payment_type == 'wallet'){
+                            $payment_type = 'wallet';
+                            $payment_status = 'success';
+                        }else{
+                            $payment_type = 'paytm';
+                            $payment_status = 'pending';
+                        }
                         $expand_date = date('Y-m-d',strtotime($expand_date));
                         $expandbooking_id = DB::table('booking_expended')->insertGetId([
                             'booking_id' => $booking_id,
@@ -1799,70 +1903,83 @@ class apiController extends Controller
                             'expand_amount' => $expand_amount,
                             'expand_km' => $allowed_km,
                             'booking_hours' => $booking_hours,
+                            'payment_type' => $payment_type,
+                            'payment_status' => $payment_status,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
 
-                        
-                        $enviroment='local';
-                        $merchent_id ='FnAoux43246182437237';
-                        $merchantKey='2fCkkMtPcbf###hr';
-                        $merchantwebsite='WEBSTAGING';
-                        $channel='WEB';
-                        $industryType='Retail';
+                        if($payment_type != 'wallet'){
+                            $enviroment='local';
+                            $merchent_id ='FnAoux43246182437237';
+                            $merchantKey='2fCkkMtPcbf###hr';
+                            $merchantwebsite='WEBSTAGING';
+                            $channel='WEB';
+                            $industryType='Retail';
 
-                       
+                           
 
-                        $paytmParams = array();
-                        $orderid = $expandbooking_id;
-                        $paytmParams["body"] = array(
-                            'requestType' => 'Payment',
-                            'mid' => $merchent_id,
-                            'websiteName' => 'WEBSTAGING',
-                            'orderId' => $orderid,
-                            'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
-                            'txnAmount'     => array(
-                                'value'     => $expand_amount,
-                                'currency'  => 'INR',
-                            ),
-                            'userInfo'      => array(
-                                'custId'    => $customer_id,
-                            )
-                        );
+                            $paytmParams = array();
+                            $orderid = $expandbooking_id;
+                            $paytmParams["body"] = array(
+                                'requestType' => 'Payment',
+                                'mid' => $merchent_id,
+                                'websiteName' => 'WEBSTAGING',
+                                'orderId' => $orderid,
+                                'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
+                                'txnAmount'     => array(
+                                    'value'     => $expand_amount,
+                                    'currency'  => 'INR',
+                                ),
+                                'userInfo'      => array(
+                                    'custId'    => $customer_id,
+                                )
+                            );
 
-                        /*
-                        * Generate checksum by parameters we have in body
-                        * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
-                        */
-                        $payment = PaytmWallet::with('receive');
-                        $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
+                            /*
+                            * Generate checksum by parameters we have in body
+                            * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+                            */
+                            $payment = PaytmWallet::with('receive');
+                            $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
 
-                        $paytmParams["head"] = array('signature'=>$checksum);
+                            $paytmParams["head"] = array('signature'=>$checksum);
 
-                        $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
+                            $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
 
-                        /* for Staging */
-                        $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
+                            /* for Staging */
+                            $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
 
-                        /* for Production */
-                        // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
+                            /* for Production */
+                            // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
 
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_POST, 1);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
-                        $response = curl_exec($ch);
-                        $gettxnarr = json_decode($response);
-                        $txnToken = $gettxnarr->body->txnToken;
+                            $ch = curl_init($url);
+                            curl_setopt($ch, CURLOPT_POST, 1);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                            //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
+                            $response = curl_exec($ch);
+                            $gettxnarr = json_decode($response);
+                            $txnToken = $gettxnarr->body->txnToken;
+                            $callbackUrl = "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid;
+                         }else{
+                            $enviroment = '';
+                            $merchent_id = '';
+                            $merchantKey = '';
+                            $merchantwebsite = '';
+                            $channel = '';
+                            $industryType = '';
+                            $txnToken = '';
+                            $callbackUrl = '';
+                         }   
 
                        
 
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $expandbooking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." " );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $expandbooking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'payment_type' => $payment_type, 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => $callbackUrl );
                     
                     }
                 } else{
@@ -2279,9 +2396,26 @@ class apiController extends Controller
                             if($total_price > $booking->total_amount){
                                 $differance_amount = $total_price-$booking->total_amount;
                             }
-                            $wallet_amount = '250';
+
+                             /* Get wallet amount */
+                            $orderWalletAmt = 0;
+                            $expandWalletAmt = 0;
+                            $upgradeWalletAmt = 0;
+
+                            $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
+
+                            $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
+
+                            $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
+
+                            $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
+                        
+                            $totalwaletamount = "".($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
+
+                            $wallet_amount = $totalwaletamount;
+                            
                             $status_code = $success = '1';
-                            $message = 'Bike Details';
+                            $message = 'Upgrade Bike Details';
                             
                             $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'wallet_amount' => $wallet_amount, 'booking_hours' => $hours." Hr" );
                         }else{
@@ -2331,6 +2465,7 @@ class apiController extends Controller
             $upgrade_model_id = $request->upgrade_model_id;
             $differance_amount = $request->differance_amount;
             $allowed_km = $request->allowed_km;
+            $payment_type = $request->payment_type;
             $error = "";
             if($booking_id == ""){
                 $error = "Please enter valid booking id";
@@ -2353,13 +2488,20 @@ class apiController extends Controller
                         $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
                     }else{
                         
-                        if($differance_amount > 0){
-                            $payment_status = 'pending';
-                            $payment_type = 'paytm';
-                        }else{
-                            $payment_status = 'success';
+                        if($payment_type == 'wallet'){
                             $payment_type = 'wallet';
+                            $payment_status = 'success';
+                        }else{
+                            if($differance_amount > 0){
+                                $payment_type = 'paytm';
+                                $payment_status = 'pending';
+                            }else{
+                                $payment_status = 'success';
+                                $payment_type = 'wallet';
+                            }    
                         }
+
+                        
                         $upgradeBikebooking_id = DB::table('booking_upgrade_bike')->insertGetId([
                             'booking_id' => $booking_id,
                             'vehicle_model_id' => $upgrade_model_id,
@@ -2371,7 +2513,7 @@ class apiController extends Controller
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
 
-                        if($differance_amount > 0){
+                        if($payment_type == 'paytm'){
 
                             $order_id = $upgradeBikebooking_id.'_'.time();
                             //$order_id = $upgradeBikebooking_id;
@@ -2430,12 +2572,12 @@ class apiController extends Controller
                             $status_code = $success = '1';
                             $message = 'Bike Model Upgrade Successfully';
                                 
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ", 'orderid' => "".$orderid );
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'payment_type' => $payment_type, 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ", 'orderid' => "".$orderid );
                         }else{
                            $status_code = $success = '1';
                            $message = 'Bike Model Upgrade Successfully';
                                 
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'callbackUrl' => "", 'orderid' => "" ); 
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'payment_type' => $payment_type, 'enviroment' => '', 'mid' => '', 'merchantKey' => '', 'merchantwebsite' => '', 'channel' => '', 'industryType' => '', "txnToken" => '', 'callbackUrl' => "", 'orderid' => "" ); 
                         }    
                     
                     }
@@ -2668,7 +2810,22 @@ class apiController extends Controller
 
                          $total_amount = $booking->total_amount+$customer_penalty+$extendamount+$upgradeamount;
 
-                         $wallet_amount = '250';
+                          /* Get wallet amount */
+                                $orderWalletAmt = 0;
+                                $expandWalletAmt = 0;
+                                $upgradeWalletAmt = 0;
+
+                                $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
+
+                                $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
+
+                                $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
+
+                                $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
+                            
+                                $totalwaletamount = "".($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
+
+                                $wallet_amount = $totalwaletamount;
 
                         $status_code = '1';
                         $message = 'My Bookings List';
@@ -2862,16 +3019,28 @@ class apiController extends Controller
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
                 if($customer){
+                     /* Get wallet amount */
+                    $orderWalletAmt = 0;
+                    $expandWalletAmt = 0;
+                    $upgradeWalletAmt = 0;
+
                     $walletAmt = DB::table('customer_wallet_payments')->where('customer_id', $customer_id)->where('isactive', '=', '1')->where('payment_status', '=', 'success')->sum('amount');
 
                     $orderWalletAmt = DB::table('vehicle_registers')->where('customer_id', $customer_id)->where('payment_type', '=', 'wallet')->where('payment_status', '=', 'success')->sum('total_amount');
-                    
-                    $totalamount = '₹ '.($walletAmt-$orderWalletAmt);
+
+                    $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
+
+                    $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
+                
+                    $totalwaletamount = '₹ '.($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
+
+                    $wallet_amount = $totalwaletamount;
+
 
                     
                     $status_code = '1';
                     $message = 'Total Wallet Amount';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'wallet_amount' => $totalamount); 
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'wallet_amount' => $wallet_amount); 
                     
                 } else{
                     $status_code = $success = '0';
