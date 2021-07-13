@@ -1475,6 +1475,9 @@ class apiController extends Controller
                        $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
 
                        $payment = $api->payment->fetch($razorpay_payment_id);
+                        echo '<pre>';
+                        print_r($payment);
+                        exit;   
                        $status = $payment['status'];
                         if($status == 'captured'){
                           //Transaction Successful
