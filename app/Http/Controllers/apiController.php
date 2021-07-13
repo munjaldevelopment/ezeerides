@@ -1071,7 +1071,8 @@ class apiController extends Controller
                     $bike_feature = array();
                     if($bikeDetail){ 
                         $vehicle_model = $bikeDetail->model;
-                        $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' / Hr';
+                        $allowed_kmperhour = $bikeDetail->allowed_km_per_hour;
+                        $allowed_km_per_hour = $allowed_kmperhour.' KM / Hr';
                         $excess_km_charges = '₹ '.$bikeDetail->excess_km_penalty_charges." / KM";
                         $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
                         $bikecharges = $bikeDetail->charges_per_hour;
@@ -1095,11 +1096,13 @@ class apiController extends Controller
                         $hours = abs($timestamp2 - $timestamp1)/(60*60);
 
                         $fleetFare = 0;
-                         $total_price = 0;
+                        $total_price = 0;
+                        $bookedKm = 0;
                         if($hours > 0){
                             //echo $bikecharges;
                             $VehicleRegister = new VehicleRegister();
                             $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                            $bookedKm = $VehicleRegister->getBookedKM($hours,$allowed_kmperhour);
                             $total_price = $fleetFare+$insurance_charges;
                         }
 
@@ -1107,6 +1110,12 @@ class apiController extends Controller
                             $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
                             
                         }
+
+                        if($bookedKm > 0){
+                            $bike_feature[] =  ['title' => 'Booking KM','subtitle' => $bookedKm." KM"];
+                            
+                        }
+
                         if($excess_km_charges){
                              $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
                         }
@@ -1162,7 +1171,7 @@ class apiController extends Controller
                         $bike_feature[] =  ['title' => 'Pre Penalty Amount', 'subtitle' => "".$customer_penalty];
 
                        
-                        $total_price += $customer_penalty;
+                        //$total_price += $customer_penalty;
                         
                         $station_name = DB::table('stations')->where('id', $station_id)->pluck('station_name')[0];
                         $station_address = DB::table('stations')->where('id', $station_id)->pluck('station_address')[0];
@@ -1258,7 +1267,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Details';
                         
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'wallet_amount' => $wallet_amount, 'total_price' => '₹ '.$total_price, 'booking_hours' => $hours." Hr" );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'ride_type' => $ride_type, 'city_id' => $city_id , 'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time, 'coupon_list' => $coupon_list, 'without_insurance_price' => "".$fleetFare, 'wallet_amount' => $wallet_amount, 'total_price' => '₹ '.$total_price, 'customer_penalty' => $customer_penalty, 'booking_hours' => $hours." Hr" );
                     }else{
                         $status_code = $success = '0';
                         $message = 'Bike not valid';
@@ -1376,8 +1385,14 @@ class apiController extends Controller
                         $otp = rand(111111, 999999);
                         
                         $allowed_km_per_hour = DB::table('vehicle_models')->where('id', $bike_model_id)->pluck('allowed_km_per_hour')[0];
-
-                        $allowed_km = ($allowed_km_per_hour*$hours);
+                        $bookedKm = 0;
+                        if($hours > 0){
+                            //echo $bikecharges;
+                            $VehicleRegister = new VehicleRegister();
+                            $bookedKm = $VehicleRegister->getBookedKM($hours,$allowed_km_per_hour);
+                            
+                        }
+                        $allowed_km = $bookedKm;
                         $booking_from = 'customer';
                         $booking_id = VehicleRegister::insertGetId([
                             'user_id' => $user_id,

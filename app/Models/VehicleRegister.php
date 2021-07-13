@@ -99,6 +99,31 @@ class VehicleRegister extends Model
 
         return $amount;         
     }
+
+    public function getBookedKM($hours = 0,$allowed_kmperhour=0)
+    {
+        //echo $hours; 
+        if($hours >= 24)
+        {
+            $hourdiffer = ($hours%24);
+            if($hourdiffer == 0){
+                $bookedkm = ($hours * $allowed_kmperhour)-($hourdiffer*4*$allowed_kmperhour);
+            }else{
+                /*if($hourdiffer < 4){
+                    $hourdiffer = 4;
+                }*/
+                
+                $bookedkm = ($hours * $allowed_kmperhour)-($hourdiffer*$allowed_kmperhour);
+            }
+        }else if($hours < 4){
+            $hours = 4;
+            $bookedkm = $hours * $allowed_kmperhour;
+        }else{
+            $bookedkm = $hours * $allowed_kmperhour;
+        }
+
+        return $bookedkm;         
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
