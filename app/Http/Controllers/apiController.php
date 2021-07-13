@@ -1425,7 +1425,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, 'email' => $email);
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => "".$orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, 'email' => $email);
                     
                     }
                 } else{
