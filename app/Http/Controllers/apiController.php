@@ -853,8 +853,8 @@ class apiController extends Controller
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
             $city_id = $request->city_id;
-            $center = $request->center_id;
-            //$center = '0';
+            //$center = $request->center_id;
+            $center = '0';
             $ride_type = $request->ride_type;
             $from_date = date("Y-m-d H:i:s",strtotime($request->from_date));
             $to_date = date("Y-m-d  H:i:s",strtotime($request->to_date));
@@ -930,7 +930,7 @@ class apiController extends Controller
 
                             }else{
                                 
-                                $charges = '₹ '.$fleetFare.' / Hr';
+                                $charges = '₹ '.$fleetFare.' / 4 Hr';
                             }
                            
 
