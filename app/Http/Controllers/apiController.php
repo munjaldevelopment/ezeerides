@@ -859,10 +859,10 @@ class apiController extends Controller
             $from_date = date("Y-m-d H:i:s",strtotime($request->from_date));
             $to_date = date("Y-m-d  H:i:s",strtotime($request->to_date));
             $error = "";
-            if($center == ""){
+            /*if($center == ""){
                 $error = "Please enter center for ride";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
-            }
+            }*/
             
             if($error == ""){
                 $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
@@ -1866,6 +1866,199 @@ class apiController extends Controller
                         ]);
 
                         if($payment_type != 'wallet'){
+                            $razor_key=env('RAZOR_KEY');
+                            $amount =$expand_amount;
+                            $orderid = $booking_id;
+                            $name=$customer->name;
+                            $description='Expand time booking charges';
+                            $contact=$customer->phone;
+                            $email='';
+ 
+                         }else{
+                            $razor_key = '';
+                            $amount = '';
+                            $orderid = '';
+                            $name = '';
+                            $description = '';
+                            $contact = '';
+                            $email = '';
+                            
+                         }   
+
+                       
+
+                        $status_code = $success = '1';
+                        $message = 'Bike Enquiry Booked Successfully';
+                            
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $booking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, "email" => $email );
+                    
+                    }
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function confirm_expanddate_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $expand_booking_id = $request->expand_booking_id;
+            $razorpay_payment_id = $request->razorpay_payment_id;
+            $error = "";
+           if($expand_booking_id == ""){
+                $error = "Please send valid expand booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($razorpay_payment_id == ""){
+                $error = "Please send valid razorpay payment id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    
+                    $booking = DB::table('booking_expended')->select('id','expand_amount', 'created_at')->where('booking_id', $booking_id)->where('id', $expand_booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+
+                       $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
+
+                       $payment = $api->payment->fetch($razorpay_payment_id);
+                        
+                        $status = $payment['status'];
+                        if($status == 'captured'){
+                          //Transaction Successful
+                            $payment_status = 'success';
+                            $payment_type = 'razorpay';
+                            $responseMessage = 'Txn Success';
+                            $transactionId = $payment['id'];
+                            DB::table('booking_expended')->where('id', '=', $expand_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
+
+                            $is_expended = 'yes';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['is_expended' => "".$is_expended,  'updated_at' => $date]);
+
+                             
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Successfully Done.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else {
+                          //Transaction Failed
+                            $payment_type = 'razorpay';
+                            $responseMessage = $payment['error_description'].' '.$payment['error_reason'];
+                            $transactionId = $payment['id'];
+                            $payment_status = 'failed';
+                            DB::table('booking_expended')->where('id', '=', $expand_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }
+                        
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Expand date booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function make_expand_date_paymentby_paytm(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $expand_date  = $request->expand_date;
+            $expand_time = $request->expand_time;
+            $expand_amount = $request->expand_amount;
+            $booking_hours = $request->booking_hours;
+            $allowed_km = $request->allowed_km;
+            $payment_type = $request->payment_type;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($expand_date == ""){
+                $error = "Please enter expand date";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
+                    if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                        if($payment_type == 'wallet'){
+                            $payment_type = 'wallet';
+                            $payment_status = 'success';
+                        }else{
+                            $payment_type = 'paytm';
+                            $payment_status = 'pending';
+                        }
+                        $expand_date = date('Y-m-d',strtotime($expand_date));
+                        $expandbooking_id = DB::table('booking_expended')->insertGetId([
+                            'booking_id' => $booking_id,
+                            'expand_date' => $expand_date,
+                            'expand_time' => $expand_time,
+                            'expand_amount' => $expand_amount,
+                            'expand_km' => $allowed_km,
+                            'booking_hours' => $booking_hours,
+                            'payment_type' => $payment_type,
+                            'payment_status' => $payment_status,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+
+                        if($payment_type != 'wallet'){
                             $enviroment='local';
                             $merchent_id ='FnAoux43246182437237';
                             $merchantKey='2fCkkMtPcbf###hr';
@@ -1956,7 +2149,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-    public function confirm_expanddate_payment(Request $request)
+    public function confirm_expanddate_payment_paytm(Request $request)
     {
         try 
         {
@@ -2245,7 +2438,8 @@ class apiController extends Controller
                         $bike_feature = array();
                         if($bikeDetail){ 
                             $vehicle_model = $bikeDetail->model;
-                            $allowed_km_per_hour = $bikeDetail->allowed_km_per_hour.' KM';
+                            $allowed_kmperhour = $bikeDetail->allowed_km_per_hour;
+                            $allowed_km_per_hour = $allowed_kmperhour.' KM / Hr';
                             $excess_km_charges = '0';
                             $charges_per_hour = '₹ '.$bikeDetail->charges_per_hour.' / Hr';
                             $bikecharges = $bikeDetail->charges_per_hour;
@@ -2266,10 +2460,27 @@ class apiController extends Controller
 
                             $hours = $booking->booking_hours;
 
+                             $fleetFare = 0;
+                             $total_price = 0;
+                             $bookedKm = 0;
+                            if($hours > 0){
+                                //echo $bikecharges;
+                                $VehicleRegister = new VehicleRegister();
+                                $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
+                                $bookedKm = $VehicleRegister->getBookedKM($hours,$allowed_kmperhour);
+                                $total_price = $fleetFare+$insurance_charges;
+                            }
+
                             if($allowed_km_per_hour > 0){
                                 $bike_feature[] =  ['title' => 'Allowed KM','subtitle' => $allowed_km_per_hour];
                                 
                             }
+
+                            if($bookedKm > 0){
+                                $bike_feature[] =  ['title' => 'Booking KM','subtitle' => $bookedKm." KM"];
+                                
+                            }
+
                             if($excess_km_charges){
                                  $bike_feature[] =  ['title' => 'Excess KM Charges', 'subtitle' => $excess_km_charges];
                             }
@@ -2315,14 +2526,7 @@ class apiController extends Controller
 
                         
 
-                             $fleetFare = 0;
-                             $total_price = 0;
-                            if($hours > 0){
-                                //echo $bikecharges;
-                                $VehicleRegister = new VehicleRegister();
-                                $fleetFare = $VehicleRegister->getFleetFare($hours,$bikecharges);
-                                $total_price = $fleetFare+$insurance_charges;
-                            }
+                            
 
                             
 
@@ -2373,7 +2577,7 @@ class apiController extends Controller
                             $status_code = $success = '1';
                             $message = 'Upgrade Bike Details';
                             
-                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'wallet_amount' => $wallet_amount, 'booking_hours' => $hours." Hr" );
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id,  'center_id' => $station_id , 'vehicle_image' => $vehicle_image, 'vehicle_gallery' => $bgallery, 'vehicle_model' => $vehicle_model,'charges_per_hour' =>$charges_per_hour, 'insurance_charges' => '₹ '.$insurance_charges, 'bike_feature' => $bike_feature, 'helmet_status' => $helmet_status, 'document_status' => $document_status, 'pickup_station' => $station_name, 'booking_time' => $booking_time ,  'start_trip_date' => $start_trip_date, 'start_trip_time' => $start_trip_time,'end_trip_date' => $end_trip_date, 'end_trip_time' => $end_trip_time,  'old_model_booking_amount' => '₹ '.$booking_amount, 'upgrade_bike_model_price' => '₹ '.$total_price, 'differance_amount' => "".$differance_amount, 'allowed_km' => "".$bookedKm, 'wallet_amount' => $wallet_amount, 'booking_hours' => $hours." Hr" );
                         }else{
                             $status_code = $success = '0';
                             $message = 'Bike not valid';
@@ -2410,6 +2614,201 @@ class apiController extends Controller
 
     //Make Payment for upgrade bike
     public function make_payment_upgrade_bike(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $upgrade_model_id = $request->upgrade_model_id;
+            $differance_amount = $request->differance_amount;
+            $allowed_km = $request->allowed_km;
+            $payment_type = $request->payment_type;
+            $error = "";
+            if($booking_id == ""){
+                $error = "Please enter valid booking id";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+
+            if($upgrade_model_id == ""){
+                $error = "Please enter upgrade bike model ";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    $customer_doc = DB::table('customer_documents')->where('customer_id', $customer_id)->where('status', '=', 'Not Live')->first();
+                    if($customer_doc){
+
+                        $status_code = $success = '0';
+                        $message = 'Customer Document not verified yet.';
+                        
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }else{
+                        
+                        if($payment_type == 'wallet'){
+                            $payment_type = 'wallet';
+                            $payment_status = 'success';
+                        }else{
+                            if($differance_amount > 0){
+                                $payment_type = 'paytm';
+                                $payment_status = 'pending';
+                            }else{
+                                $payment_status = 'success';
+                                $payment_type = 'wallet';
+                            }    
+                        }
+
+                        
+                        $upgradeBikebooking_id = DB::table('booking_upgrade_bike')->insertGetId([
+                            'booking_id' => $booking_id,
+                            'vehicle_model_id' => $upgrade_model_id,
+                            'upgrade_amount' => $differance_amount,
+                            'allowed_km' => $allowed_km,
+                            'payment_status' => $payment_status,
+                            'payment_type' => $payment_type,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        if($payment_type == 'wallet'){
+                            $is_upgrade = 'yes';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['is_upgrade' => "".$is_upgrade,  'updated_at' => $date]);
+                        }
+
+                        if($payment_type == 'razorpay'){
+
+                            $razor_key=env('RAZOR_KEY');
+                            $amount =$differance_amount;
+                            $orderid = $upgradeBikebooking_id;
+                            $name=$customer->name;
+                            $description='Upgrade Bike Model Booking';
+                            $contact=$customer->phone;
+                            $email='';
+
+                        ################################################
+                            $status_code = $success = '1';
+                            $message = 'Bike Model Upgrade Successfully';
+                                
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, "email" => $email);
+                        }else{
+                           $status_code = $success = '1';
+                           $message = 'Bike Model Upgrade Successfully';
+                                
+                            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'upgrade_booking_id' => $upgradeBikebooking_id, 'differance_amount' => $differance_amount , 'payment_type' => $payment_type, 'razor_key' => '', 'amount' => '', 'orderid' => '', 'name' => '', 'description' => '', 'contact' => '', "email" => ''); 
+                        }    
+                    
+                    }
+                } else{
+                    $status_code = $success = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+    public function confirm_upgrade_bike_payment(Request $request)
+    {
+        try 
+        {
+            $json = $userData = array();
+            
+            $date   = date('Y-m-d H:i:s');
+            $customer_id = $request->customer_id;
+            $booking_id = $request->booking_id;
+            $upgrade_bike_booking_id = $request->upgrade_bike_booking_id;
+            $orderid = $request->orderid;
+            $razorpay_payment_id = $request->razorpay_payment_id;
+            $error = "";
+           if($upgrade_bike_booking_id == ""){
+                $error = "Please send valid upgrade bike booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($error == ""){
+                $customer = DB::table('customers')->where('id', $customer_id)->where('status', '=', 'Live')->first();
+                if($customer){
+                    
+                    $booking = DB::table('booking_upgrade_bike')->select('id','upgrade_amount', 'created_at')->where('booking_id', $booking_id)->where('id', $upgrade_bike_booking_id)->orderBy('id', 'DESC')->first();
+                    if($booking){
+
+                        $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
+
+                       $payment = $api->payment->fetch($razorpay_payment_id);
+                       /* echo '<pre>';
+                        print_r($payment);
+                        exit;*/   
+                       $status = $payment['status'];
+                        if($status == 'captured'){
+                          //Transaction Successful
+                            $payment_status = 'success';
+                            $payment_type = 'razorpay';
+                            $responseMessage = 'Txn Success';
+                            $transactionId = $payment['id'];
+                            DB::table('booking_upgrade_bike')->where('id', '=', $upgrade_bike_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
+
+                            $is_upgrade = 'yes';
+                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['is_upgrade' => "".$is_upgrade,  'updated_at' => $date]);
+
+                             
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Successfully Done.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message);  
+
+                        }else{
+                          //Transaction Failed
+                            $payment_type = 'razorpay';
+                            $responseMessage = $payment['error_description'].' '.$payment['error_reason'];
+                            $transactionId = $payment['id'];
+                            $payment_status = 'failed';
+                            DB::table('booking_upgrade_bike')->where('id', '=', $upgrade_bike_booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
+
+
+                            $status_code = $success = '1';
+                            $message = 'Your Booking Transaction Failed.';
+                        
+                            $json = array('status_code' => $status_code, 'message'  => $message); 
+                        }
+                        
+
+                        
+                    }else{
+                        $status_code = '0';
+                        $message = 'Upgrade bike model booking id not valid';
+                    
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                    }
+                } else{
+                    $status_code = '0';
+                    $message = 'Customer not valid';
+                    
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id);
+                }
+            }
+        }
+        catch(\Exception $e) {
+            $status_code = '0';
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+    
+            $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => '');
+        }
+        
+        return response()->json($json, 200);
+    }
+
+
+    public function make_payment_upgrade_bike_paytm(Request $request)
     {
         try 
         {
@@ -2555,7 +2954,7 @@ class apiController extends Controller
         return response()->json($json, 200);
     }
 
-    public function confirm_upgrade_bike_payment(Request $request)
+    public function confirm_upgrade_bike_payment_paytm(Request $request)
     {
         try 
         {
