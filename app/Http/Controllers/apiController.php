@@ -3004,7 +3004,7 @@ class apiController extends Controller
                         }else{
                           //Transaction Failed
                             $responseMessage = 'Txn Failed';
-                            $transactionId = $payment['id']
+                            $transactionId = $payment['id'];
                             $payment_status = 'failed';
                             DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
 
