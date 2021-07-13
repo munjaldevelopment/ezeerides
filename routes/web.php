@@ -48,3 +48,6 @@ Route::get('/terms', 'StaticPageController@termsPage');
 Route::get('/privacy', 'StaticPageController@privacyPage');
 Route::get('/faq', 'StaticPageController@faqPage');
 
+Route::get('payment-razorpay', 'PaymentController@create')->name('paywithrazorpay');
+Route::post('payment', 'PaymentController@payment')->name('payment');
+

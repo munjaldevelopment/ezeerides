@@ -20,6 +20,7 @@ use LaravelFCM\Message\PayloadNotificationBuilder;
 use FCM;
 
 use PaytmWallet;
+use Razorpay\Api\Api;
 
 
 
@@ -1300,7 +1301,7 @@ class apiController extends Controller
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
-            $payment_type = $request->payment_type;
+            $payment_type = $request->:;
             $lattitude = $request->lattitude;
             $longitude = $request->longitude;
             $document_status = 0;
@@ -1354,13 +1355,14 @@ class apiController extends Controller
                             $payment_type = 'wallet';
                             $payment_status = 'success';
                         }else{
-                            $payment_type = 'paytm';
+                            $payment_type = 'razorpay';
                             $payment_status = 'pending';
                         }
                         $status = 'In';
                         $booking_status = '1';
                         $customer_name = $customer->name;
                         $phone = $customer->mobile;
+
 
                         $pick_up = date('Y-m-d',strtotime($from_date));
                         $pick_up_time = date('H:i',strtotime($from_date));
@@ -1407,76 +1409,23 @@ class apiController extends Controller
                         VehicleRegister::where('id', $booking_id)->update(['booking_no' => $booking_no]);
 
                     if($payment_type != 'wallet'){
-                        $enviroment='local';
-                        $merchent_id ='FnAoux43246182437237';
-                        $merchantKey='2fCkkMtPcbf###hr';
-                        $merchantwebsite='WEBSTAGING';
-                        $channel='WEB';
-                        $industryType='Retail';
-
-                       
-
-                        $paytmParams = array();
+                        $razor_key=env('RAZOR_KEY');
+                        $amount =$total_amount;
                         $orderid = $booking_id;
-                        $paytmParams["body"] = array(
-                            'requestType' => 'Payment',
-                            'mid' => $merchent_id,
-                            'websiteName' => 'WEBSTAGING',
-                            'orderId' => $orderid,
-                            'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
-                            'txnAmount'     => array(
-                                'value'     => $total_amount,
-                                'currency'  => 'INR',
-                            ),
-                            'userInfo'      => array(
-                                'custId'    => $customer_id,
-                            )
-                        );
-
-                        /*
-                        * Generate checksum by parameters we have in body
-                        * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
-                        */
-                        $payment = PaytmWallet::with('receive');
-                        $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
-
-                        $paytmParams["head"] = array('signature'=>$checksum);
-
-                        $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
-
-                        /* for Staging */
-                        $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
-
-                        /* for Production */
-                        // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
-
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_POST, 1);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
-                        $response = curl_exec($ch);
-                        $gettxnarr = json_decode($response);
-                        $txnToken = $gettxnarr->body->txnToken;
-                        $callbackUrl = "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid;
+                        $name=$customer_name;
+                        $description='Bike Booking';
+                        $contact=$phone;
+                        $email='';
+    
                     }else{
-                        $enviroment = '';
-                        $merchent_id = '';
-                        $merchantKey = '';
-                        $merchantwebsite = '';
-                        $channel = '';
-                        $industryType = '';
-                        $txnToken = '';
-                        $callbackUrl = '';
-
+                        $razor_key = '';
                     }
                        
 
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'payment_type' => $payment_type, 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => $callbackUrl );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id, 'booking_no' => $booking_no , 'total_amount' => $total_amount , 'booking_hours' => $hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, 'email' => $email);
                     
                     }
                 } else{
@@ -1506,9 +1455,14 @@ class apiController extends Controller
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
             $booking_id = $request->booking_id;
+            $razorpay_payment_id = $request->razorpay_payment_id;
             $error = "";
            if($booking_id == ""){
                 $error = "Please send valid booking id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($razorpay_payment_id == ""){
+                $error = "Please send valid razorpay payment id.";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
             if($error == ""){
@@ -1518,25 +1472,16 @@ class apiController extends Controller
                     $booking = DB::table('vehicle_registers')->select('id','booking_no','total_amount', 'payment_status', 'created_at')->where('customer_id', $customer_id)->where('id', $booking_id)->orderBy('id', 'DESC')->first();
                     if($booking){
 
-                        $status = PaytmWallet::with('status');
-                        $status->prepare(['order' => $booking_id]);
-                        $status->check();
-                        
-                        $response = $status->response(); // To get raw response as array
-                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
-                        /*print_r($response);
-                        exit;*/
+                       $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
 
-                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
-                        //get important parameters via public methods
-                        $orderId = $status->getOrderId(); // Get order id
-                        
-                        $transactionId = $status->getTransactionId(); // Get transaction id
-                        
-                        if($status->isSuccessful()){
+                       $payment = $api->payment->fetch($razorpay_payment_id);
+                       $status = $payment['status'];
+                        if($status == 'captured'){
                           //Transaction Successful
                             $payment_status = 'success';
-                            $payment_type = 'paytm';
+                            $payment_type = 'razorpay';
+                            $responseMessage = 'Txn Success';
+                            $transactionId = $payment['id'];
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status,  'payment_type' => $payment_type, 'updated_at' => $date]);
 
                              /* paid due penalties */
@@ -1561,10 +1506,13 @@ class apiController extends Controller
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);  
 
-                        }else if($status->isFailed()){
+                        }else{
                           //Transaction Failed
-                            
+                            $payment_type = 'razorpay';
+                            $responseMessage = $payment['error_description'].' '.$payment['error_reason'];
+                            $transactionId = $payment['id'];
                             $payment_status = 'failed';
+
                             DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
 
 
@@ -1572,18 +1520,7 @@ class apiController extends Controller
                             $message = 'Your Booking Transaction Failed.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message); 
-                        }else if($status->isOpen()){
-                          //Transaction Open/Processing
-                            $payment_status = 'pending';
-                            DB::table('vehicle_registers')->where('id', '=', $booking_id)->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-                            $status_code = $success = '1';
-                            $message = 'Your Booking Transaction is Pending / Processing.';
-                        
-                            $json = array('status_code' => $status_code, 'message'  => $message);
                         }
-                        
-
-                        
                     }else{
                         $status_code = '0';
                         $message = 'Booking id not valid';

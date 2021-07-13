@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '1a2b68625399e193a0b24c99b0f2b9ea2ee9a9f3',
+    'reference' => 'b4eb51697f519de36f2e6f28f2b2051305b58d39',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -759,7 +759,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '1a2b68625399e193a0b24c99b0f2b9ea2ee9a9f3',
+      'reference' => 'b4eb51697f519de36f2e6f28f2b2051305b58d39',
     ),
     'laravel/passport' => 
     array (
@@ -1378,12 +1378,30 @@ private static $installed = array (
       ),
       'reference' => 'cd4032040a750077205918c86049aa0f43d22947',
     ),
+    'razorpay/razorpay' => 
+    array (
+      'pretty_version' => '2.7.0',
+      'version' => '2.7.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'e28454acdc110b544fc80bec9518b9b86b275a2c',
+    ),
     'rhumsaa/uuid' => 
     array (
       'replaced' => 
       array (
         0 => '4.1.1',
       ),
+    ),
+    'rmccue/requests' => 
+    array (
+      'pretty_version' => 'v1.8.0',
+      'version' => '1.8.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'afbe4790e4def03581c4a0963a1e8aa01f6030f1',
     ),
     'sebastian/code-unit-reverse-lookup' => 
     array (

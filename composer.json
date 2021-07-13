@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
+        "anandsiddharth/laravel-paytm-wallet": "^1.0",
         "apility/laravel-fcm": "^1.4",
         "backpack/backupmanager": "^3.0",
         "backpack/crud": "4.1.*",
@@ -27,11 +28,11 @@
         "hisorange/browser-detect": "^4.3",
         "intervention/image": "^2.5",
         "laravel/framework": "^7.3",
-        "anandsiddharth/laravel-paytm-wallet":"^1.0",
         "laravel/passport": "^9.0",
         "laravel/tinker": "^2.0",
         "maatwebsite/excel": "^3.1",
         "pragmarx/tracker": "^4.0",
+        "razorpay/razorpay": "^2.7",
         "venturecraft/revisionable": "^1.35"
     },
     "require-dev": {
