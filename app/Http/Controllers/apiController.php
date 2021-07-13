@@ -2872,59 +2872,17 @@ class apiController extends Controller
 
                     $order_id = $walletAmtid.'_'.time();
 
-                    $enviroment='local';
-                    $merchent_id ='FnAoux43246182437237';
-                    $merchantKey='2fCkkMtPcbf###hr';
-                    $merchantwebsite='WEBSTAGING';
-                    $channel='WEB';
-                    $industryType='Retail';
-                    $paytmParams = array();
-                        $orderid = $order_id;
-                        $paytmParams["body"] = array(
-                            'requestType' => 'Payment',
-                            'mid' => $merchent_id,
-                            'websiteName' => 'WEBSTAGING',
-                            'orderId' => $orderid,
-                            'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." ",
-                            'txnAmount'     => array(
-                                'value'     => $amount,
-                                'currency'  => 'INR',
-                            ),
-                            'userInfo'      => array(
-                                'custId'    => $customer_id,
-                            )
-                        );
-
-                        /*
-                        * Generate checksum by parameters we have in body
-                        * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
-                        */
-                        $payment = PaytmWallet::with('receive');
-                        $checksum = $payment->generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $merchantKey);
-
-                        $paytmParams["head"] = array('signature'=>$checksum);
-
-                        $post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
-
-                        /* for Staging */
-                        $url = "https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=FnAoux43246182437237&orderId=".$orderid." ";
-
-                        /* for Production */
-                        // $url = "https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765";
-
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_POST, 1);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type':'application/json')); 
-                        $response = curl_exec($ch);
-                        $gettxnarr = json_decode($response);
-                        $txnToken = $gettxnarr->body->txnToken;
+                    $razor_key=env('RAZOR_KEY');
+                    $amount =$amount;
+                    $orderid = $order_id;
+                    $name=$customer->name;
+                    $description='Wallet Amount Add';
+                    $contact=$customer->mobile;
+                    $email='';
 
                     $status_code = '1';
                     $message = 'Wallet Amount';
-                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'order_id' => $order_id, 'amount' => $amount, 'enviroment' => $enviroment, 'mid' => $merchent_id, 'merchantKey' => $merchantKey, 'merchantwebsite' => $merchantwebsite, 'channel' => $channel, 'industryType' => $industryType, "txnToken" => $txnToken, 'callbackUrl' => "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=".$orderid." "); 
+                    $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'razor_key' => $razor_key, 'order_id' => $order_id, 'amount' => $amount, 'name' => $name, 'contact' => $contact, 'email' => $email, 'description' => $description); 
                     
                 } else{
                     $status_code = $success = '0';
@@ -3006,9 +2964,14 @@ class apiController extends Controller
             $date   = date('Y-m-d H:i:s');
             $customer_id = $request->customer_id;
             $order_id = $request->order_id;
+            $razorpay_payment_id = $request->razorpay_payment_id;
             $error = "";
-           if($order_id == ""){
+            if($order_id == ""){
                 $error = "Please send valid order id.";
+                $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
+            }
+            if($razorpay_payment_id == ""){
+                $error = "Please send valid razorpay payment id.";
                 $json = array('status_code' => '0', 'message' => $error, 'customer_id' => $customer_id);
             }
             if($error == ""){
@@ -3018,22 +2981,14 @@ class apiController extends Controller
                     $walletchk = DB::table('customer_wallet_payments')->select('id','amount','created_at')->where('customer_id', $customer_id)->where('id', $odridarr[0])->orderBy('id', 'Asc')->first();
                     if($walletchk){
 
-                        $status = PaytmWallet::with('status');
-                        $status->prepare(['order' => $order_id]);
-                        $status->check();
-                        
-                        $response = $status->response(); // To get raw response as array
-                        //Check out response parameters sent by paytm here -> http://paywithpaytm.com/developer/paytm_api_doc?target=txn-status-api-description
-                        /*print_r($response);
-                        exit;*/
+                       $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
 
-                        $responseMessage = $status->getResponseMessage(); //Get Response Message If Available
-                        //get important parameters via public methods
-                        $orderId = $status->getOrderId(); // Get order id
-                        
-                        $transactionId = $status->getTransactionId(); // Get transaction id
-                        
-                        if($status->isSuccessful()){
+                       $payment = $api->payment->fetch($razorpay_payment_id);
+                       $status = $payment['status'];
+                        if($status == 'captured'){
+                           $responseMessage = 'Txn Success';
+                           $transactionId = $payment['id']; 
+                           $payment_status = 'success';  
                           //Transaction Successful
                             $payment_status = 'success';
                             DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
@@ -3043,9 +2998,10 @@ class apiController extends Controller
                         
                             $json = array('status_code' => $status_code, 'message'  => $message);  
 
-                        }else if($status->isFailed()){
+                        }else{
                           //Transaction Failed
-                            
+                            $responseMessage = 'Txn Failed';
+                            $transactionId = $payment['id']
                             $payment_status = 'failed';
                             DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
 
@@ -3054,14 +3010,6 @@ class apiController extends Controller
                             $message = 'Your Wallet Amount Transaction Failed.';
                         
                             $json = array('status_code' => $status_code, 'message'  => $message); 
-                        }else if($status->isOpen()){
-                          //Transaction Open/Processing
-                            $payment_status = 'pending';
-                            DB::table('customer_wallet_payments')->where('id', '=', $odridarr[0])->update(['responseMessage' => "".$responseMessage, 'transactionId' => $transactionId, 'payment_status' => $payment_status, 'updated_at' => $date]);
-                            $status_code = $success = '1';
-                            $message = 'Your Wallet Amount Transaction is Pending / Processing.';
-                        
-                            $json = array('status_code' => $status_code, 'message'  => $message);
                         }
                         
 
