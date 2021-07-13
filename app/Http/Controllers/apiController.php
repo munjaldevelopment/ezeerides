@@ -854,7 +854,7 @@ class apiController extends Controller
             $customer_id = $request->customer_id;
             $city_id = $request->city_id;
             //$center = $request->center_id;
-            $center = 'All';
+            $center = '0';
             $ride_type = $request->ride_type;
             $from_date = date("Y-m-d H:i:s",strtotime($request->from_date));
             $to_date = date("Y-m-d  H:i:s",strtotime($request->to_date));
@@ -885,7 +885,7 @@ class apiController extends Controller
                     $vehicleList = $vehicleList->orderBy('v.id', 'asc')->get(); 
 
                     
-                    if(count($vehicleList) >0){
+                    if(count($vehicleList) > 0){
                         $v_list = array();
                         foreach($vehicleList as $vlist)
                         {
