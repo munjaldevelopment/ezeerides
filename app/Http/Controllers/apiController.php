@@ -1301,7 +1301,7 @@ class apiController extends Controller
             $total_amount = $request->total_amount;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
-            $payment_type = $request->:;
+            $payment_type = $request->payment_type;
             $lattitude = $request->lattitude;
             $longitude = $request->longitude;
             $document_status = 0;
