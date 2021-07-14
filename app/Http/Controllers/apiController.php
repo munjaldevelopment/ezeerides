@@ -1854,7 +1854,7 @@ class apiController extends Controller
                             $payment_type = 'wallet';
                             $payment_status = 'success';
                         }else{
-                            $payment_type = 'paytm';
+                            $payment_type = 'razorpay';
                             $payment_status = 'pending';
                         }
                         $expand_date = date('Y-m-d',strtotime($expand_date));
@@ -1877,7 +1877,7 @@ class apiController extends Controller
                             $orderid = $booking_id;
                             $name=$customer->name;
                             $description='Expand time booking charges';
-                            $contact=$customer->phone;
+                            $contact=$customer->mobile;
                             $email='';
  
                          }else{
