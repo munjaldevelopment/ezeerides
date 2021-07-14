@@ -1779,7 +1779,7 @@ class apiEmployeeController extends Controller
                     }
                     $current_time = date('H:i:s');
 
-                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','is_amount_receive','receive_date','status')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->wheredate('expected_drop', '<=', $filterdate)->where('expected_drop_time', '<', $current_time);
+                    $booked_vehicleList = DB::table('vehicle_registers')->select('id','vehicle_model_id','booking_no','user_id','customer_id', 'customer_name','pick_up','pick_up_time','expected_drop','expected_drop_time','station','vehicle','additional_amount', 'receive_amount','is_amount_receive','receive_date','status')->where('user_id',$employee_id)->where('booking_status','1')->where('due_penalty','no')->wheredate('expected_drop', '<=', $filterdate);
 
                     if($center){
                         $booked_vehicleList = $booked_vehicleList->where('station',$station_name);    
@@ -1836,12 +1836,12 @@ class apiEmployeeController extends Controller
                             $city_name = DB::table('cities')->where('id', $city_id)->pluck('city')[0];
                         }
                         $status_code = $success = '1';
-                        $message = 'Vehicle Filter Result';
+                        $message = 'Booking Filter Result';
                         
                         $json = array('status_code' => $status_code, 'message' => $message, 'city_name' => $city_name, 'center_name' => $station_name, 'vehicle_list' => $v_list);
                     }else{
                         $status_code = $success = '0';
-                        $message = 'Vehicle not available right now';
+                        $message = 'Booking not available right now';
                     
                         $json = array('status_code' => $status_code, 'message' => $message, 'employee_id' => $employee_id);    
                     }
