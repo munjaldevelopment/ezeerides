@@ -1874,7 +1874,7 @@ class apiController extends Controller
                         if($payment_type != 'wallet'){
                             $razor_key=env('RAZOR_KEY');
                             $amount =$expand_amount;
-                            $orderid = $booking_id;
+                            $orderid = $expandbooking_id;
                             $name=$customer->name;
                             $description='Expand time booking charges';
                             $contact=$customer->mobile;
@@ -1896,7 +1896,7 @@ class apiController extends Controller
                         $status_code = $success = '1';
                         $message = 'Bike Enquiry Booked Successfully';
                             
-                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $booking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, "email" => $email );
+                        $json = array('status_code' => $status_code, 'message' => $message, 'customer_id' => $customer_id, 'booking_id' => $booking_id,'expand_booking_id' => $expandbooking_id, 'expand_amount' => $expand_amount , 'booking_hours' => $booking_hours." Hr", 'payment_type' => $payment_type, 'razor_key' => $razor_key, 'amount' => $amount, 'orderid' => $orderid, 'name' => $name, 'description' => $description, 'contact' => $contact, "email" => $email );
                     
                     }
                 } else{
