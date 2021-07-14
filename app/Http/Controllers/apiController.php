@@ -1435,6 +1435,12 @@ class apiController extends Controller
     
                     }else{
                         $razor_key = '';
+                        $amount ='';
+                        $orderid = $booking_id;
+                        $name='';
+                        $description='';
+                        $contact='';
+                        $email='';
                     }
                        
 
