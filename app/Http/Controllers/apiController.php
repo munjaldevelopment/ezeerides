@@ -2659,7 +2659,7 @@ class apiController extends Controller
                             $payment_status = 'success';
                         }else{
                             if($differance_amount > 0){
-                                $payment_type = 'paytm';
+                                $payment_type = 'razorpay';
                                 $payment_status = 'pending';
                             }else{
                                 $payment_status = 'success';
