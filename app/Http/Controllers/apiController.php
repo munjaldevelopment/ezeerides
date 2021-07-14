@@ -2690,7 +2690,7 @@ class apiController extends Controller
                             $orderid = $upgradeBikebooking_id;
                             $name=$customer->name;
                             $description='Upgrade Bike Model Booking';
-                            $contact=$customer->phone;
+                            $contact=$customer->mobile;
                             $email='';
 
                         ################################################
