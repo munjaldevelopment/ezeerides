@@ -1491,11 +1491,11 @@ class apiController extends Controller
                        $api = new Api(env('RAZOR_KEY'), env('RAZOR_SECRET'));
 
                        $payment = $api->payment->fetch($razorpay_payment_id);
-                       /* echo '<pre>';
-                        print_r($payment);
-                        exit;*/   
+                       /*echo '<pre>';
+                       print_r($payment);
+                       exit;*/      
                        $status = $payment['status'];
-                        if($status == 'captured'){
+                        if($status == 'authorized' || $status == 'captured'){
                           //Transaction Successful
                             $payment_status = 'success';
                             $payment_type = 'razorpay';
@@ -1943,7 +1943,7 @@ class apiController extends Controller
                        $payment = $api->payment->fetch($razorpay_payment_id);
                         
                         $status = $payment['status'];
-                        if($status == 'captured'){
+                        if($status == 'authorized' || $status == 'captured'){
                           //Transaction Successful
                             $payment_status = 'success';
                             $payment_type = 'razorpay';
@@ -2749,7 +2749,7 @@ class apiController extends Controller
                         print_r($payment);
                         exit;*/   
                        $status = $payment['status'];
-                        if($status == 'captured'){
+                        if($status == 'authorized' || $status == 'captured'){
                           //Transaction Successful
                             $payment_status = 'success';
                             $payment_type = 'razorpay';
@@ -3403,7 +3403,7 @@ class apiController extends Controller
 
                        $payment = $api->payment->fetch($razorpay_payment_id);
                        $status = $payment['status'];
-                        if($status == 'captured'){
+                        if($status == 'authorized' || $status == 'captured'){
                            $responseMessage = 'Txn Success';
                            $transactionId = $payment['id']; 
                            $payment_status = 'success';  
