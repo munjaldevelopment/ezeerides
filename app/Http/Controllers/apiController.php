@@ -3352,10 +3352,13 @@ class apiController extends Controller
                     $expandWalletAmt = DB::table('booking_expended as be')->join('vehicle_registers as v', 'be.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('be.payment_type', '=', 'wallet')->where('be.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('be.expand_amount');
 
                     $upgradeWalletAmt = DB::table('booking_upgrade_bike as up')->join('vehicle_registers as v', 'up.booking_id', '=', 'v.id')->where('v.customer_id', $customer_id)->where('up.payment_type', '=', 'wallet')->where('up.payment_status', '=', 'success')->where('v.payment_status', '=', 'success')->sum('up.upgrade_amount');
-                
+                    
                     $totalwaletamount = '₹ '.($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
-
-                    $wallet_amount = $totalwaletamount;
+                    if($totalwaletamount > 0){    
+                            $wallet_amount = $totalwaletamount;
+                    }else{
+                        $wallet_amount = '0';
+                    }
 
 
                     
