@@ -3189,10 +3189,15 @@ class apiController extends Controller
                                 $totalwaletamount = "".($walletAmt-($orderWalletAmt+$expandWalletAmt+$upgradeWalletAmt));
 
                                 $wallet_amount = $totalwaletamount;
-
+                                $station_name = $booking->station;
+                                $station_id = DB::table('stations')->where('station_name', $station_name)->pluck('id')[0];
+                                $station_address = DB::table('stations')->where('id', $station_id)->pluck('station_address')[0];
+                                if($station_address){
+                                    $station_name .= " (".$station_address.")";
+                                }
                         $status_code = '1';
                         $message = 'My Bookings List';
-                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $booking->station, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'booking_amount' => $booking->total_amount, 'wallet_amount' => $wallet_amount, 'customer_penalty' => $customer_penalty, 'total_amount' => "".$total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list, 'is_expended' => $booking->is_expended, 'extendhistory' => $extendhistory, 'is_upgrade' => $booking->is_upgrade,'upgradeBikehistory' => $upgradeBikehistory  );
+                        $json = array('status_code' => $status_code,  'message' => $message, 'id' => "".$booking->id, 'bike_image' => $bike_image, 'booking_no' => $booking->booking_no, 'customer_name' => $booking->customer_name, 'phone' => "".$booking->phone, 'booking_otp' => "".$booking->register_otp, 'pick_up_date' => date('d-m-Y', strtotime($booking->pick_up)), 'pick_up_time' => $booking->pick_up_time, 'expected_drop_date' => date('d-m-Y', strtotime($booking->expected_drop)), 'expected_drop_time' => $booking->expected_drop_time, 'center_name' => $station_name, 'vehicle_model' => $vehicle_model, 'vehicle_number' => $booking->vehicle, 'coupon_code' => $booking->coupon_code, 'booking_amount' => $booking->total_amount, 'wallet_amount' => $wallet_amount, 'customer_penalty' => $customer_penalty, 'total_amount' => "".$total_amount, 'booking_date' => date('d-m-Y H:i:s', strtotime($booking->created_at)), 'booking_status' => $booking_status, 'vehicle_image_before_ride' => $booked_vehicle_before_list, 'vehicle_image_after_ride' => $booked_vehicle_after_list, 'is_expended' => $booking->is_expended, 'extendhistory' => $extendhistory, 'is_upgrade' => $booking->is_upgrade,'upgradeBikehistory' => $upgradeBikehistory  );
                     }else{
                          $status_code = '0';
                         $message = 'No booking found.';
@@ -3357,7 +3362,7 @@ class apiController extends Controller
                     if($totalwaletamount > 0){    
                             $wallet_amount = $totalwaletamount;
                     }else{
-                        $wallet_amount = '0';
+                        $wallet_amount = '0.00';
                     }
 
 
