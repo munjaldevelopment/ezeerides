@@ -1587,6 +1587,7 @@ class apiController extends Controller
                     if($bookingList){
                         foreach($bookingList as $booking)
                         {
+                            echo $booking->is_upgrade;
                             if($booking->is_expended == 'yes'){
                                 $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
                                 $booking->expected_drop = $expand_booking->expand_date;
