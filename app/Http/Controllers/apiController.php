@@ -1587,7 +1587,7 @@ class apiController extends Controller
                     if($bookingList){
                         foreach($bookingList as $booking)
                         {
-                            echo $booking->is_upgrade;
+                            
                             if($booking->is_expended == 'yes'){
                                 $expand_booking = DB::table('booking_expended')->where('booking_id', $booking->id)->where('payment_status', 'success')->orderBy('id', 'DESC')->first();
                                 $booking->expected_drop = $expand_booking->expand_date;
@@ -1647,8 +1647,8 @@ class apiController extends Controller
         }
         catch(\Exception $e) {
             $status_code = '0';
-            //$message = $e->getMessage();//$e->getTraceAsString(); getMessage //
-            $message = $e->getTraceAsString();
+            $message = $e->getMessage();//$e->getTraceAsString(); getMessage //
+            //$message = $e->getTraceAsString();
     
             $json = array('status_code' => $status_code, 'message' => $message);
         }
