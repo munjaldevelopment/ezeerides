@@ -64,7 +64,7 @@ class StationCrudController extends CrudController
          ]);
         CRUD::column('station_name');
 
-        CRUD::column('station_address');
+        //CRUD::column('station_address');
 
         $this->crud->addColumn([
             'label'     => 'Employee Name',

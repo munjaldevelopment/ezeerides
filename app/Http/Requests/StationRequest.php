@@ -28,6 +28,7 @@ class StationRequest extends FormRequest
         $id = $this->get('id') ?? request()->route('id');
         return [
             'station_name' => 'required|min:5|max:255|unique:stations,station_name,'.$id,
+            'employee_id' => 'required|unique:stations,employee_id,'.$id,
         ];
     }
 
